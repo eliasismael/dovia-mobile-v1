@@ -16,6 +16,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'd_h_a_s_s_o_c_i_a_t_e_servicios_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'd_h_a_s_s_o_c_i_a_t_e_servicios_model.dart';
 
 /// Superficie de los campos del diseño (#FAFAFA).
@@ -674,16 +675,7 @@ class _DHASSOCIATEServiciosWidgetState
         ),
         alignment: const AlignmentDirectional(0.0, 0.0),
         child: _model.isPickingCertificate
-            ? SizedBox(
-                width: 24.0,
-                height: 24.0,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.0,
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    FlutterFlowTheme.of(context).primary,
-                  ),
-                ),
-              )
+            ? const DoviaSpinner(small: true)
             : certificate == null
                 ? SvgPicture.asset(
                     'assets/images/AddMediaImage.svg',
@@ -922,7 +914,7 @@ class _DHASSOCIATEServiciosWidgetState
                           if (!snapshot.hasData) {
                             return const Padding(
                               padding: EdgeInsets.symmetric(vertical: 40.0),
-                              child: Center(child: CircularProgressIndicator()),
+                              child: Center(child: DoviaSpinner()),
                             );
                           }
                           return _buildContent(snapshot.data!);

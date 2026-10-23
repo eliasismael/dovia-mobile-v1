@@ -17,6 +17,7 @@ import '/custom_code/widgets/index.dart' as custom_widgets;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 's_h_o_w_i_n_g_registro_de_visita2_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 's_h_o_w_i_n_g_registro_de_visita2_model.dart';
 
 class SHOWINGRegistroDeVisita2Widget extends StatefulWidget {
@@ -310,7 +311,7 @@ class _SHOWINGRegistroDeVisita2WidgetState
                     wrapWithModel(
                       model: _model.sHOWINGHeaderModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: SHOWINGHeaderWidget(
+                      child: const SHOWINGHeaderWidget(
                         title: 'Registro de visita',
                       ),
                     ),
@@ -321,8 +322,7 @@ class _SHOWINGRegistroDeVisita2WidgetState
                         future: _overviewFuture,
                         builder: (context, snapshot) {
                           if (!snapshot.hasData) {
-                            return const Center(
-                                child: CircularProgressIndicator());
+                            return const Center(child: DoviaSpinner());
                           }
                           final res = snapshot.data!;
                           if (!res.succeeded) {

@@ -11,6 +11,7 @@ import '/index.dart'; // To get OPERATIVELISTINGChecklistFormWidget and Agenda
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'o_p_e_r_a_t_i_v_e_l_i_s_t_i_n_g_checklist_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'o_p_e_r_a_t_i_v_e_l_i_s_t_i_n_g_checklist_model.dart';
 
 // Data model for an enriched checklist item
@@ -471,7 +472,7 @@ class _OPERATIVELISTINGChecklistWidgetState
         if (!snap.hasData) {
           return const Padding(
             padding: EdgeInsets.symmetric(vertical: 24),
-            child: Center(child: CircularProgressIndicator(color: _primary)),
+            child: Center(child: DoviaSpinner()),
           );
         }
         final items = snap.data!.where((d) => d.matches(_query)).toList();
@@ -554,7 +555,7 @@ class _OPERATIVELISTINGChecklistWidgetState
               alignment: Alignment.center,
               child: Text(
                 expanded ? 'Ver menos' : 'Ver más',
-                style: TextStyle(
+                style: const TextStyle(
                   fontFamily: 'Public Sans',
                   color: _primary,
                   fontSize: 14,
@@ -1018,14 +1019,7 @@ class _ContactHQPopupState extends State<_ContactHQPopup> {
                 elevation: 0,
               ),
               child: _loading
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        color: Colors.white,
-                        strokeWidth: 2,
-                      ),
-                    )
+                  ? const DoviaSpinner(small: true, color: Colors.white)
                   : const Text(
                       'Aceptar y Enviar',
                       style: TextStyle(

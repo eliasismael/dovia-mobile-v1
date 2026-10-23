@@ -12,6 +12,7 @@ import '/shared_components/header_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_oferta_renta_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'd_o_v_i_a_c_l_i_e_n_t_oferta_renta_model.dart';
 
 class DOVIACLIENTOfertaRentaWidget extends StatefulWidget {
@@ -102,16 +103,8 @@ class _DOVIACLIENTOfertaRentaWidgetState
         if (!snapshot.hasData) {
           return Scaffold(
             backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-            body: Center(
-              child: SizedBox(
-                width: 50.0,
-                height: 50.0,
-                child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    FlutterFlowTheme.of(context).primary,
-                  ),
-                ),
-              ),
+            body: const Center(
+              child: DoviaSpinner(),
             ),
           );
         }

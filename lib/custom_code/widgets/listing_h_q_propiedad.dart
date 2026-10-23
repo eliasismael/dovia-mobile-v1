@@ -9,6 +9,7 @@ import '/app_state.dart';
 import 'dart:io';
 import 'package:flutter/foundation.dart'; // For kIsWeb
 import 'package:flutter/material.dart';
+import '/shared_components/dovia_spinner.dart';
 // Begin custom widget code
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
 
@@ -771,11 +772,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
     }
   }
 
-  Widget _buttonSpinner(Color color) => SizedBox(
-        width: 20,
-        height: 20,
-        child: CircularProgressIndicator(strokeWidth: 2, color: color),
-      );
+  Widget _buttonSpinner(Color color) => DoviaSpinner(small: true, color: color);
 
   @override
   Widget build(BuildContext context) {
@@ -1037,7 +1034,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
           const SizedBox(height: 12),
           Text(
             '${_selectedCriteria.length} seleccionados (mínimo 3)',
-            style: TextStyle(
+            style: const TextStyle(
               fontFamily: 'Public Sans',
               fontSize: 12,
               color: placeholderColor,
@@ -1234,7 +1231,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
         ),
         if (label == 'Foto principal') ...[
           const SizedBox(height: 4),
-          Text(
+          const Text(
             'Será la miniatura de la propiedad al publicarla.',
             style: TextStyle(
               fontFamily: 'Public Sans',
@@ -1342,11 +1339,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
                         if (progress == null) return child;
                         return _imagePlaceholder(
                           const Center(
-                            child: SizedBox(
-                              height: 18,
-                              width: 18,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            ),
+                            child: DoviaSpinner(small: true),
                           ),
                         );
                       },

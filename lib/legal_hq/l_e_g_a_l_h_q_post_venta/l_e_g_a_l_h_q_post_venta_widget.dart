@@ -9,6 +9,7 @@ import '/shared_components/corner_gradient_background/corner_gradient_background
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'l_e_g_a_l_h_q_post_venta_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'l_e_g_a_l_h_q_post_venta_model.dart';
 
 /// Cierre de Operación: el Legal HQ audita los documentos finales que ya revisó
@@ -108,8 +109,7 @@ class _LEGALHQPostVentaWidgetState extends State<LEGALHQPostVentaWidget> {
                               ? const Padding(
                                   padding: EdgeInsets.symmetric(vertical: 80.0),
                                   child: Center(
-                                    child:
-                                        CircularProgressIndicator(color: _aqua),
+                                    child: DoviaSpinner(),
                                   ),
                                 )
                               : detail == null

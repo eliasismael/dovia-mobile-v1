@@ -11,6 +11,7 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'l_e_g_a_l_h_q_procesos_casos_con_hipoteca_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'l_e_g_a_l_h_q_procesos_casos_con_hipoteca_model.dart';
 
 class LEGALHQProcesosCasosConHipotecaWidget extends StatefulWidget {
@@ -136,8 +137,7 @@ class _LEGALHQProcesosCasosConHipotecaWidgetState
                               ? const Padding(
                                   padding: EdgeInsets.symmetric(vertical: 80.0),
                                   child: Center(
-                                    child:
-                                        CircularProgressIndicator(color: _aqua),
+                                    child: DoviaSpinner(),
                                   ),
                                 )
                               : detail == null
@@ -1489,14 +1489,7 @@ class _LEGALHQProcesosCasosConHipotecaWidgetState
           padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
         ),
         child: busy
-            ? const SizedBox(
-                width: 18.0,
-                height: 18.0,
-                child: CircularProgressIndicator(
-                  color: Colors.white,
-                  strokeWidth: 2.0,
-                ),
-              )
+            ? const DoviaSpinner(small: true, color: Colors.white)
             : Text(
                 label,
                 style: GoogleFonts.publicSans(

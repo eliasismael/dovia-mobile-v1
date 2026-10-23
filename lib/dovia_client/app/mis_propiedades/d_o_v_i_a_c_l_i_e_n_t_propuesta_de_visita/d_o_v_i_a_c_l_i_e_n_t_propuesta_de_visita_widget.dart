@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'd_o_v_i_a_c_l_i_e_n_t_propuesta_de_visita_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'd_o_v_i_a_c_l_i_e_n_t_propuesta_de_visita_model.dart';
 
 class DOVIACLIENTPropuestaDeVisitaWidget extends StatefulWidget {
@@ -214,8 +215,7 @@ class _DOVIACLIENTPropuestaDeVisitaWidgetState
                 ),
                 Expanded(
                   child: _isLoading
-                      ? const Center(
-                          child: CircularProgressIndicator(color: _primary))
+                      ? const Center(child: DoviaSpinner())
                       : SingleChildScrollView(
                           padding: const EdgeInsets.all(20.0),
                           child: Column(
@@ -475,14 +475,7 @@ class _DOVIACLIENTPropuestaDeVisitaWidgetState
                                     elevation: 0,
                                   ),
                                   child: _isAccepting
-                                      ? const SizedBox(
-                                          width: 22,
-                                          height: 22,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2.5,
-                                            color: _primary,
-                                          ),
-                                        )
+                                      ? const DoviaSpinner(small: true)
                                       : Text(
                                           'Aceptar y enviar notificación',
                                           style: GoogleFonts.inter(

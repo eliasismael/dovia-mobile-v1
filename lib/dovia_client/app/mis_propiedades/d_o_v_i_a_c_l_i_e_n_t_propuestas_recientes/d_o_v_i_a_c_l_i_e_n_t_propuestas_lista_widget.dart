@@ -15,6 +15,7 @@ import 'owner_proposal_navigation.dart';
 import 'propuesta_reciente_card_widget.dart';
 import 'propuestas_filter_bar_widget.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_propuestas_lista_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'd_o_v_i_a_c_l_i_e_n_t_propuestas_lista_model.dart';
 
 /// Listado completo de un carril de propuestas recibidas: el destino del
@@ -177,13 +178,10 @@ class _DOVIACLIENTPropuestasListaWidgetState
 
   Widget _buildBody() {
     if (_isLoading) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 60.0),
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 60.0),
         child: Center(
-          child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(
-                FlutterFlowTheme.of(context).primary),
-          ),
+          child: DoviaSpinner(),
         ),
       );
     }

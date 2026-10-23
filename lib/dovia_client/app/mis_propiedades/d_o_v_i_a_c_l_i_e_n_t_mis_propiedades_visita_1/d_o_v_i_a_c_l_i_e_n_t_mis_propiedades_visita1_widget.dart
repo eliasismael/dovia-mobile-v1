@@ -21,6 +21,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_mis_propiedades_visita1_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'd_o_v_i_a_c_l_i_e_n_t_mis_propiedades_visita1_model.dart';
 
 class DOVIACLIENTMisPropiedadesVisita1Widget extends StatefulWidget {
@@ -376,7 +377,7 @@ class _DOVIACLIENTMisPropiedadesVisita1WidgetState
                 child: const CornerGradientBackgroundWidget(),
               ),
               if (_model.isLoading)
-                const Center(child: CircularProgressIndicator())
+                const Center(child: DoviaSpinner())
               else
                 SingleChildScrollView(
                   child: Column(
@@ -988,10 +989,7 @@ class _InstructionsSectionHeader extends StatelessWidget {
               ),
         ),
         isSaving
-            ? const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2))
+            ? const DoviaSpinner(small: true)
             : GestureDetector(
                 onTap: isEditing ? onSave : onEdit,
                 child: Container(
@@ -1072,7 +1070,7 @@ class _ContractRow extends StatelessWidget {
                     height: 32,
                     child: Padding(
                       padding: EdgeInsets.all(6.0),
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                      child: DoviaSpinner(),
                     ))
               else if (contractUploaded)
                 Row(

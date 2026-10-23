@@ -12,6 +12,7 @@ import 'package:timeago/timeago.dart' as timeago;
 import 'package:url_launcher/url_launcher.dart';
 
 import '../main.dart';
+import '/shared_components/dovia_spinner.dart';
 
 export 'lat_lng.dart';
 export 'place.dart';
@@ -282,13 +283,7 @@ void showSnackbar(
           if (loading)
             const Padding(
               padding: EdgeInsetsDirectional.only(end: 10.0),
-              child: SizedBox(
-                height: 20,
-                width: 20,
-                child: CircularProgressIndicator(
-                  color: Colors.white,
-                ),
-              ),
+              child: DoviaSpinner(small: true, color: Colors.white),
             ),
           Text(message),
         ],

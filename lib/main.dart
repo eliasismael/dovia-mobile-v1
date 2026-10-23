@@ -25,6 +25,7 @@ import 'notifications/push_notifications_service.dart';
 
 import 'flutter_flow/flutter_flow_util.dart';
 import 'repositories/index.dart';
+import '/shared_components/dovia_spinner.dart';
 
 /// Licencias OFL de las fuentes incluidas en `assets/google_fonts`.
 Stream<LicenseEntry> _fontLicenses() async* {
@@ -272,6 +273,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       theme: ThemeData(
         brightness: Brightness.light,
         useMaterial3: false,
+        // Sin esto los spinners sin color salían azules (el de Material).
+        progressIndicatorTheme: const ProgressIndicatorThemeData(
+          color: DoviaSpinner.green,
+        ),
       ),
       themeMode: _themeMode,
       routerConfig: _router,

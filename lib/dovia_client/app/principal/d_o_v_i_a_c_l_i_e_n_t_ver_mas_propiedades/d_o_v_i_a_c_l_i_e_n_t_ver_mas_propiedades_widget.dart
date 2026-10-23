@@ -19,6 +19,7 @@ import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
 import '/shared_components/header_navigation.dart';
 import 'package:flutter/material.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_ver_mas_propiedades_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'd_o_v_i_a_c_l_i_e_n_t_ver_mas_propiedades_model.dart';
 
 class DOVIACLIENTVerMasPropiedadesWidget extends StatefulWidget {
@@ -149,17 +150,8 @@ class _DOVIACLIENTVerMasPropiedadesWidgetState
                               builder: (context, snapshot) {
                                 // Customize what your widget looks like when it's loading.
                                 if (!snapshot.hasData) {
-                                  return Center(
-                                    child: SizedBox(
-                                      width: 50.0,
-                                      height: 50.0,
-                                      child: CircularProgressIndicator(
-                                        valueColor:
-                                            AlwaysStoppedAnimation<Color>(
-                                          FlutterFlowTheme.of(context).primary,
-                                        ),
-                                      ),
-                                    ),
+                                  return const Center(
+                                    child: DoviaSpinner(),
                                   );
                                 }
                                 final listViewListPropertiesResponse =

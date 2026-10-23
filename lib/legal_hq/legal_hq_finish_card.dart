@@ -5,6 +5,7 @@ import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_legal_process.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/legal_hq/legal_hq_process_data.dart';
+import '/shared_components/dovia_spinner.dart';
 
 /// Cierre de un trámite de venta o renta aprobado, del lado de Legal HQ.
 ///
@@ -111,12 +112,7 @@ class _LegalHqFinishCardState extends State<LegalHqFinishCard> {
                       borderRadius: BorderRadius.circular(24.0)),
                 ),
                 child: _finishing
-                    ? const SizedBox(
-                        width: 18.0,
-                        height: 18.0,
-                        child: CircularProgressIndicator(
-                            strokeWidth: 2.0, color: Colors.white),
-                      )
+                    ? const DoviaSpinner(small: true, color: Colors.white)
                     : Text(
                         'Aprobar comprobante y finalizar',
                         style: GoogleFonts.publicSans(

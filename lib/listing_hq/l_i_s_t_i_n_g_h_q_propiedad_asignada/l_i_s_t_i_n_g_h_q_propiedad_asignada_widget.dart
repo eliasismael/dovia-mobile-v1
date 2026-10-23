@@ -16,6 +16,7 @@ import '/core/result.dart';
 import '/shared_components/popup_exito/popup_exito_widget.dart';
 import 'package:provider/provider.dart';
 import 'l_i_s_t_i_n_g_h_q_propiedad_asignada_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'l_i_s_t_i_n_g_h_q_propiedad_asignada_model.dart';
 
 /// Pantalla "Propiedad pendiente de Operative Listing".
@@ -481,7 +482,7 @@ class _LISTINGHQPropiedadAsignadaWidgetState
                     if (_loading)
                       const Padding(
                         padding: EdgeInsets.only(top: 80.0),
-                        child: CircularProgressIndicator(),
+                        child: DoviaSpinner(),
                       )
                     else if (_loadError != null)
                       Padding(

@@ -12,6 +12,7 @@ import '/notifications/notification_navigation.dart';
 import '/notifications/notification_router.dart';
 import '/notifications/notification_test_sheet.dart';
 import '/repositories/notifications_repository.dart';
+import '/shared_components/dovia_spinner.dart';
 
 /// Inbox de notificaciones compartido por todos los perfiles.
 ///
@@ -196,7 +197,7 @@ class _NotificationsInboxWidgetState extends State<NotificationsInboxWidget>
     if (repo.isLoading && items.isEmpty) {
       return const Padding(
         padding: EdgeInsets.symmetric(vertical: 60),
-        child: Center(child: CircularProgressIndicator(color: aqua)),
+        child: Center(child: DoviaSpinner()),
       );
     }
 
@@ -256,7 +257,7 @@ class _NotificationsInboxWidgetState extends State<NotificationsInboxWidget>
             child: repo.isLoadingMore
                 ? const Padding(
                     padding: EdgeInsets.all(12),
-                    child: CircularProgressIndicator(color: aqua),
+                    child: DoviaSpinner(),
                   )
                 : TextButton(
                     onPressed: () => repo.loadMore(),

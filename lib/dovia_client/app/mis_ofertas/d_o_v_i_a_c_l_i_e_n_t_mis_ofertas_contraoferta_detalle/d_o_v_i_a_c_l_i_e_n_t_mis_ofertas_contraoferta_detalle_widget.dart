@@ -14,6 +14,7 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_mis_ofertas_contraoferta_detalle_model.dart';
+import '/shared_components/dovia_spinner.dart';
 
 export 'd_o_v_i_a_c_l_i_e_n_t_mis_ofertas_contraoferta_detalle_model.dart';
 
@@ -141,7 +142,7 @@ class _DOVIACLIENTMisOfertasContraofertaDetalleWidgetState
 
   Widget _body() {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: DoviaSpinner());
     }
     if (_errorMessage != null) {
       return Center(
@@ -750,14 +751,7 @@ class _ClientCounterOfferContentState extends State<ClientCounterOfferContent> {
           ),
         ),
         child: _isSubmitting
-            ? const SizedBox(
-                width: 17.0,
-                height: 17.0,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.0,
-                  color: Colors.white,
-                ),
-              )
+            ? const DoviaSpinner(small: true, color: Colors.white)
             : Text(text, style: GoogleFonts.publicSans(color: Colors.white)),
       ),
     );

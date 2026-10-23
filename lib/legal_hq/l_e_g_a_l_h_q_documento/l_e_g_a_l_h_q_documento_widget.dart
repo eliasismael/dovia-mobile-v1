@@ -11,6 +11,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'l_e_g_a_l_h_q_documento_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'l_e_g_a_l_h_q_documento_model.dart';
 
 class LEGALHQDocumentoWidget extends StatefulWidget {
@@ -145,14 +146,7 @@ class _LEGALHQDocumentoWidgetState extends State<LEGALHQDocumentoWidget> {
                           ] else if (!_statusLoaded) ...[
                             const SizedBox(height: 16.0),
                             const Center(
-                              child: SizedBox(
-                                width: 22.0,
-                                height: 22.0,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2.0,
-                                  color: _aqua,
-                                ),
-                              ),
+                              child: DoviaSpinner(small: true),
                             ),
                           ] else if (_awaitingSubmission) ...[
                             const SizedBox(height: 16.0),
@@ -517,15 +511,10 @@ class _LEGALHQDocumentoWidgetState extends State<LEGALHQDocumentoWidget> {
           mainAxisSize: MainAxisSize.min,
           children: [
             if (loading)
-              SizedBox(
-                width: 16.0,
-                height: 16.0,
-                child: CircularProgressIndicator(
-                    strokeWidth: 2.0, color: foreground),
-              )
+              DoviaSpinner(small: true, color: foreground)
             else
               Icon(icon, size: 18.0, color: foreground),
-            const SizedBox(width: 8.0),
+            const SizedBox(width: DoviaSpinner.textGap),
             Flexible(
               child: Text(
                 label,
@@ -619,12 +608,7 @@ class _LEGALHQDocumentoWidgetState extends State<LEGALHQDocumentoWidget> {
               ),
             ),
             child: _isSubmitting
-                ? const SizedBox(
-                    width: 18.0,
-                    height: 18.0,
-                    child: CircularProgressIndicator(
-                        strokeWidth: 2.0, color: Colors.white),
-                  )
+                ? const DoviaSpinner(small: true, color: Colors.white)
                 : Text(
                     'Enviar',
                     style: GoogleFonts.publicSans(

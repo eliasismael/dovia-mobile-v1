@@ -17,6 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'd_c_forma_pago_suscripcion2_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'd_c_forma_pago_suscripcion2_model.dart';
 
 /// Último paso de la contratación del plan: confirmar y pagar.
@@ -286,7 +287,7 @@ class _DCFormaPagoSuscripcion2WidgetState
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const CircularProgressIndicator(color: Color(0xFF007376)),
+          const DoviaSpinner(),
           const SizedBox(height: 24.0),
           Text(
             'Estamos confirmando tu pago…',

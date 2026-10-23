@@ -21,6 +21,7 @@ import '/domain/counter_offer_view.dart';
 import '/domain/offer_json.dart';
 import '/dovia_client/app/mis_ofertas/cierre_legal/cierre_legal_section_widget.dart';
 import '/dovia_client/app/mis_ofertas/contraoferta/negociacion_contraoferta_widget.dart';
+import '/shared_components/dovia_spinner.dart';
 
 enum NegotiationState { negotiation, structuring, signing, completed }
 
@@ -324,7 +325,7 @@ class _ProposalScreenState extends State<ProposalScreen> {
       return const Center(
         child: Padding(
           padding: EdgeInsets.symmetric(vertical: 40),
-          child: CircularProgressIndicator(color: Color(0xFF007376)),
+          child: DoviaSpinner(),
         ),
       );
     }
@@ -615,10 +616,7 @@ class _ProposalScreenState extends State<ProposalScreen> {
                 return const SizedBox(
                   height: 120,
                   child: Center(
-                    child: CircularProgressIndicator(
-                      valueColor:
-                          AlwaysStoppedAnimation<Color>(Color(0xFF007376)),
-                    ),
+                    child: DoviaSpinner(),
                   ),
                 );
               }
@@ -1207,14 +1205,7 @@ class _ProposalScreenState extends State<ProposalScreen> {
           ),
         ),
         child: isLoading
-            ? const SizedBox(
-                height: 20,
-                width: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                ),
-              )
+            ? const DoviaSpinner(small: true, color: Colors.white)
             : const Text(
                 "Aceptar",
                 style:
@@ -1263,13 +1254,7 @@ class _ProposalScreenState extends State<ProposalScreen> {
                 ],
               ),
               child: isUploading
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(Color(0xFF007376))))
+                  ? const DoviaSpinner(small: true)
                   : const Icon(Icons.upload_outlined,
                       color: Color(0xFF007376), size: 18),
             ),
@@ -1552,14 +1537,7 @@ class _ProposalScreenState extends State<ProposalScreen> {
               Icon(leftIcon, color: leftIconColor, size: 32),
             const SizedBox(width: 8),
             if (status == "uploading")
-              const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF007376)),
-                ),
-              )
+              const DoviaSpinner(small: true)
             else if (status == "upload_download")
               Row(
                 children: [

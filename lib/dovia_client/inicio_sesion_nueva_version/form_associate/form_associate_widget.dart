@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'form_associate_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'form_associate_model.dart';
 
 class FormAssociateWidget extends StatefulWidget {
@@ -164,9 +165,7 @@ class _FormAssociateWidgetState extends State<FormAssociateWidget> {
                 // el formulario no aparece un instante para irse enseguida.
                 if (_checkingSent)
                   const Center(
-                    child: CircularProgressIndicator(
-                      color: Color(0xFF007376),
-                    ),
+                    child: DoviaSpinner(),
                   )
                 else
                   Padding(

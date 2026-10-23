@@ -20,6 +20,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '/auth/custom_auth/auth_util.dart';
 
 import 'd_h_a_s_s_o_c_i_a_t_e_empresa_home_page_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'd_h_a_s_s_o_c_i_a_t_e_empresa_home_page_model.dart';
 
 /// Panel del Dovia Home Associate **tipo Empresa** (`Role =
@@ -606,8 +607,7 @@ class _DHASSOCIATEEmpresaHomePageWidgetState
                               if (board == null)
                                 const SizedBox(
                                   height: 100.0,
-                                  child: Center(
-                                      child: CircularProgressIndicator()),
+                                  child: Center(child: DoviaSpinner()),
                                 )
                               else if (board.categories.failed)
                                 _buildEmptyState(board.categories.errorMessage)
@@ -622,8 +622,7 @@ class _DHASSOCIATEEmpresaHomePageWidgetState
                               if (board == null)
                                 const Padding(
                                   padding: EdgeInsets.symmetric(vertical: 40.0),
-                                  child: Center(
-                                      child: CircularProgressIndicator()),
+                                  child: Center(child: DoviaSpinner()),
                                 )
                               else
                                 ..._buildLanes(board),

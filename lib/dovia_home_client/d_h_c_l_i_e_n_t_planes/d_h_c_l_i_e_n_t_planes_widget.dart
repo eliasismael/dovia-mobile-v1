@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'd_h_c_l_i_e_n_t_planes_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'd_h_c_l_i_e_n_t_planes_model.dart';
 
 /// Tarjetas de los planes de DOVIA Home Premium.
@@ -120,7 +121,7 @@ class _DHCLIENTPlanesWidgetState extends State<DHCLIENTPlanesWidget> {
                   color: FlutterFlowTheme.of(context).primary,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(
+                child: const Icon(
                   Icons.check,
                   color: Colors.white,
                   size: 10.0,
@@ -564,7 +565,7 @@ class _DHCLIENTPlanesWidgetState extends State<DHCLIENTPlanesWidget> {
       return const Padding(
         padding: EdgeInsets.symmetric(vertical: 60.0),
         child: Center(
-          child: CircularProgressIndicator(color: Color(0xFF007376)),
+          child: DoviaSpinner(),
         ),
       );
     }

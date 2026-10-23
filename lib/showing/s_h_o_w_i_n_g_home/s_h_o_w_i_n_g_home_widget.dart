@@ -18,6 +18,7 @@ import '/showing/s_h_o_w_i_n_g_report_popup/s_h_o_w_i_n_g_report_popup_widget.da
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 's_h_o_w_i_n_g_home_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 's_h_o_w_i_n_g_home_model.dart';
 
 // ── Enriched visit data for a Showing card ─────────────────────────────────
@@ -264,7 +265,7 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
               ''
           : '';
       return pid.isEmpty
-          ? Future.value(ApiCallResponse(null, {}, 0))
+          ? Future.value(const ApiCallResponse(null, {}, 0))
           : DOVIAAPIPropertyContextGroup.getPropertyByIDCall
               .call(propertyId: pid);
     }).toList();
@@ -490,7 +491,7 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                     wrapWithModel(
                       model: _model.sHOWINGHeaderModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: SHOWINGHeaderWidget(
+                      child: const SHOWINGHeaderWidget(
                         showRouteButton: true,
                         title: 'Home',
                       ),
@@ -666,7 +667,7 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
         if (!snap.hasData) {
           return const Padding(
             padding: EdgeInsets.symmetric(vertical: 20),
-            child: Center(child: CircularProgressIndicator()),
+            child: Center(child: DoviaSpinner()),
           );
         }
         if (snap.data!.isEmpty) {

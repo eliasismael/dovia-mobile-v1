@@ -18,6 +18,7 @@ import '/backend/api_requests/api_dovia_home.dart';
 import '/backend/api_requests/dovia_home_paginated_loader.dart';
 
 import 'd_h_c_l_i_e_n_t_visitas_finalizadas_lista_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'd_h_c_l_i_e_n_t_visitas_finalizadas_lista_model.dart';
 
 /// Historial completo y filtrable de los servicios finalizados del cliente
@@ -294,8 +295,7 @@ class _DHCLIENTVisitasFinalizadasListaWidgetState
                       future: _visitsFuture,
                       builder: (context, snapshot) {
                         if (!snapshot.hasData) {
-                          return const Center(
-                              child: CircularProgressIndicator());
+                          return const Center(child: DoviaSpinner());
                         }
                         final result = snapshot.data!;
                         final visits = result.visits;

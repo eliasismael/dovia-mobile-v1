@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'l_e_g_a_l_a_s_s_o_c_i_a_t_e_procesos2_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'l_e_g_a_l_a_s_s_o_c_i_a_t_e_procesos2_model.dart';
 
 /// Pantalla del trámite legal del asociado. Muestra el paso que corresponde
@@ -625,9 +626,7 @@ class _LEGALASSOCIATEProcesos2WidgetState
                       child: _loading
                           ? const Padding(
                               padding: EdgeInsets.all(40),
-                              child: Center(
-                                  child: CircularProgressIndicator(
-                                      color: _primary)),
+                              child: Center(child: DoviaSpinner()),
                             )
                           : detail == null
                               ? _text('No se pudo cargar el trámite.',
@@ -1361,12 +1360,7 @@ class _LEGALASSOCIATEProcesos2WidgetState
           if (_uploading)
             const Padding(
               padding: EdgeInsets.all(8),
-              child: SizedBox(
-                width: 18,
-                height: 18,
-                child:
-                    CircularProgressIndicator(strokeWidth: 2, color: _primary),
-              ),
+              child: DoviaSpinner(small: true),
             )
           else
             ...actions,
@@ -1915,11 +1909,7 @@ class _LEGALASSOCIATEProcesos2WidgetState
         child: _text(label, color: color, weight: FontWeight.w600),
       );
 
-  Widget _spinner() => const SizedBox(
-        width: 18,
-        height: 18,
-        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-      );
+  Widget _spinner() => const DoviaSpinner(small: true, color: Colors.white);
 
   Widget _text(
     String text, {

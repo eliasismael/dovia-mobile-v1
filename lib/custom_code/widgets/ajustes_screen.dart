@@ -15,6 +15,7 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/shared_components/draw_map_component/draw_map_component_widget.dart';
 import '/shared_components/dovia_support/dovia_support_widget.dart';
 import '/core/result.dart';
+import '/shared_components/dovia_spinner.dart';
 
 class AjustesScreen extends StatefulWidget {
   final double? width;
@@ -106,8 +107,7 @@ class _AjustesScreenState extends State<AjustesScreen> {
         : null;
 
     if (repo.isLoading && profile == null) {
-      return const Center(
-          child: CircularProgressIndicator(color: Color(0xFF007376)));
+      return const Center(child: DoviaSpinner());
     }
 
     return SingleChildScrollView(
@@ -468,7 +468,7 @@ class _AjustesScreenState extends State<AjustesScreen> {
     if (loading) {
       content = const Padding(
         padding: EdgeInsets.symmetric(vertical: 24),
-        child: Center(child: CircularProgressIndicator(color: _aqua)),
+        child: Center(child: DoviaSpinner()),
       );
     } else if (!hasSub) {
       content = Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -555,11 +555,7 @@ class _AjustesScreenState extends State<AjustesScreen> {
                     borderRadius: BorderRadius.circular(24)),
               ),
               child: _cancellingSubscription
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(
-                          strokeWidth: 2, color: _softRed))
+                  ? const DoviaSpinner(small: true, color: _softRed)
                   : const Text('Cancelar suscripción',
                       style: TextStyle(
                           fontFamily: 'Public Sans',

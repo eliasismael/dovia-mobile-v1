@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'l_i_s_t_i_n_g_h_q_documentos_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'l_i_s_t_i_n_g_h_q_documentos_model.dart';
 
 /// Data class for a document card from the API.
@@ -651,7 +652,7 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                                     padding:
                                         EdgeInsets.symmetric(vertical: 40.0),
                                     child: Center(
-                                      child: CircularProgressIndicator(),
+                                      child: DoviaSpinner(),
                                     ),
                                   );
                                 }

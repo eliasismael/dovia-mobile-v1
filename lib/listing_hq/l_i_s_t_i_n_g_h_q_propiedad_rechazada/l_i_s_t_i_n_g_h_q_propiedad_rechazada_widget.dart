@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'l_i_s_t_i_n_g_h_q_propiedad_rechazada_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'l_i_s_t_i_n_g_h_q_propiedad_rechazada_model.dart';
 
 class LISTINGHQPropiedadRechazadaWidget extends StatefulWidget {
@@ -523,9 +524,7 @@ class _LISTINGHQPropiedadRechazadaWidgetState
                   // Scrollable Body
                   Expanded(
                     child: _isLoading
-                        ? Center(
-                            child: CircularProgressIndicator(
-                                color: FlutterFlowTheme.of(context).primary))
+                        ? const Center(child: DoviaSpinner())
                         : SingleChildScrollView(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 20.0, vertical: 10.0),

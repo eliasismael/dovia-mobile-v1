@@ -3,6 +3,7 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/index.dart';
 import 'package:flutter/material.dart';
 import 'd_h_c_l_i_e_n_t_otra_ubicacion_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'd_h_c_l_i_e_n_t_otra_ubicacion_model.dart';
 
 /// Ruta "Otra ubicación" del flujo de cotización.
@@ -60,10 +61,8 @@ class _DHCLIENTOtraUbicacionWidgetState
     return Scaffold(
       key: scaffoldKey,
       backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-      body: Center(
-        child: CircularProgressIndicator(
-          color: FlutterFlowTheme.of(context).primary,
-        ),
+      body: const Center(
+        child: DoviaSpinner(),
       ),
     );
   }

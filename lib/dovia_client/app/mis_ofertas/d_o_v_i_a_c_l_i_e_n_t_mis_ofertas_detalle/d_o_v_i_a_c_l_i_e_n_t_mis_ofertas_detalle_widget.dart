@@ -14,6 +14,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../cancelar_oferta_modal_widget.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_mis_ofertas_detalle_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'd_o_v_i_a_c_l_i_e_n_t_mis_ofertas_detalle_model.dart';
 
 /// Detalle de una oferta que el cliente envió: la propuesta congelada, en sólo
@@ -213,7 +214,7 @@ class _DOVIACLIENTMisOfertasDetalleWidgetState
 
   Widget _buildBody() {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator(color: _aqua));
+      return const Center(child: DoviaSpinner());
     }
 
     if (_errorMessage != null || _detail == null) {
@@ -549,14 +550,7 @@ class _DOVIACLIENTMisOfertasDetalleWidgetState
                 ),
               ),
               child: _isWithdrawing
-                  ? const SizedBox(
-                      width: 18.0,
-                      height: 18.0,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2.0,
-                        color: _destructive,
-                      ),
-                    )
+                  ? const DoviaSpinner(small: true, color: _destructive)
                   : Text(
                       'Retirar Oferta',
                       style: GoogleFonts.publicSans(

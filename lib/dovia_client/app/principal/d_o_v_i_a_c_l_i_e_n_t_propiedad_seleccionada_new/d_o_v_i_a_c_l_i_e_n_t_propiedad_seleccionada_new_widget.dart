@@ -31,6 +31,7 @@ import 'package:provider/provider.dart';
 import '/repositories/visits_repository.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_propiedad_seleccionada_new_model.dart';
 import 'recorrido_360_modal.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'd_o_v_i_a_c_l_i_e_n_t_propiedad_seleccionada_new_model.dart';
 
 class DOVIACLIENTPropiedadSeleccionadaNewWidget extends StatefulWidget {
@@ -271,14 +272,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
           height: 220.0,
           color: const Color(0xFFE9EEEE),
           alignment: Alignment.center,
-          child: const SizedBox(
-            width: 22.0,
-            height: 22.0,
-            child: CircularProgressIndicator(
-              strokeWidth: 2.0,
-              color: Color(0xFF007376),
-            ),
-          ),
+          child: const DoviaSpinner(small: true),
         ),
       ),
     );

@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 // import '/flutter_flow/custom_functions.dart'; // <--- ELIMINADO PARA QUE NO DE ERROR
 
 import 'package:flutter/gestures.dart';
+import '/shared_components/dovia_spinner.dart';
 
 /// Resumen del plan y confirmación antes de ir a pagar.
 ///
@@ -160,14 +161,7 @@ class _SubscriptionPaymentState extends State<SubscriptionPayment> {
                 elevation: 0,
               ),
               child: widget.isBusy
-                  ? const SizedBox(
-                      height: 22,
-                      width: 22,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    )
+                  ? const DoviaSpinner(small: true, color: Colors.white)
                   : const Text(
                       "Acceder al plan",
                       style: TextStyle(

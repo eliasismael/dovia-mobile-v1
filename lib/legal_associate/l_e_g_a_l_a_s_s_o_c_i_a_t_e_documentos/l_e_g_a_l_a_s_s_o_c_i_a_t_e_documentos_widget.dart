@@ -10,6 +10,7 @@ import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'l_e_g_a_l_a_s_s_o_c_i_a_t_e_documentos_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'l_e_g_a_l_a_s_s_o_c_i_a_t_e_documentos_model.dart';
 
 /// Qué tiene que hacer el asociado con un documento.
@@ -207,7 +208,7 @@ class _LEGALASSOCIATEDocumentosWidgetState
     if (_loading) {
       return const Padding(
         padding: EdgeInsets.all(40),
-        child: Center(child: CircularProgressIndicator(color: _primary)),
+        child: Center(child: DoviaSpinner()),
       );
     }
     if (_processes.isEmpty) {

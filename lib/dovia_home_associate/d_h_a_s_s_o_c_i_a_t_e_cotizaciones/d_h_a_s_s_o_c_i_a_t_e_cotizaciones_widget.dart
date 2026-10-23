@@ -23,6 +23,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '/auth/custom_auth/auth_util.dart';
 
 import 'd_h_a_s_s_o_c_i_a_t_e_cotizaciones_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'd_h_a_s_s_o_c_i_a_t_e_cotizaciones_model.dart';
 
 /// Valores del filtro "Estado del trabajo", uno por carril del ciclo de venta.
@@ -523,7 +524,7 @@ class _DHASSOCIATECotizacionesWidgetState
                         if (!snapshot.hasData) {
                           return const Padding(
                             padding: EdgeInsets.symmetric(vertical: 40.0),
-                            child: Center(child: CircularProgressIndicator()),
+                            child: Center(child: DoviaSpinner()),
                           );
                         }
                         final board = snapshot.data!;

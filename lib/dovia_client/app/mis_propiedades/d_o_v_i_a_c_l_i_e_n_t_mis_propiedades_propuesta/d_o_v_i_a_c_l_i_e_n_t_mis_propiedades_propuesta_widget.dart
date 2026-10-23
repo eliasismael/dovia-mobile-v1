@@ -15,6 +15,7 @@ import '/shared_components/header_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_mis_propiedades_propuesta_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'd_o_v_i_a_c_l_i_e_n_t_mis_propiedades_propuesta_model.dart';
 
 class DOVIACLIENTMisPropiedadesPropuestaWidget extends StatefulWidget {
@@ -475,7 +476,7 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
 
   Widget _buildBody() {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator(color: _primary));
+      return const Center(child: DoviaSpinner());
     }
     if (_errorMessage != null) {
       return Center(
@@ -1018,11 +1019,7 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
           ),
           onPressed: _isActioning ? null : _acceptOffer,
           child: _isActioning
-              ? const SizedBox(
-                  width: 18,
-                  height: 18,
-                  child: CircularProgressIndicator(
-                      strokeWidth: 2, color: Colors.white))
+              ? const DoviaSpinner(small: true, color: Colors.white)
               : FittedBox(
                   fit: BoxFit.scaleDown,
                   child: Text('Aceptar',
@@ -1192,11 +1189,7 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
                 ? null
                 : _rejectOffer,
             child: _isActioning
-                ? const SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(
-                        strokeWidth: 2, color: Colors.white))
+                ? const DoviaSpinner(small: true, color: Colors.white)
                 : Text('Confirmar rechazo',
                     style: GoogleFonts.inter(
                         fontSize: 15,

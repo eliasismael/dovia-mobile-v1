@@ -1,6 +1,7 @@
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:auto_size_text/auto_size_text.dart';
+import '/shared_components/dovia_spinner.dart';
 
 class FFButtonOptions {
   const FFButtonOptions({
@@ -104,15 +105,9 @@ class _FFButtonWidgetState extends State<FFButtonWidget> {
                 ? _getTextWidth(text, widget.options.textStyle, maxLines)
                 : null,
             child: Center(
-              child: SizedBox(
-                width: 23,
-                height: 23,
-                child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    widget.options.textStyle?.color ?? Colors.white,
-                  ),
-                ),
-              ),
+              child: DoviaSpinner(
+                  small: true,
+                  color: widget.options.textStyle?.color ?? Colors.white),
             ),
           )
         : AutoSizeText(

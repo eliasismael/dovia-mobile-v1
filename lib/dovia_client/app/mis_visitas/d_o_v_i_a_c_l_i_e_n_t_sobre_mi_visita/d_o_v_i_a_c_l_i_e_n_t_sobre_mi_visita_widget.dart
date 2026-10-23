@@ -21,6 +21,7 @@ import '../d_o_v_i_a_c_l_i_e_n_t_ofertar/d_o_v_i_a_c_l_i_e_n_t_ofertar_widget.da
 import '../../principal/agendar_cita/agendar_cita_widget.dart';
 import 'reschedule_visit_widget.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_sobre_mi_visita_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'd_o_v_i_a_c_l_i_e_n_t_sobre_mi_visita_model.dart';
 
 class DOVIACLIENTSobreMiVisitaWidget extends StatefulWidget {
@@ -419,7 +420,7 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
                     if (_isLoading)
                       const Padding(
                         padding: EdgeInsets.only(top: 80.0),
-                        child: Center(child: CircularProgressIndicator()),
+                        child: Center(child: DoviaSpinner()),
                       )
                     else
                       Padding(

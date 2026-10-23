@@ -16,6 +16,7 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_mis_propiedades_propiedad_publicada_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'd_o_v_i_a_c_l_i_e_n_t_mis_propiedades_propiedad_publicada_model.dart';
 
 class DOVIACLIENTMisPropiedadesPropiedadPublicadaWidget extends StatefulWidget {
@@ -1135,9 +1136,7 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
   Widget _publicInfoCard() {
     if (_isLoadingProperty) {
       return const Center(
-          child: Padding(
-              padding: EdgeInsets.all(20),
-              child: CircularProgressIndicator(color: _primary)));
+          child: Padding(padding: EdgeInsets.all(20), child: DoviaSpinner()));
     }
 
     final name = _propName();
@@ -1365,7 +1364,7 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
                             const Center(
                                 child: Padding(
                               padding: EdgeInsets.symmetric(vertical: 20),
-                              child: CircularProgressIndicator(color: _primary),
+                              child: DoviaSpinner(),
                             ))
                           else if (_pendingVisits.isEmpty)
                             _emptyState(
@@ -1462,8 +1461,7 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
                                   const Center(
                                       child: Padding(
                                     padding: EdgeInsets.symmetric(vertical: 20),
-                                    child: CircularProgressIndicator(
-                                        color: _primary),
+                                    child: DoviaSpinner(),
                                   ))
                                 else if (pendingOffers.isEmpty)
                                   _emptyState(
@@ -2225,11 +2223,8 @@ class _EditPriceModalState extends State<_EditPriceModal> {
                                       if (mounted) Navigator.pop(context);
                                     },
                               child: _isSaving
-                                  ? const SizedBox(
-                                      width: 20,
-                                      height: 20,
-                                      child: CircularProgressIndicator(
-                                          color: Colors.white, strokeWidth: 2))
+                                  ? const DoviaSpinner(
+                                      small: true, color: Colors.white)
                                   : Text(
                                       'Aceptar',
                                       style: GoogleFonts.publicSans(
@@ -2517,12 +2512,8 @@ class _NoDisponibleModalState extends State<_NoDisponibleModal> {
                                 borderRadius: BorderRadius.circular(100)),
                           ),
                           child: _isLoading
-                              ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                      color: Colors.white, strokeWidth: 2),
-                                )
+                              ? const DoviaSpinner(
+                                  small: true, color: Colors.white)
                               // Si no entra en una línea, baja a la segunda.
                               : Text(
                                   'Marcar como no disponible',
@@ -2752,12 +2743,7 @@ class _PausaModalState extends State<_PausaModal> {
                             borderRadius: BorderRadius.circular(25)),
                       ),
                       child: _isLoading
-                          ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(
-                                  color: Colors.white, strokeWidth: 2),
-                            )
+                          ? const DoviaSpinner(small: true, color: Colors.white)
                           // En una línea: si no entra, se achica.
                           : FittedBox(
                               fit: BoxFit.scaleDown,

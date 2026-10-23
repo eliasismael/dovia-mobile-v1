@@ -9,6 +9,7 @@ import '/flutter_flow/flutter_flow_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'tus_favoritos_carpetas_modal_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'tus_favoritos_carpetas_modal_model.dart';
 
 class TusFavoritosCarpetasModalWidget extends StatefulWidget {
@@ -108,10 +109,8 @@ class _TusFavoritosCarpetasModalWidgetState
       child: busy
           ? Padding(
               padding: const EdgeInsets.all(8),
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: checked ? Colors.white : _aqua,
-              ),
+              child: DoviaSpinner(
+                  small: true, color: checked ? Colors.white : null),
             )
           : Icon(
               checked ? Icons.check_rounded : Icons.add_rounded,
@@ -244,16 +243,8 @@ class _TusFavoritosCarpetasModalWidgetState
       builder: (context, snapshot) {
         // Customize what your widget looks like when it's loading.
         if (!snapshot.hasData) {
-          return Center(
-            child: SizedBox(
-              width: 50.0,
-              height: 50.0,
-              child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  FlutterFlowTheme.of(context).primary,
-                ),
-              ),
-            ),
+          return const Center(
+            child: DoviaSpinner(),
           );
         }
         final containerCheckIfPropertyIsFavoritedResponse = snapshot.data!;
@@ -545,20 +536,8 @@ class _TusFavoritosCarpetasModalWidgetState
                                         builder: (context, snapshot) {
                                           // Customize what your widget looks like when it's loading.
                                           if (!snapshot.hasData) {
-                                            return Center(
-                                              child: SizedBox(
-                                                width: 50.0,
-                                                height: 50.0,
-                                                child:
-                                                    CircularProgressIndicator(
-                                                  valueColor:
-                                                      AlwaysStoppedAnimation<
-                                                          Color>(
-                                                    FlutterFlowTheme.of(context)
-                                                        .primary,
-                                                  ),
-                                                ),
-                                              ),
+                                            return const Center(
+                                              child: DoviaSpinner(),
                                             );
                                           }
                                           final listViewGetAllFavoriteFoldersResponse =
@@ -1068,13 +1047,8 @@ class _TusFavoritosCarpetasModalWidgetState
                                       borderRadius: BorderRadius.circular(100),
                                     ),
                                     child: _creatingFolder
-                                        ? const SizedBox(
-                                            width: 18,
-                                            height: 18,
-                                            child: CircularProgressIndicator(
-                                                strokeWidth: 2,
-                                                color: Colors.white),
-                                          )
+                                        ? const DoviaSpinner(
+                                            small: true, color: Colors.white)
                                         : const Text(
                                             'Guardar',
                                             style: TextStyle(

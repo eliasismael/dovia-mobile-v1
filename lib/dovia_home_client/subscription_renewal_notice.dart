@@ -13,6 +13,7 @@ import '/repositories/payments_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import '/shared_components/dovia_spinner.dart';
 
 class SubscriptionRenewalNotice extends StatefulWidget {
   const SubscriptionRenewalNotice({super.key, this.message});
@@ -126,14 +127,7 @@ class _SubscriptionRenewalNoticeState extends State<SubscriptionRenewalNotice> {
                 ),
               ),
               child: _opening
-                  ? const SizedBox(
-                      width: 18.0,
-                      height: 18.0,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2.0,
-                        color: Colors.white,
-                      ),
-                    )
+                  ? const DoviaSpinner(small: true, color: Colors.white)
                   : Text(
                       'Reactivar plan',
                       style: GoogleFonts.publicSans(

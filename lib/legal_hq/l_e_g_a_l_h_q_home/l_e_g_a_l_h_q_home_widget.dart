@@ -12,6 +12,7 @@ import '/shared_components/corner_gradient_background/corner_gradient_background
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'l_e_g_a_l_h_q_home_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'l_e_g_a_l_h_q_home_model.dart';
 
 /// Roles autorizados a ver este panel.
@@ -380,7 +381,7 @@ class _LEGALHQHomeWidgetState extends State<LEGALHQHomeWidget> {
           return const SizedBox(
             height: height,
             child: Center(
-              child: CircularProgressIndicator(color: _aqua),
+              child: DoviaSpinner(),
             ),
           );
         }
@@ -580,14 +581,7 @@ class _LEGALHQHomeWidgetState extends State<LEGALHQHomeWidget> {
                       padding: const EdgeInsets.symmetric(horizontal: 20.0),
                     ),
                     child: _claimingProcessId == process.id
-                        ? const SizedBox(
-                            width: 14.0,
-                            height: 14.0,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2.0,
-                              color: Colors.white,
-                            ),
-                          )
+                        ? const DoviaSpinner(small: true, color: Colors.white)
                         : Text(
                             // Un expediente sin Legal HQ asignado se reclama al
                             // tocar el botón; uno propio se abre directamente.

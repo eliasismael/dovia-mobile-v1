@@ -14,6 +14,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '/showing/s_h_o_w_i_n_g_registro_de_visita_2/s_h_o_w_i_n_g_registro_de_visita2_widget.dart';
 import '/showing/s_h_o_w_i_n_g_report_popup/s_h_o_w_i_n_g_report_popup_widget.dart';
 import 's_h_o_w_i_n_g_propiedades_a_mostrar_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 's_h_o_w_i_n_g_propiedades_a_mostrar_model.dart';
 
 class _ShowingVisit {
@@ -851,7 +852,7 @@ class _SHOWINGPropiedadesAMostrarWidgetState
                                 return const Padding(
                                   padding: EdgeInsets.symmetric(vertical: 40.0),
                                   child: Center(
-                                    child: CircularProgressIndicator(),
+                                    child: DoviaSpinner(),
                                   ),
                                 );
                               }

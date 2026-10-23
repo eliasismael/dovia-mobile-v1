@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'o_p_e_r_a_t_i_v_e_l_i_s_t_i_n_g_home_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'o_p_e_r_a_t_i_v_e_l_i_s_t_i_n_g_home_model.dart';
 
 // ── Data model for a fully-enriched visit card ─────────────────────────────
@@ -470,7 +471,7 @@ class _OPERATIVELISTINGHomeWidgetState
 
   Widget _loader() => const Padding(
         padding: EdgeInsets.symmetric(vertical: 20),
-        child: Center(child: CircularProgressIndicator()),
+        child: Center(child: DoviaSpinner()),
       );
 
   Widget _emptyMsg(String text) => Padding(
@@ -1082,14 +1083,7 @@ class _RescheduleReasonSheetState extends State<_RescheduleReasonSheet> {
                 elevation: 0,
               ),
               child: _loading
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        color: Colors.white,
-                        strokeWidth: 2,
-                      ),
-                    )
+                  ? const DoviaSpinner(small: true, color: Colors.white)
                   : const Text(
                       'Enviar solicitud',
                       style: TextStyle(

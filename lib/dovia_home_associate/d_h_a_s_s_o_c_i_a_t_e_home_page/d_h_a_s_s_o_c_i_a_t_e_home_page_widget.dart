@@ -20,6 +20,7 @@ import '/backend/api_requests/api_dovia_home.dart';
 import '/backend/api_requests/api_manager.dart';
 
 import 'd_h_a_s_s_o_c_i_a_t_e_home_page_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'd_h_a_s_s_o_c_i_a_t_e_home_page_model.dart';
 
 /// Panel del Dovia Home Associate (Profesional Independiente), adaptado a
@@ -603,7 +604,7 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
         if (!snapshot.hasData) {
           return const Padding(
             padding: EdgeInsets.symmetric(vertical: 24.0),
-            child: Center(child: CircularProgressIndicator()),
+            child: Center(child: DoviaSpinner()),
           );
         }
         final response = snapshot.data!;
@@ -692,7 +693,7 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
         if (!snapshot.hasData) {
           return const Padding(
             padding: EdgeInsets.symmetric(vertical: 24.0),
-            child: Center(child: CircularProgressIndicator()),
+            child: Center(child: DoviaSpinner()),
           );
         }
         final available = _applyFilters(
@@ -829,8 +830,7 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
                                         ConnectionState.waiting)
                                       const SizedBox(
                                         height: 100.0,
-                                        child: Center(
-                                            child: CircularProgressIndicator()),
+                                        child: Center(child: DoviaSpinner()),
                                       )
                                     else if (snapshot.data?.failed ?? false)
                                       _buildEmptyState(

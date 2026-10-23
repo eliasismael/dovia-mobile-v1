@@ -16,6 +16,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 's_h_o_w_i_n_g_agenda_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 's_h_o_w_i_n_g_agenda_model.dart';
 
 class _AgendaVisit {
@@ -478,8 +479,7 @@ class _SHOWINGAgendaWidgetState extends State<SHOWINGAgendaWidget> {
                             if (_loading)
                               const Padding(
                                 padding: EdgeInsets.symmetric(vertical: 60.0),
-                                child: CircularProgressIndicator(
-                                    color: Color(0xFF007376)),
+                                child: DoviaSpinner(),
                               )
                             else if (visibleDates.isEmpty)
                               Padding(

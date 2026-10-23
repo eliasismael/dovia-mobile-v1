@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
 
 import 'package:flutter_svg/flutter_svg.dart';
+import '/shared_components/dovia_spinner.dart';
 
 enum ImageSourceType {
   asset,
@@ -185,7 +186,7 @@ class PropertyMatchCardWidget extends StatelessWidget {
     return Container(
       color: imagePlaceholderColor,
       child: const Center(
-        child: CircularProgressIndicator(strokeWidth: 2, color: aquaColor),
+        child: DoviaSpinner(),
       ),
     );
   }

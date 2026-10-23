@@ -26,6 +26,7 @@ import '/backend/api_requests/api_dovia_home.dart';
 import '/backend/api_requests/api_manager.dart';
 
 import 'd_h_a_s_s_o_c_i_a_t_e_cotizacion_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'd_h_a_s_s_o_c_i_a_t_e_cotizacion_model.dart';
 
 /// Extensiones que acepta el envío de propuestas: un PDF con el desglose, o una
@@ -809,12 +810,7 @@ class _DHASSOCIATECotizacionWidgetState
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(25.0)),
         ),
         child: _model.isSubmitting
-            ? const SizedBox(
-                width: 20.0,
-                height: 20.0,
-                child: CircularProgressIndicator(
-                    strokeWidth: 2.0, color: Colors.white),
-              )
+            ? const DoviaSpinner(small: true, color: Colors.white)
             : Text(
                 'Enviar cotización',
                 style: GoogleFonts.publicSans(

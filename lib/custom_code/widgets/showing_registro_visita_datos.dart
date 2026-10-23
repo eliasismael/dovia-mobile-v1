@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import '/flutter_flow/upload_data.dart';
 import '/flutter_flow/uploaded_file.dart';
+import '/shared_components/dovia_spinner.dart';
 // Begin custom widget code
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
 
@@ -788,14 +789,7 @@ class _ShowingRegistroVisitaDatosState
             ),
             alignment: Alignment.center,
             child: _isUploadingPhotos
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: primaryColor,
-                    ),
-                  )
+                ? const DoviaSpinner(small: true)
                 : const Text(
                     'Subir fotos',
                     style: TextStyle(
@@ -983,7 +977,7 @@ class _ShowingRegistroVisitaDatosState
             alignment: Alignment.center,
             child: Text(
               _isSending ? 'Enviando...' : 'Finalizar registro de visita',
-              style: TextStyle(
+              style: const TextStyle(
                 fontFamily: 'Public Sans',
                 fontSize: 16,
                 fontWeight: FontWeight.w600,

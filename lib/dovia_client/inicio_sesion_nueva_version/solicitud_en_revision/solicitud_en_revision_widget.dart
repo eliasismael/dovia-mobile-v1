@@ -9,6 +9,7 @@ import '/shared_components/corner_gradient_background/corner_gradient_background
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '/shared_components/dovia_spinner.dart';
 
 /// Asociado que ya envió todo su registro y espera la aprobación de DOVIA.
 ///
@@ -147,14 +148,7 @@ class _SolicitudEnRevisionWidgetState extends State<SolicitudEnRevisionWidget>
                           const SizedBox(
                             height: 42.0,
                             child: Center(
-                              child: SizedBox(
-                                width: 28.0,
-                                height: 28.0,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 3.0,
-                                  color: Color(0xFF007376),
-                                ),
-                              ),
+                              child: DoviaSpinner(),
                             ),
                           )
                         else ...[

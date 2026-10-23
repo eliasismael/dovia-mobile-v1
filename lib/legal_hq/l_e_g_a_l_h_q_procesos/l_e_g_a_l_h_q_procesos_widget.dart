@@ -11,6 +11,7 @@ import '/shared_components/corner_gradient_background/corner_gradient_background
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'l_e_g_a_l_h_q_procesos_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'l_e_g_a_l_h_q_procesos_model.dart';
 
 /// Filtros del listado, tal como los chips del diseño.
@@ -331,7 +332,7 @@ class _LEGALHQProcesosWidgetState extends State<LEGALHQProcesosWidget> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Padding(
             padding: EdgeInsets.symmetric(vertical: 60.0),
-            child: Center(child: CircularProgressIndicator(color: _aqua)),
+            child: Center(child: DoviaSpinner()),
           );
         }
 
@@ -483,14 +484,7 @@ class _LEGALHQProcesosWidgetState extends State<LEGALHQProcesosWidget> {
                       ),
                     ),
                     child: _claimingProcessId == process.id
-                        ? const SizedBox(
-                            width: 14.0,
-                            height: 14.0,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2.0,
-                              color: Colors.white,
-                            ),
-                          )
+                        ? const DoviaSpinner(small: true, color: Colors.white)
                         : Text(
                             'Revisar',
                             style: GoogleFonts.publicSans(

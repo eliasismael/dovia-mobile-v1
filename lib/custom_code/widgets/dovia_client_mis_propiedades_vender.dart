@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
 
 import 'package:flutter_svg/flutter_svg.dart';
+import '/shared_components/dovia_spinner.dart';
 
 class DoviaClientMisPropiedadesVender extends StatefulWidget {
   final double? width;
@@ -399,14 +400,8 @@ class _DoviaClientMisPropiedadesVenderState
                       fit: BoxFit.cover,
                       loadingBuilder: (context, child, loadingProgress) {
                         if (loadingProgress == null) return child;
-                        return Center(
-                          child: CircularProgressIndicator(
-                            value: loadingProgress.expectedTotalBytes != null
-                                ? loadingProgress.cumulativeBytesLoaded /
-                                    loadingProgress.expectedTotalBytes!
-                                : null,
-                            color: primaryColor,
-                          ),
+                        return const Center(
+                          child: DoviaSpinner(),
                         );
                       },
                       errorBuilder: (context, error, stackTrace) {

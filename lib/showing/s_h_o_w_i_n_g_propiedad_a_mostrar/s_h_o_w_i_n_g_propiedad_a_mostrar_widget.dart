@@ -18,6 +18,7 @@ import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_visits.dart';
 import '/backend/api_requests/api_properties.dart';
 import '/index.dart';
+import '/shared_components/dovia_spinner.dart';
 export 's_h_o_w_i_n_g_propiedad_a_mostrar_model.dart';
 
 class SHOWINGPropiedadAMostrarWidget extends StatefulWidget {
@@ -644,11 +645,7 @@ class _SHOWINGPropiedadAMostrarWidgetState
                           ? const Padding(
                               padding: EdgeInsets.symmetric(vertical: 80.0),
                               child: Center(
-                                child: CircularProgressIndicator(
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                    Color(0xFF007376),
-                                  ),
-                                ),
+                                child: DoviaSpinner(),
                               ),
                             )
                           : _loadError != null

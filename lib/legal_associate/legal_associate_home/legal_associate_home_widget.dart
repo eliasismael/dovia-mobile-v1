@@ -11,6 +11,7 @@ import '/shared_components/corner_gradient_background/corner_gradient_background
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'legal_associate_home_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'legal_associate_home_model.dart';
 
 // ── Data model for a legal process item ─────────────────────────────────────
@@ -460,7 +461,7 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
         if (!snapshot.hasData) {
           return const Padding(
             padding: EdgeInsets.all(40.0),
-            child: Center(child: CircularProgressIndicator(color: _aqua)),
+            child: Center(child: DoviaSpinner()),
           );
         }
         final groups = snapshot.data!;
@@ -518,7 +519,7 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
           return SizedBox(
             height: height,
             child: const Center(
-              child: CircularProgressIndicator(color: _aqua),
+              child: DoviaSpinner(),
             ),
           );
         }

@@ -12,6 +12,7 @@ import '/showing/s_h_o_w_i_n_g_report_popup/s_h_o_w_i_n_g_report_popup_widget.da
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 's_h_o_w_i_n_g_registro_de_visita_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 's_h_o_w_i_n_g_registro_de_visita_model.dart';
 
 // ── A single visit row inside a date block of the schedule ─────────────────
@@ -298,8 +299,7 @@ class _SHOWINGRegistroDeVisitaWidgetState
                               if (!snap.hasData) {
                                 return const Padding(
                                   padding: EdgeInsets.symmetric(vertical: 40),
-                                  child: Center(
-                                      child: CircularProgressIndicator()),
+                                  child: Center(child: DoviaSpinner()),
                                 );
                               }
                               return _buildSections(snap.data!);

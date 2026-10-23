@@ -15,6 +15,7 @@ import '../client_offer_navigation.dart';
 import '../mi_oferta_card_widget.dart';
 import '../d_o_v_i_a_c_l_i_e_n_t_mis_ofertas_lista/d_o_v_i_a_c_l_i_e_n_t_mis_ofertas_lista_widget.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_mis_ofertas_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'd_o_v_i_a_c_l_i_e_n_t_mis_ofertas_model.dart';
 
 /// Panel centralizado de las ofertas que el usuario envió como cliente.
@@ -170,13 +171,10 @@ class _DOVIACLIENTMisOfertasWidgetState
 
   Widget _buildBody() {
     if (_isLoading) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 60.0),
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 60.0),
         child: Center(
-          child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(
-                FlutterFlowTheme.of(context).primary),
-          ),
+          child: DoviaSpinner(),
         ),
       );
     }

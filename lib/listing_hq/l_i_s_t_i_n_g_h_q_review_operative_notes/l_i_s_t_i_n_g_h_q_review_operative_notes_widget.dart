@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_visits.dart';
 import 'l_i_s_t_i_n_g_h_q_review_operative_notes_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'l_i_s_t_i_n_g_h_q_review_operative_notes_model.dart';
 
 class LISTINGHQReviewOperativeNotesWidget extends StatefulWidget {
@@ -90,7 +91,7 @@ class _LISTINGHQReviewOperativeNotesWidgetState
                   builder: (context, snapshot) {
                     if (widget.visitId != null &&
                         snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
+                      return const Center(child: DoviaSpinner());
                     }
 
                     final data = snapshot.data;

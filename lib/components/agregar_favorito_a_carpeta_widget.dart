@@ -9,6 +9,7 @@ import '/shared_components/secondary_button/secondary_button_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'agregar_favorito_a_carpeta_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'agregar_favorito_a_carpeta_model.dart';
 
 class AgregarFavoritoACarpetaWidget extends StatefulWidget {
@@ -87,16 +88,8 @@ class _AgregarFavoritoACarpetaWidgetState
                 builder: (context, snapshot) {
                   // Customize what your widget looks like when it's loading.
                   if (!snapshot.hasData) {
-                    return Center(
-                      child: SizedBox(
-                        width: 50.0,
-                        height: 50.0,
-                        child: CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            FlutterFlowTheme.of(context).primary,
-                          ),
-                        ),
-                      ),
+                    return const Center(
+                      child: DoviaSpinner(),
                     );
                   }
                   final listViewGetAllFavoriteFoldersResponse = snapshot.data!;

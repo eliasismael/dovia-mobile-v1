@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '/repositories/visits_repository.dart';
 import '/core/result.dart';
+import '/shared_components/dovia_spinner.dart';
 
 // Begin custom widget code
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
@@ -527,7 +528,7 @@ class _ListingHQMatchmakingSelectorWidgetState
     if (_isLoading) {
       return const Padding(
         padding: EdgeInsets.symmetric(vertical: 32.0),
-        child: Center(child: CircularProgressIndicator()),
+        child: Center(child: DoviaSpinner()),
       );
     }
     if (_availableOperatives.isEmpty) {

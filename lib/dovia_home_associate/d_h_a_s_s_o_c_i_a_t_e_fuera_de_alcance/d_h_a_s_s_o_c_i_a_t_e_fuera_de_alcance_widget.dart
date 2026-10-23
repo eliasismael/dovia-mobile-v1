@@ -13,6 +13,7 @@ import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'd_h_a_s_s_o_c_i_a_t_e_fuera_de_alcance_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'd_h_a_s_s_o_c_i_a_t_e_fuera_de_alcance_model.dart';
 
 /// Reporte de **trabajo fuera de alcance** que el asociado levanta durante la
@@ -478,13 +479,8 @@ class _DHASSOCIATEFueraDeAlcanceWidgetState
                                     borderRadius: BorderRadius.circular(25.0)),
                               ),
                               child: _model.isSubmitting
-                                  ? const SizedBox(
-                                      width: 20.0,
-                                      height: 20.0,
-                                      child: CircularProgressIndicator(
-                                          strokeWidth: 2.0,
-                                          color: Colors.white),
-                                    )
+                                  ? const DoviaSpinner(
+                                      small: true, color: Colors.white)
                                   : Text(
                                       'Enviar',
                                       style: GoogleFonts.publicSans(

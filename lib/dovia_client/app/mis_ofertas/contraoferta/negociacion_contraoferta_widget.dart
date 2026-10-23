@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import '/shared_components/dovia_spinner.dart';
 
 /// Las dos propuestas enfrentadas: la que el cliente envió, congelada arriba
 /// como referencia, y la que el propietario devolvió, abajo.
@@ -450,11 +451,7 @@ class _NegociacionContraofertaWidgetState
                 ),
               ),
               child: _isActioning
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(
-                          strokeWidth: 2, color: Colors.white))
+                  ? const DoviaSpinner(small: true, color: Colors.white)
                   : Text(
                       'Aceptar',
                       style: GoogleFonts.publicSans(

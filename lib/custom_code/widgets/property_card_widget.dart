@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 // Property Card Widget - Based on Figma design (node 1034:22675)
 // A reusable card component displaying property information with image
 import 'package:flutter_svg/flutter_svg.dart';
+import '/shared_components/dovia_spinner.dart';
 
 class PropertyCardWidget extends StatelessWidget {
   static const Color textColor = Color(0xFF00444B);
@@ -167,10 +168,7 @@ class PropertyCardWidget extends StatelessWidget {
     return Container(
       color: imagePlaceholderColor,
       child: const Center(
-        child: CircularProgressIndicator(
-          strokeWidth: 2,
-          color: Color(0xFF007376),
-        ),
+        child: DoviaSpinner(),
       ),
     );
   }

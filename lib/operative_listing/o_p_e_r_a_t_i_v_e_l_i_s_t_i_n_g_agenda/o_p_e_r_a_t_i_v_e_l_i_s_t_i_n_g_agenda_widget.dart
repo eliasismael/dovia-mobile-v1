@@ -12,6 +12,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'o_p_e_r_a_t_i_v_e_l_i_s_t_i_n_g_agenda_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'o_p_e_r_a_t_i_v_e_l_i_s_t_i_n_g_agenda_model.dart';
 
 // ── Data model for an agenda visit card ─────────────────────────────
@@ -343,9 +344,7 @@ class _OPERATIVELISTINGAgendaWidgetState
                           if (_loading)
                             const Padding(
                               padding: EdgeInsets.symmetric(vertical: 60.0),
-                              child: CircularProgressIndicator(
-                                color: Color(0xFF007376),
-                              ),
+                              child: DoviaSpinner(),
                             )
                           else if (visibleDates.isEmpty)
                             const Padding(

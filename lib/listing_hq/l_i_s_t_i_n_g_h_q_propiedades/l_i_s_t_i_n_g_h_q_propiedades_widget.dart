@@ -12,6 +12,7 @@ import '/shared_components/corner_gradient_background/corner_gradient_background
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'l_i_s_t_i_n_g_h_q_propiedades_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'l_i_s_t_i_n_g_h_q_propiedades_model.dart';
 
 class _HqCardData {
@@ -573,7 +574,7 @@ class _LISTINGHQPropiedadesWidgetState extends State<LISTINGHQPropiedadesWidget>
     return const Padding(
       padding: EdgeInsets.symmetric(vertical: 20.0),
       child: Center(
-        child: CircularProgressIndicator(),
+        child: DoviaSpinner(),
       ),
     );
   }

@@ -14,6 +14,7 @@ import '/backend/api_requests/api_properties.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'o_p_e_r_a_t_i_v_e_l_i_s_t_i_n_g_checklist_form_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'o_p_e_r_a_t_i_v_e_l_i_s_t_i_n_g_checklist_form_model.dart';
 
 class OPERATIVELISTINGChecklistFormWidget extends StatefulWidget {
@@ -311,8 +312,7 @@ class _OPERATIVELISTINGChecklistFormWidgetState
                             if (_fetchingVisit)
                               const Padding(
                                 padding: EdgeInsets.symmetric(vertical: 40),
-                                child:
-                                    Center(child: CircularProgressIndicator()),
+                                child: Center(child: DoviaSpinner()),
                               )
                             else if (FFAppState().lastActiveVisitId.isEmpty)
                               const Padding(

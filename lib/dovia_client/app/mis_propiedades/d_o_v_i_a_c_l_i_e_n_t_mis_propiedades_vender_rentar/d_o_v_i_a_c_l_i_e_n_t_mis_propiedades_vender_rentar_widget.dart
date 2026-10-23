@@ -34,6 +34,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_mis_propiedades_vender_rentar_model.dart';
 import 'property_publication_form.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'd_o_v_i_a_c_l_i_e_n_t_mis_propiedades_vender_rentar_model.dart';
 
 /// Formulario para publicar una propiedad en venta, renta o ambas: precios,
@@ -1048,7 +1049,7 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
     if ((profile == null && repo.isLoading) || _uploadingAccountId) {
       identity = const Padding(
         padding: EdgeInsets.symmetric(vertical: 12.0),
-        child: Center(child: CircularProgressIndicator()),
+        child: Center(child: DoviaSpinner()),
       );
     } else if (profile?.identificationDocumentUrl != null) {
       identity = Container(

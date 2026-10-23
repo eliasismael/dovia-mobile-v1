@@ -15,6 +15,7 @@ import '/domain/offer_json.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_mis_visitas_model.dart';
 export 'd_o_v_i_a_c_l_i_e_n_t_mis_visitas_model.dart';
 import '../d_o_v_i_a_c_l_i_e_n_t_sobre_mi_visita/reschedule_visit_widget.dart';
+import '/shared_components/dovia_spinner.dart';
 
 class DOVIACLIENTMisVisitasWidget extends StatefulWidget {
   const DOVIACLIENTMisVisitasWidget({super.key});
@@ -214,17 +215,23 @@ class _DOVIACLIENTMisVisitasWidgetState
                           FutureBuilder<List<ApiCallResponse>>(
                             future: Future.wait([
                               _pendingOwnerFuture ??
-                                  Future.value(ApiCallResponse(null, {}, 0)),
+                                  Future.value(
+                                      const ApiCallResponse(null, {}, 0)),
                               _upcomingAssignedFuture ??
-                                  Future.value(ApiCallResponse(null, {}, 0)),
+                                  Future.value(
+                                      const ApiCallResponse(null, {}, 0)),
                               _upcomingPendingFuture ??
-                                  Future.value(ApiCallResponse(null, {}, 0)),
+                                  Future.value(
+                                      const ApiCallResponse(null, {}, 0)),
                               _rescheduledFuture ??
-                                  Future.value(ApiCallResponse(null, {}, 0)),
+                                  Future.value(
+                                      const ApiCallResponse(null, {}, 0)),
                               _allVisitsFuture ??
-                                  Future.value(ApiCallResponse(null, {}, 0)),
+                                  Future.value(
+                                      const ApiCallResponse(null, {}, 0)),
                               _completedFuture ??
-                                  Future.value(ApiCallResponse(null, {}, 0)),
+                                  Future.value(
+                                      const ApiCallResponse(null, {}, 0)),
                             ]),
                             builder: (context, snap) {
                               final upcoming = <dynamic>[];
@@ -407,7 +414,7 @@ class _DOVIACLIENTMisVisitasWidgetState
   Widget _loader() {
     return const Padding(
       padding: EdgeInsets.symmetric(vertical: 20),
-      child: Center(child: CircularProgressIndicator()),
+      child: Center(child: DoviaSpinner()),
     );
   }
 

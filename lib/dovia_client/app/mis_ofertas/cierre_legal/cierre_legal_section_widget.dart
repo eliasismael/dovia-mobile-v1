@@ -9,6 +9,7 @@ import 'calificar_agente_modal_widget.dart';
 import 'documentos_legales_widget.dart';
 import 'reportar_problema_modal_widget.dart';
 import 'legal_professional_card_widget.dart';
+import '/shared_components/dovia_spinner.dart';
 
 /// Pie del proceso legal cerrado: quiénes acompañaron el trato y el expediente
 /// que dejó.
@@ -153,7 +154,7 @@ class _CierreLegalSectionWidgetState extends State<CierreLegalSectionWidget> {
     if (_isLoading) {
       return const Padding(
         padding: EdgeInsets.symmetric(vertical: 40),
-        child: Center(child: CircularProgressIndicator(color: _aqua)),
+        child: Center(child: DoviaSpinner()),
       );
     }
 

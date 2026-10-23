@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '/legal_hq/legal_hq_process_data.dart';
+import '/shared_components/dovia_spinner.dart';
 
 /// Firma del acuerdo: dónde y cuándo, tal como la agendó el Legal Associate.
 ///
@@ -154,12 +155,7 @@ class _LegalMeetingCardWidgetState extends State<LegalMeetingCardWidget> {
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 16),
               child: Center(
-                child: SizedBox(
-                  width: 22,
-                  height: 22,
-                  child:
-                      CircularProgressIndicator(strokeWidth: 2, color: _aqua),
-                ),
+                child: DoviaSpinner(small: true),
               ),
             )
           else if (a == null)

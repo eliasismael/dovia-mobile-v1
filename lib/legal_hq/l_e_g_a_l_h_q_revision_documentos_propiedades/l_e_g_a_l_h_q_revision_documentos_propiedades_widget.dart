@@ -9,6 +9,7 @@ import '/shared_components/corner_gradient_background/corner_gradient_background
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'l_e_g_a_l_h_q_revision_documentos_propiedades_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'l_e_g_a_l_h_q_revision_documentos_propiedades_model.dart';
 
 class LEGALHQRevisionDocumentosPropiedadesWidget extends StatefulWidget {
@@ -109,8 +110,7 @@ class _LEGALHQRevisionDocumentosPropiedadesWidgetState
                               ? const Padding(
                                   padding: EdgeInsets.symmetric(vertical: 80.0),
                                   child: Center(
-                                    child:
-                                        CircularProgressIndicator(color: _aqua),
+                                    child: DoviaSpinner(),
                                   ),
                                 )
                               : detail == null

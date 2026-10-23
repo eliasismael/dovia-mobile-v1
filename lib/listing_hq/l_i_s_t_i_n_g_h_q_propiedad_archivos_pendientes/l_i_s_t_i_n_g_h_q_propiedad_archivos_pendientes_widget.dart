@@ -15,6 +15,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'l_i_s_t_i_n_g_h_q_propiedad_archivos_pendientes_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'l_i_s_t_i_n_g_h_q_propiedad_archivos_pendientes_model.dart';
 
 class LISTINGHQPropiedadArchivosPendientesWidget extends StatefulWidget {
@@ -791,8 +792,7 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
                                   return const Padding(
                                     padding:
                                         EdgeInsets.symmetric(vertical: 40.0),
-                                    child: Center(
-                                        child: CircularProgressIndicator()),
+                                    child: Center(child: DoviaSpinner()),
                                   );
                                 }
                                 final docs = snapshot.data ?? [];

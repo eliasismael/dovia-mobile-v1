@@ -18,6 +18,7 @@ import '/backend/api_requests/api_manager.dart';
 import '/backend/api_requests/api_recruitment.dart';
 import '/backend/api_requests/api_users.dart';
 import 'package:image_picker/image_picker.dart';
+import '/shared_components/dovia_spinner.dart';
 
 class DoviaAssociateFormWidget extends StatefulWidget {
   final double? width;
@@ -1138,12 +1139,7 @@ class _DoviaAssociateFormWidgetState extends State<DoviaAssociateFormWidget> {
               ),
               alignment: Alignment.center,
               child: _sending
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(
-                          strokeWidth: 2, color: Colors.white),
-                    )
+                  ? const DoviaSpinner(small: true, color: Colors.white)
                   : const Text(
                       'Enviar',
                       style: TextStyle(

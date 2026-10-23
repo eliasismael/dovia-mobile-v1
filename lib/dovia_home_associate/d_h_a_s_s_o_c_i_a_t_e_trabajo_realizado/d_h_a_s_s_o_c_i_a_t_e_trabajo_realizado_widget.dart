@@ -17,6 +17,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'd_h_a_s_s_o_c_i_a_t_e_trabajo_realizado_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'd_h_a_s_s_o_c_i_a_t_e_trabajo_realizado_model.dart';
 
 /// Resumen de un trabajo que el asociado ya finalizó. Se abre desde el "Ojo" de
@@ -301,11 +302,7 @@ class _DHASSOCIATETrabajoRealizadoWidgetState
                   height: 136.0,
                   color: FlutterFlowTheme.of(context).primaryBackground,
                   child: const Center(
-                    child: SizedBox(
-                      width: 20.0,
-                      height: 20.0,
-                      child: CircularProgressIndicator(strokeWidth: 2.0),
-                    ),
+                    child: DoviaSpinner(small: true),
                   ),
                 ),
           errorBuilder: (context, _, __) => Container(

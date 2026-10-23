@@ -13,6 +13,7 @@ import '/repositories/offers_repository.dart';
 import '/core/amount_input_formatter.dart';
 import '/core/result.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_mis_propiedades_contraofertar_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'd_o_v_i_a_c_l_i_e_n_t_mis_propiedades_contraofertar_model.dart';
 
 class DOVIACLIENTMisPropiedadesContraofertarWidget extends StatefulWidget {
@@ -711,11 +712,7 @@ class _DOVIACLIENTMisPropiedadesContraofertarWidgetState
               ),
               onPressed: _isSending ? null : _sendCounteroffer,
               child: _isSending
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                          strokeWidth: 2, color: Colors.white))
+                  ? const DoviaSpinner(small: true, color: Colors.white)
                   : Text('Enviar oferta',
                       style: GoogleFonts.inter(
                           fontSize: 16,

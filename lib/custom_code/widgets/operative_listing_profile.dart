@@ -14,6 +14,7 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/backend/api_requests/api_users.dart';
 import '/shared_components/dovia_support/dovia_support_widget.dart';
 import '/core/result.dart';
+import '/shared_components/dovia_spinner.dart';
 
 class OperativeListingProfile extends StatefulWidget {
   final double? width;
@@ -166,7 +167,7 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: 60),
                 child: Center(
-                  child: CircularProgressIndicator(color: aqua),
+                  child: DoviaSpinner(),
                 ),
               )
             else ...[
@@ -484,12 +485,7 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
                     borderRadius: BorderRadius.circular(100)),
               ),
               child: _savingDatos
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                          strokeWidth: 2, color: Colors.white),
-                    )
+                  ? const DoviaSpinner(small: true, color: Colors.white)
                   : const Text('Guardar'),
             ),
           ),
@@ -782,12 +778,7 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
             ),
             child: Center(
               child: uploading
-                  ? const SizedBox(
-                      width: 22,
-                      height: 22,
-                      child: CircularProgressIndicator(
-                          strokeWidth: 2, color: aqua),
-                    )
+                  ? const DoviaSpinner(small: true)
                   : Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -1669,9 +1660,9 @@ class _DeleteSuccessDialog extends StatelessWidget {
               color: Colors.white,
               borderRadius: BorderRadius.circular(24),
             ),
-            child: Column(
+            child: const Column(
               mainAxisSize: MainAxisSize.min,
-              children: const [
+              children: [
                 Text(
                   'Se eliminó con éxito',
                   textAlign: TextAlign.center,

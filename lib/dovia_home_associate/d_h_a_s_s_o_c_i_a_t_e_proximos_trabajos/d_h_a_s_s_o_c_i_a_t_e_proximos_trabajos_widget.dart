@@ -22,6 +22,7 @@ import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_dovia_home.dart';
 
 import 'd_h_a_s_s_o_c_i_a_t_e_proximos_trabajos_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'd_h_a_s_s_o_c_i_a_t_e_proximos_trabajos_model.dart';
 
 /// Agenda completa del asociado. Se abre desde el "Ver más" de la sección
@@ -588,7 +589,7 @@ class _DHASSOCIATEProximosTrabajosWidgetState
                         if (!snapshot.hasData) {
                           return const Padding(
                             padding: EdgeInsets.symmetric(vertical: 40.0),
-                            child: Center(child: CircularProgressIndicator()),
+                            child: Center(child: DoviaSpinner()),
                           );
                         }
                         final agenda = snapshot.data!;

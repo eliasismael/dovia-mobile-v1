@@ -18,6 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_mis_propiedades_acuerdo_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'd_o_v_i_a_c_l_i_e_n_t_mis_propiedades_acuerdo_model.dart';
 
 class DOVIACLIENTMisPropiedadesAcuerdoWidget extends StatefulWidget {
@@ -3935,9 +3936,7 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
                                     padding: EdgeInsetsDirectional.fromSTEB(
                                         0.0, 24.0, 0.0, 24.0),
                                     child: Center(
-                                      child: CircularProgressIndicator(
-                                        color: Color(0xFF007376),
-                                      ),
+                                      child: DoviaSpinner(),
                                     ),
                                   );
                                 }

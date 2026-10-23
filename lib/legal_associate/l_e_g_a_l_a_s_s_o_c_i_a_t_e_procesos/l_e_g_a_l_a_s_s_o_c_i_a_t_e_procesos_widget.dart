@@ -10,6 +10,7 @@ import '/shared_components/corner_gradient_background/corner_gradient_background
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'l_e_g_a_l_a_s_s_o_c_i_a_t_e_procesos_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'l_e_g_a_l_a_s_s_o_c_i_a_t_e_procesos_model.dart';
 
 /// Filtro de la lista: etiqueta del pill y estados que pide al backend
@@ -289,7 +290,7 @@ class _LEGALASSOCIATEProcesosWidgetState
     if (_loading) {
       return const Padding(
         padding: EdgeInsets.all(16),
-        child: Center(child: CircularProgressIndicator()),
+        child: Center(child: DoviaSpinner()),
       );
     }
     if (_items.isEmpty) {

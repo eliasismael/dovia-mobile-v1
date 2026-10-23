@@ -20,6 +20,7 @@ import '/backend/api_requests/api_dovia_home.dart';
 import '/backend/api_requests/api_manager.dart';
 
 import 'd_h_c_l_i_e_n_t_proximas_visitas_lista_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'd_h_c_l_i_e_n_t_proximas_visitas_lista_model.dart';
 
 /// Listado completo y filtrable de las solicitudes de servicio del cliente
@@ -237,8 +238,7 @@ class _DHCLIENTProximasVisitasListaWidgetState
                       future: _visitsFuture,
                       builder: (context, snapshot) {
                         if (!snapshot.hasData) {
-                          return const Center(
-                              child: CircularProgressIndicator());
+                          return const Center(child: DoviaSpinner());
                         }
                         final response = snapshot.data!;
                         // El parser corre sobre `jsonBody`: pasarle el

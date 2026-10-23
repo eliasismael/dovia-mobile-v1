@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import '/repositories/visits_repository.dart';
 import '/core/result.dart';
 import '/shared_components/popup_exito/popup_exito_widget.dart';
+import '/shared_components/dovia_spinner.dart';
 // Begin custom widget code
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
 
@@ -365,14 +366,7 @@ class _ScheduleAppointmentWidgetState extends State<ScheduleAppointmentWidget> {
                         elevation: 0,
                       ),
                       child: _isSubmitting
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2,
-                              ),
-                            )
+                          ? const DoviaSpinner(small: true, color: Colors.white)
                           : const Text(
                               'Aceptar',
                               style: TextStyle(

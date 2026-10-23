@@ -16,6 +16,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'o_p_e_r_a_t_i_v_e_l_i_s_t_i_n_g_primera_visita_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'o_p_e_r_a_t_i_v_e_l_i_s_t_i_n_g_primera_visita_model.dart';
 
 class OPERATIVELISTINGPrimeraVisitaWidget extends StatefulWidget {
@@ -472,7 +473,7 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
                       child: _loading
                           ? const Padding(
                               padding: EdgeInsets.symmetric(vertical: 60),
-                              child: Center(child: CircularProgressIndicator()),
+                              child: Center(child: DoviaSpinner()),
                             )
                           : Column(
                               mainAxisSize: MainAxisSize.max,

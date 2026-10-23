@@ -3,6 +3,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_visits.dart';
 import '/shared_components/popup_exito/popup_exito_widget.dart';
+import '/shared_components/dovia_spinner.dart';
 
 /// Abre el pop-up de reagendar como hoja inferior de Dovia: esquinas de
 /// arriba redondeadas, sombra, fondo oscurecido y animaciones suaves. Al
@@ -440,11 +441,7 @@ class _RescheduleVisitWidgetState extends State<RescheduleVisitWidget> {
                 elevation: 0,
               ),
               child: _isSubmitting
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                          color: Colors.white, strokeWidth: 2))
+                  ? const DoviaSpinner(small: true, color: Colors.white)
                   : const Text(
                       'Solicitar reagendamiento',
                       style: TextStyle(
@@ -601,11 +598,7 @@ class _RescheduleVisitWidgetState extends State<RescheduleVisitWidget> {
                 elevation: 0,
               ),
               child: _isSubmitting
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                          color: Colors.white, strokeWidth: 2))
+                  ? const DoviaSpinner(small: true, color: Colors.white)
                   : const Text(
                       'Confirmar reagendamiento',
                       style: TextStyle(

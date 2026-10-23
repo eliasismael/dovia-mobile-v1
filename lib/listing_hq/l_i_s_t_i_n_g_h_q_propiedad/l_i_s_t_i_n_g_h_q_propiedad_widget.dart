@@ -14,6 +14,7 @@ import 'package:mime_type/mime_type.dart';
 import 'package:image_picker/image_picker.dart';
 import '/custom_code/widgets/index.dart' as custom_widgets;
 import 'package:flutter/material.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'l_i_s_t_i_n_g_h_q_propiedad_model.dart';
 
 class LISTINGHQPropiedadWidget extends StatefulWidget {
@@ -176,7 +177,7 @@ class _LISTINGHQPropiedadWidgetState extends State<LISTINGHQPropiedadWidget> {
                                 ConnectionState.waiting) {
                           return const Padding(
                             padding: EdgeInsets.symmetric(vertical: 40.0),
-                            child: Center(child: CircularProgressIndicator()),
+                            child: Center(child: DoviaSpinner()),
                           );
                         }
 

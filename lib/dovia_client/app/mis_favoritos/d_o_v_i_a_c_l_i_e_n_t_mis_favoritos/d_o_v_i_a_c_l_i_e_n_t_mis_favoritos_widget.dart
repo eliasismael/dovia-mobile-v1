@@ -19,6 +19,7 @@ import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_mis_favoritos_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'd_o_v_i_a_c_l_i_e_n_t_mis_favoritos_model.dart';
 
 class DOVIACLIENTMisFavoritosWidget extends StatefulWidget {
@@ -197,8 +198,7 @@ class _DOVIACLIENTMisFavoritosWidgetState
                                 ),
                                 builder: (context, snapshot) {
                                   if (!snapshot.hasData) {
-                                    return const Center(
-                                        child: CircularProgressIndicator());
+                                    return const Center(child: DoviaSpinner());
                                   }
                                   final gridViewGetAllFavoriteFoldersResponse =
                                       snapshot.data!;
@@ -397,16 +397,8 @@ class _DOVIACLIENTMisFavoritosWidgetState
                             builder: (context, snapshot) {
                               // Customize what your widget looks like when it's loading.
                               if (!snapshot.hasData) {
-                                return Center(
-                                  child: SizedBox(
-                                    width: 50.0,
-                                    height: 50.0,
-                                    child: CircularProgressIndicator(
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                        FlutterFlowTheme.of(context).primary,
-                                      ),
-                                    ),
-                                  ),
+                                return const Center(
+                                  child: DoviaSpinner(),
                                 );
                               }
                               final listViewGetDefaultFavoritesResponse =

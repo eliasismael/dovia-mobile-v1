@@ -12,6 +12,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'create_account2_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'create_account2_model.dart';
 
 class CreateAccount2Widget extends StatefulWidget {
@@ -300,16 +301,8 @@ class _CreateAccount2WidgetState extends State<CreateAccount2Widget> {
                                       builder: (context) {
                                         if (_model.verifyingCode ||
                                             _model.resendingCode) {
-                                          return SizedBox(
-                                            width: 24.0,
-                                            height: 24.0,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2.5,
-                                              color:
-                                                  FlutterFlowTheme.of(context)
-                                                      .primary,
-                                            ),
-                                          );
+                                          return const DoviaSpinner(
+                                              small: true);
                                         }
                                         if (!_model.invalidCode &&
                                             _model.codeInfo != null) {
