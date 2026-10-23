@@ -90,6 +90,11 @@ class FirebasePushMessaging implements PushMessaging {
   @override
   Future<String?> getToken() async {
     try {
+      if (defaultTargetPlatform == TargetPlatform.iOS &&
+          !await _waitForApnsToken()) {
+        debugPrint('[Push] iOS no entregó el token de APNs');
+        return null;
+      }
       // ignore: deprecated_member_use
       return await _messaging.getToken();
     } catch (e) {
@@ -97,6 +102,17 @@ class FirebasePushMessaging implements PushMessaging {
       debugPrint('[Push] No se pudo obtener el token: $e');
       return null;
     }
+  }
+
+  /// En iOS el token de FCM depende del de APNs, que llega un rato después de
+  /// dar el permiso (sobre todo la primera vez): sin él, `getToken` falla con
+  /// `apns-token-not-set`. Se espera hasta unos 10 segundos.
+  Future<bool> _waitForApnsToken() async {
+    for (var attempt = 0; attempt < 20; attempt++) {
+      if (await _messaging.getAPNSToken() != null) return true;
+      await Future<void>.delayed(const Duration(milliseconds: 500));
+    }
+    return false;
   }
 
   @override
