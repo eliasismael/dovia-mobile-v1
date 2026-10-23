@@ -17,6 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'd_h_c_l_i_e_n_t_reportar_problema_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'd_h_c_l_i_e_n_t_reportar_problema_model.dart';
 
 /// Superficie de los campos del diseño (#FAFAFA).
@@ -378,7 +379,7 @@ class _DHCLIENTReportarProblemaWidgetState
                     child: DOVIASHAREDHeaderWidget(
                       showLogo: openedFromHome(context),
                       showSupport: false,
-                      topPadding: 58.0,
+                      belowStatusBar: true,
                       showMap: false,
                       showNotifications: true,
                       showSettings: true,
@@ -564,16 +565,7 @@ class _DHCLIENTReportarProblemaWidgetState
         ),
         alignment: const AlignmentDirectional(0.0, 0.0),
         child: _model.isMediaUploading
-            ? SizedBox(
-                width: 24.0,
-                height: 24.0,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.0,
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    FlutterFlowTheme.of(context).primary,
-                  ),
-                ),
-              )
+            ? const DoviaSpinner(small: true)
             : SvgPicture.asset(
                 'assets/images/AddMediaImage.svg',
                 width: 24.0,

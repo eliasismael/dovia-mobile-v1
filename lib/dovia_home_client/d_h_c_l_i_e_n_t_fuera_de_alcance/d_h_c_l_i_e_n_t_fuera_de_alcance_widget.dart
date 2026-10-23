@@ -17,6 +17,7 @@ import '/backend/api_requests/api_dovia_home.dart';
 import '/repositories/index.dart';
 import '/shared_components/popup_exito/popup_exito_widget.dart';
 import 'd_h_c_l_i_e_n_t_fuera_de_alcance_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'd_h_c_l_i_e_n_t_fuera_de_alcance_model.dart';
 
 /// Diagnóstico de un trabajo que el asociado catalogó como fuera de alcance.
@@ -432,7 +433,7 @@ class _DHCLIENTFueraDeAlcanceWidgetState
                     child: DOVIASHAREDHeaderWidget(
                       showLogo: openedFromHome(context),
                       showSupport: false,
-                      topPadding: 58.0,
+                      belowStatusBar: true,
                       showMap: false,
                       showCurrency: false,
                       title: 'Fuera de alcance',
@@ -561,8 +562,7 @@ class _DHCLIENTFueraDeAlcanceWidgetState
                                         const EdgeInsetsDirectional.fromSTEB(
                                             0.0, 12.0, 0.0, 0.0),
                                     child: _model.isLoadingDiagnosis
-                                        ? const Center(
-                                            child: CircularProgressIndicator())
+                                        ? const Center(child: DoviaSpinner())
                                         : Container(
                                             width: MediaQuery.sizeOf(context)
                                                     .width *

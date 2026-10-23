@@ -25,6 +25,7 @@ import '/backend/api_requests/api_dovia_home.dart';
 import '/backend/api_requests/api_manager.dart';
 
 import 'd_h_c_l_i_e_n_t_homepage_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'd_h_c_l_i_e_n_t_homepage_model.dart';
 
 /// Solicitud de servicio agendada por el cliente. Se muestra en "Próximas
@@ -873,7 +874,7 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
         }
         if (!snapshot.hasData) {
           return onlyForSubscribers(
-              const Center(child: CircularProgressIndicator()));
+              const Center(child: DoviaSpinner()));
         }
 
         final data = snapshot.data!;
@@ -1179,14 +1180,7 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
         borderRadius: BorderRadius.circular(16.0),
       ),
       alignment: Alignment.center,
-      child: SizedBox(
-        width: 22.0,
-        height: 22.0,
-        child: CircularProgressIndicator(
-          strokeWidth: 2.0,
-          color: FlutterFlowTheme.of(context).primary,
-        ),
-      ),
+      child: const DoviaSpinner(small: true),
     );
   }
 
@@ -1229,7 +1223,7 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                     updateCallback: () => safeSetState(() {}),
                     child: const DOVIASHAREDHeaderWidget(
                       showSupport: false,
-                      topPadding: 58.0,
+                      belowStatusBar: true,
                       showNotifications: true,
                       showSettings: true,
                       title: 'Dovia Home',
@@ -1503,7 +1497,7 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                           builder: (context, snapshot) {
                             if (!snapshot.hasData) {
                               return const Center(
-                                  child: CircularProgressIndicator());
+                                  child: DoviaSpinner());
                             }
                             final response = snapshot.data!;
                             if (!response.succeeded) {
@@ -1609,7 +1603,7 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                           builder: (context, snapshot) {
                             if (!snapshot.hasData) {
                               return const Center(
-                                  child: CircularProgressIndicator());
+                                  child: DoviaSpinner());
                             }
                             final response = snapshot.data!;
                             if (!response.succeeded) {

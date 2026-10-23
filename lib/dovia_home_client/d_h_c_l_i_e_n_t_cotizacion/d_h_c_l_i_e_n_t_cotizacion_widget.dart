@@ -24,6 +24,7 @@ import '/core/result.dart';
 import '/repositories/payments_repository.dart';
 
 import 'd_h_c_l_i_e_n_t_cotizacion_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'd_h_c_l_i_e_n_t_cotizacion_model.dart';
 
 /// Levantamiento de un requerimiento complejo para que la red de proveedores
@@ -484,7 +485,7 @@ class _DHCLIENTCotizacionWidgetState extends State<DHCLIENTCotizacionWidget> {
                     child: DOVIASHAREDHeaderWidget(
                       showLogo: openedFromHome(context),
                       showSupport: false,
-                      topPadding: 58.0,
+                      belowStatusBar: true,
                       title: 'Cotización',
                       showMap: false,
                       showCurrency: false,
@@ -496,9 +497,7 @@ class _DHCLIENTCotizacionWidgetState extends State<DHCLIENTCotizacionWidget> {
                           20.0, 60.0, 20.0, 120.0),
                       child: _premiumCheckFailed
                           ? _premiumCheckRetry()
-                          : const CircularProgressIndicator(
-                              color: Color(0xFF007376),
-                            ),
+                          : const DoviaSpinner(),
                     )
                   else if (!hasPremium)
                     const Padding(
@@ -726,14 +725,7 @@ class _DHCLIENTCotizacionWidgetState extends State<DHCLIENTCotizacionWidget> {
         ),
         alignment: Alignment.center,
         child: _model.isPhotoUploading
-            ? const SizedBox(
-                width: 24.0,
-                height: 24.0,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.0,
-                  color: Color(0xFF007376),
-                ),
-              )
+            ? const DoviaSpinner(small: true)
             : Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -841,14 +833,7 @@ class _DHCLIENTCotizacionWidgetState extends State<DHCLIENTCotizacionWidget> {
               ),
               alignment: Alignment.center,
               child: _model.isPhotoUploading
-                  ? const SizedBox(
-                      width: 22.0,
-                      height: 22.0,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2.0,
-                        color: Color(0xFF007376),
-                      ),
-                    )
+                  ? const DoviaSpinner(small: true)
                   : const Icon(
                       Icons.add,
                       size: 28.0,

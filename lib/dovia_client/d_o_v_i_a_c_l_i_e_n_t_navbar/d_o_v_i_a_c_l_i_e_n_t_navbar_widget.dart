@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import '/shared_components/floating_navbar_inset.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_navbar_model.dart';
 export 'd_o_v_i_a_c_l_i_e_n_t_navbar_model.dart';
 
@@ -176,14 +177,14 @@ class _DOVIACLIENTNavbarWidgetState extends State<DOVIACLIENTNavbarWidget> {
             height: 56.0,
             // Degradé y sombra más marcada: se distingue del
             // resto de la barra en vez de ser un círculo verde plano.
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [Color(0xFF0A8A8D), Color(0xFF00444B)],
               ),
               shape: BoxShape.circle,
-              boxShadow: const [
+              boxShadow: [
                 BoxShadow(
                   blurRadius: 14.0,
                   color: Color(0x5500444B),
@@ -221,77 +222,86 @@ class _DOVIACLIENTNavbarWidgetState extends State<DOVIACLIENTNavbarWidget> {
   Widget build(BuildContext context) {
     context.watch<FFAppState>();
 
-    return SizedBox(
-      width: MediaQuery.sizeOf(context).width * 1.0,
-      height: _totalHeight,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Align(
-            alignment: const AlignmentDirectional(0.0, 1.0),
-            child: Container(
-              width: double.infinity,
-              height: _barHeight,
-              decoration: BoxDecoration(
-                color: FlutterFlowTheme.of(context).secondaryBackground,
-                borderRadius: BorderRadius.circular(24.0),
-              ),
-              child: Padding(
-                padding:
-                    const EdgeInsetsDirectional.fromSTEB(8.0, 0.0, 8.0, 0.0),
-                // Los ítems van pegados abajo: la curva del activo marca el
-                // borde inferior de la barra.
-                child: Row(
-                  mainAxisSize: MainAxisSize.max,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    _navItem(
-                      asset: 'assets/images/IconoCasaLLave.svg',
-                      label: 'Propiedades',
-                      itemKey: widget.tutorialKeys?['propiedades'],
-                      routeName: DOVIACLIENTMisPropiedadesWidget.routeName,
-                      onTap: () => _openRestricted(
-                          DOVIACLIENTMisPropiedadesWidget.routeName),
-                    ),
-                    _navItem(
-                      asset: 'assets/images/IconoCalendario.svg',
-                      label: 'Visitas',
-                      itemKey: widget.tutorialKeys?['visitas'],
-                      routeName: DOVIACLIENTMisVisitasWidget.routeName,
-                      // El invitado ve el aviso de registro en vez de entrar.
-                      onTap: () => _openRestricted(
-                          DOVIACLIENTMisVisitasWidget.routeName),
-                    ),
-                    // Hueco para el botón central, que va por encima.
-                    const SizedBox(width: 72.0),
-                    _navItem(
-                      asset: 'assets/images/IconoMisOfertas.svg',
-                      label: 'Ofertas',
-                      itemKey: widget.tutorialKeys?['ofertas'],
-                      routeName: DOVIACLIENTMisOfertasWidget.routeName,
-                      onTap: () => _openRestricted(
-                          DOVIACLIENTMisOfertasWidget.routeName),
-                    ),
-                    _navItem(
-                      asset: 'assets/images/IconoCorazon.svg',
-                      label: 'Favoritos',
-                      itemKey: widget.tutorialKeys?['favoritos'],
-                      iconSize: 20.0,
-                      routeName: DOVIACLIENTMisFavoritosWidget.routeName,
-                      // El invitado ve el aviso de registro en vez de entrar.
-                      onTap: () => _openRestricted(
-                          DOVIACLIENTMisFavoritosWidget.routeName),
-                    ),
-                  ],
+    // Como en Dovia Home: en el inicio, que no usa SafeArea abajo, la barra
+    // flota sobre el contenido (ver FloatingNavbarInset).
+    return FloatingNavbarInset(
+      child: SizedBox(
+        width: MediaQuery.sizeOf(context).width * 1.0,
+        height: _totalHeight,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Align(
+              alignment: const AlignmentDirectional(0.0, 1.0),
+              child: Container(
+                width: double.infinity,
+                height: _barHeight,
+                // Separada de los bordes: flota, y sus esquinas no quedan
+                // junto a las de la pantalla, que tienen otra curva.
+                margin: const EdgeInsets.symmetric(
+                    horizontal: kFloatingNavbarSideMargin),
+                decoration: BoxDecoration(
+                  color: FlutterFlowTheme.of(context).secondaryBackground,
+                  borderRadius: BorderRadius.circular(kFloatingNavbarRadius),
+                  boxShadow: kFloatingNavbarShadow,
+                ),
+                child: Padding(
+                  padding:
+                      const EdgeInsetsDirectional.fromSTEB(8.0, 0.0, 8.0, 0.0),
+                  // Los ítems van pegados abajo: la curva del activo marca el
+                  // borde inferior de la barra.
+                  child: Row(
+                    mainAxisSize: MainAxisSize.max,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      _navItem(
+                        asset: 'assets/images/IconoCasaLLave.svg',
+                        label: 'Propiedades',
+                        itemKey: widget.tutorialKeys?['propiedades'],
+                        routeName: DOVIACLIENTMisPropiedadesWidget.routeName,
+                        onTap: () => _openRestricted(
+                            DOVIACLIENTMisPropiedadesWidget.routeName),
+                      ),
+                      _navItem(
+                        asset: 'assets/images/IconoCalendario.svg',
+                        label: 'Visitas',
+                        itemKey: widget.tutorialKeys?['visitas'],
+                        routeName: DOVIACLIENTMisVisitasWidget.routeName,
+                        // El invitado ve el aviso de registro en vez de entrar.
+                        onTap: () => _openRestricted(
+                            DOVIACLIENTMisVisitasWidget.routeName),
+                      ),
+                      // Hueco para el botón central, que va por encima.
+                      const SizedBox(width: 72.0),
+                      _navItem(
+                        asset: 'assets/images/IconoOfertasNegociacion.svg',
+                        label: 'Ofertas',
+                        itemKey: widget.tutorialKeys?['ofertas'],
+                        routeName: DOVIACLIENTMisOfertasWidget.routeName,
+                        onTap: () => _openRestricted(
+                            DOVIACLIENTMisOfertasWidget.routeName),
+                      ),
+                      _navItem(
+                        asset: 'assets/images/IconoCorazon.svg',
+                        label: 'Favoritos',
+                        itemKey: widget.tutorialKeys?['favoritos'],
+                        iconSize: 20.0,
+                        routeName: DOVIACLIENTMisFavoritosWidget.routeName,
+                        // El invitado ve el aviso de registro en vez de entrar.
+                        onTap: () => _openRestricted(
+                            DOVIACLIENTMisFavoritosWidget.routeName),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-          Align(
-            alignment: const AlignmentDirectional(0.0, -1.0),
-            child: _centerButton(),
-          ),
-        ],
+            Align(
+              alignment: const AlignmentDirectional(0.0, -1.0),
+              child: _centerButton(),
+            ),
+          ],
+        ),
       ),
     );
   }

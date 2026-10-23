@@ -24,6 +24,7 @@ import '/backend/api_requests/api_dovia_home.dart';
 import '/repositories/payments_repository.dart';
 
 import 'd_h_c_l_i_e_n_t_ubicacion_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'd_h_c_l_i_e_n_t_ubicacion_model.dart';
 
 /// Página donde se selecciona en el mapa la ubicacion de la propiedad a
@@ -551,14 +552,7 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
       child: _isGeocoding
           ? const Padding(
               padding: EdgeInsets.all(15.0),
-              child: SizedBox(
-                width: 22.0,
-                height: 22.0,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.0,
-                  color: Colors.white,
-                ),
-              ),
+              child: DoviaSpinner(small: true, color: Colors.white),
             )
           : IconButton(
               icon: const Icon(Icons.search, color: Colors.white),
@@ -603,7 +597,7 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
                     child: DOVIASHAREDHeaderWidget(
                       showLogo: openedFromHome(context),
                       showSupport: false,
-                      topPadding: 58.0,
+                      belowStatusBar: true,
                       title: 'Dovia Home',
                       showMap: false,
                       showCurrency: false,

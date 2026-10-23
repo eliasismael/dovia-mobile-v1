@@ -17,6 +17,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '/auth/custom_auth/auth_util.dart';
 
 import 'd_h_c_l_i_e_n_t_emergencias_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'd_h_c_l_i_e_n_t_emergencias_model.dart';
 
 class DHCLIENTEmergenciasWidget extends StatefulWidget {
@@ -230,16 +231,7 @@ class _DHCLIENTEmergenciasWidgetState extends State<DHCLIENTEmergenciasWidget> {
                 ),
                 alignment: Alignment.center,
                 child: _model.isPhotoUploading
-                    ? SizedBox(
-                        width: 22.0,
-                        height: 22.0,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.0,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            FlutterFlowTheme.of(context).primary,
-                          ),
-                        ),
-                      )
+                    ? const DoviaSpinner(small: true)
                     : Icon(
                         Icons.add,
                         size: 28.0,
@@ -281,7 +273,7 @@ class _DHCLIENTEmergenciasWidgetState extends State<DHCLIENTEmergenciasWidget> {
                     child: DOVIASHAREDHeaderWidget(
                       showLogo: openedFromHome(context),
                       showSupport: false,
-                      topPadding: 58.0,
+                      belowStatusBar: true,
                       showMap: false,
                       showCurrency: false,
                       title: 'Emergencias',
@@ -542,18 +534,7 @@ class _DHCLIENTEmergenciasWidgetState extends State<DHCLIENTEmergenciasWidget> {
                                 ),
                                 alignment: const AlignmentDirectional(0.0, 0.0),
                                 child: _model.isPhotoUploading
-                                    ? SizedBox(
-                                        width: 24.0,
-                                        height: 24.0,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2.0,
-                                          valueColor:
-                                              AlwaysStoppedAnimation<Color>(
-                                            FlutterFlowTheme.of(context)
-                                                .primary,
-                                          ),
-                                        ),
-                                      )
+                                    ? const DoviaSpinner(small: true)
                                     : Column(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [

@@ -24,6 +24,7 @@ import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_dovia_home.dart';
 
 import 'd_h_c_l_i_e_n_t_costo_emergencia_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'd_h_c_l_i_e_n_t_costo_emergencia_model.dart';
 
 /// Pasarela de cobro condicional del servicio de emergencia ("Costo fijo mínimo
@@ -734,7 +735,7 @@ class _DHCLIENTCostoEmergenciaWidgetState
                     child: DOVIASHAREDHeaderWidget(
                       showLogo: openedFromHome(context),
                       showSupport: false,
-                      topPadding: 58.0,
+                      belowStatusBar: true,
                       title: 'Costo fijo mínimo\ndel trabajo',
                       hideActions: true,
                     ),
@@ -748,7 +749,7 @@ class _DHCLIENTCostoEmergenciaWidgetState
                     child: (!premiumResolved || _isLoadingRequest)
                         ? const Padding(
                             padding: EdgeInsets.symmetric(vertical: 60.0),
-                            child: Center(child: CircularProgressIndicator()),
+                            child: Center(child: DoviaSpinner()),
                           )
                         : _requestData == null
                             ? _loadErrorCard()
@@ -1058,14 +1059,7 @@ class _DHCLIENTCostoEmergenciaWidgetState
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const SizedBox(
-                width: 20.0,
-                height: 20.0,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.0,
-                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF007376)),
-                ),
-              ),
+              const DoviaSpinner(small: true),
               const SizedBox(height: 8.0),
               Text(
                 'Estamos confirmando tu pago…',

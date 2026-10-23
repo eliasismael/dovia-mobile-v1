@@ -24,6 +24,7 @@ import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_dovia_home.dart';
 
 import 'd_h_c_l_i_e_n_t_valor_visita_page_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'd_h_c_l_i_e_n_t_valor_visita_page_model.dart';
 
 /// Página que muestra el valor de la visita individual cuando el cliente omite
@@ -687,14 +688,7 @@ class _DHCLIENTValorVisitaPageWidgetState
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const SizedBox(
-                width: 20.0,
-                height: 20.0,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.0,
-                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF007376)),
-                ),
-              ),
+              const DoviaSpinner(small: true),
               const SizedBox(height: 8.0),
               Text(
                 'Estamos confirmando tu pago…',
@@ -763,14 +757,7 @@ class _DHCLIENTValorVisitaPageWidgetState
       return const Padding(
         padding: EdgeInsetsDirectional.fromSTEB(0.0, 24.0, 0.0, 24.0),
         child: Center(
-          child: SizedBox(
-            width: 28.0,
-            height: 28.0,
-            child: CircularProgressIndicator(
-              strokeWidth: 2.5,
-              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF007376)),
-            ),
-          ),
+          child: DoviaSpinner(),
         ),
       );
     }
@@ -1032,7 +1019,7 @@ class _DHCLIENTValorVisitaPageWidgetState
                     child: DOVIASHAREDHeaderWidget(
                       showLogo: openedFromHome(context),
                       showSupport: false,
-                      topPadding: 58.0,
+                      belowStatusBar: true,
                       title: 'Valor de la visita',
                       hideActions: true,
                     ),

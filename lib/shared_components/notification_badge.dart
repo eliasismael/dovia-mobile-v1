@@ -11,20 +11,31 @@ const kNotificationsIconAsset =
 /// Envuelve [icon] con el contador de no leídas si [asset] es el ícono de
 /// notificaciones. Para los helpers que arman varios íconos con el mismo
 /// código.
-Widget withNotificationBadge(String asset, Widget icon) =>
-    asset == kNotificationsIconAsset ? NotificationBadge(child: icon) : icon;
+Widget withNotificationBadge(String asset, Widget icon,
+        {bool onCircle = false}) =>
+    asset == kNotificationsIconAsset
+        ? NotificationBadge(onCircle: onCircle, child: icon)
+        : icon;
 
 /// Contador de notificaciones sin leer sobre el ícono de la campana.
 ///
-/// Va dentro de los límites del ícono (esquina superior derecha) porque en las
-/// navbars el ícono está dentro de un `ClipRRect` que recortaría lo de afuera.
+/// En las navbars va dentro de los límites del ícono (esquina superior
+/// derecha) porque el ícono está dentro de un `ClipRRect` que recortaría lo de
+/// afuera. En los headers, con [onCircle], envuelve el círculo blanco del
+/// botón y se apoya sobre su borde, arriba a la derecha: así no tapa la
+/// campana.
 ///
 /// Sale de [NotificationsRepository.unreadCount]. Si no hay repositorio en el
 /// árbol (Ej: un test de una pantalla suelta) muestra el ícono solo.
 class NotificationBadge extends StatelessWidget {
-  const NotificationBadge({super.key, required this.child});
+  const NotificationBadge({
+    super.key,
+    required this.child,
+    this.onCircle = false,
+  });
 
   final Widget child;
+  final bool onCircle;
 
   @override
   Widget build(BuildContext context) {
@@ -42,24 +53,29 @@ class NotificationBadge extends StatelessWidget {
       children: [
         child,
         Positioned(
-          top: 0,
-          right: 0,
+          top: onCircle ? -4 : 0,
+          right: onCircle ? -4 : 0,
           child: Container(
-            constraints: const BoxConstraints(minWidth: 14, minHeight: 14),
-            padding: const EdgeInsets.symmetric(horizontal: 3),
+            constraints: BoxConstraints(
+              minWidth: onCircle ? 20 : 16,
+              minHeight: onCircle ? 20 : 16,
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 4),
             decoration: BoxDecoration(
-              color: FlutterFlowTheme.of(context).error,
-              borderRadius: BorderRadius.circular(7),
+              color: FlutterFlowTheme.of(context).primary,
+              borderRadius: BorderRadius.circular(10),
+              // Borde blanco: se despega del círculo y de la campana.
+              border: Border.all(color: Colors.white, width: 1.5),
             ),
             alignment: Alignment.center,
             child: Text(
               count > 9 ? '9+' : '$count',
               semanticsLabel: '$count notificaciones sin leer',
-              style: const TextStyle(
+              style: TextStyle(
                 color: Colors.white,
-                fontSize: 9,
-                fontWeight: FontWeight.w700,
-                height: 1.2,
+                fontSize: onCircle ? 11 : 10,
+                fontWeight: FontWeight.w800,
+                height: 1.1,
               ),
             ),
           ),

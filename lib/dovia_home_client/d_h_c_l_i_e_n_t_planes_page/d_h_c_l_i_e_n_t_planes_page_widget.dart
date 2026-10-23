@@ -83,7 +83,7 @@ class _DHCLIENTPlanesPageWidgetState extends State<DHCLIENTPlanesPageWidget> {
                     child: DOVIASHAREDHeaderWidget(
                       showLogo: openedFromHome(context),
                       showSupport: false,
-                      topPadding: 58.0,
+                      belowStatusBar: true,
                       showMap: false,
                       showCurrency: false,
                       showSettings: true,

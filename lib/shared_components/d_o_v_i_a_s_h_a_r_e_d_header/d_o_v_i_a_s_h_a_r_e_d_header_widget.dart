@@ -26,6 +26,7 @@ class DOVIASHAREDHeaderWidget extends StatefulWidget {
     this.showSupport = true,
     this.onChatTap,
     this.topPadding = 42.0,
+    this.belowStatusBar = false,
   }) : title = title ?? '[title]';
 
   final String title;
@@ -54,9 +55,19 @@ class DOVIASHAREDHeaderWidget extends StatefulWidget {
   /// asociado que está en la casa del cliente) lo redirigen con este parámetro.
   final VoidCallback? onChatTap;
 
-  /// Margen superior del header. Dovia Home lo usa más bajo para quedar a
-  /// la altura del resto de la app.
+  /// Margen superior del header.
   final double topPadding;
+
+  /// Para las pantallas sin SafeArea arriba (Dovia Home y el inicio del
+  /// cliente): el header va justo debajo de la barra de estado, con el mismo
+  /// aire en cualquier celular, en vez de [topPadding].
+  final bool belowStatusBar;
+
+  /// Distancia del header al techo en esas pantallas. Antes era un 58 fijo:
+  /// en Android dejaba un hueco grande y en iPhone (barra de 59) quedaba al
+  /// ras.
+  static double topBelowStatusBar(BuildContext context) =>
+      MediaQuery.viewPaddingOf(context).top + 12.0;
 
   @override
   State<DOVIASHAREDHeaderWidget> createState() =>
@@ -122,8 +133,13 @@ class _DOVIASHAREDHeaderWidgetState extends State<DOVIASHAREDHeaderWidget> {
     final sideWidth =
         _leadingWidth > _actionsWidth ? _leadingWidth : _actionsWidth;
     return Padding(
-      padding:
-          EdgeInsetsDirectional.fromSTEB(20.0, widget.topPadding, 20.0, 0.0),
+      padding: EdgeInsetsDirectional.fromSTEB(
+          20.0,
+          widget.belowStatusBar
+              ? DOVIASHAREDHeaderWidget.topBelowStatusBar(context)
+              : widget.topPadding,
+          20.0,
+          0.0),
       child: Row(
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -342,22 +358,27 @@ class _DOVIASHAREDHeaderWidgetState extends State<DOVIASHAREDHeaderWidget> {
                                 context.pushNamed(
                                     DOVIACLIENTNotificacionesWidget.routeName);
                               },
-                              child: Container(
-                                width: 40.0,
-                                height: 40.0,
-                                decoration: BoxDecoration(
-                                  color: FlutterFlowTheme.of(context)
-                                      .secondaryBackground,
-                                  shape: BoxShape.circle,
+                              // El contador va sobre el borde del círculo, no
+                              // sobre la campana.
+                              child: NotificationBadge(
+                                onCircle: true,
+                                child: Container(
+                                  width: 40.0,
+                                  height: 40.0,
+                                  decoration: BoxDecoration(
+                                    color: FlutterFlowTheme.of(context)
+                                        .secondaryBackground,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  alignment:
+                                      const AlignmentDirectional(0.0, 0.0),
+                                  child: SvgPicture.asset(
+                                    'assets/images/DH_icono-navbar-notificaciones.svg',
+                                    width: 22.0,
+                                    height: 22.0,
+                                    fit: BoxFit.contain,
+                                  ),
                                 ),
-                                alignment: const AlignmentDirectional(0.0, 0.0),
-                                child: NotificationBadge(
-                                    child: SvgPicture.asset(
-                                  'assets/images/DH_icono-navbar-notificaciones.svg',
-                                  width: 22.0,
-                                  height: 22.0,
-                                  fit: BoxFit.contain,
-                                )),
                               ),
                             ),
                           if (widget.showSettings)

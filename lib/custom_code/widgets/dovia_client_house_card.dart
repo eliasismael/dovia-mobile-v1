@@ -294,7 +294,11 @@ class _DoviaClientHouseCardState extends State<DoviaClientHouseCard> {
           ? Icons.north_east
           : (_isFavorite ? Icons.favorite : Icons.favorite_border),
       color: _ink,
-      size: widget.compact ? 16 : 18,
+      // El corazón llena más el círculo: a 18 se perdía. La flecha queda como
+      // estaba.
+      size: widget.isNewProject
+          ? (widget.compact ? 16 : 18)
+          : (widget.compact ? 20 : 22),
     );
     final circle = Container(
       width: size,

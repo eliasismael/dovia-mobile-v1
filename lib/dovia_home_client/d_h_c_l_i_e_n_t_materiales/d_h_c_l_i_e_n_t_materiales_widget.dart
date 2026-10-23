@@ -21,6 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'd_h_c_l_i_e_n_t_materiales_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'd_h_c_l_i_e_n_t_materiales_model.dart';
 
 /// Superficie de las cajas de solo lectura del diseño (#FAFAFA).
@@ -511,7 +512,7 @@ class _DHCLIENTMaterialesWidgetState extends State<DHCLIENTMaterialesWidget> {
                     child: DOVIASHAREDHeaderWidget(
                       showLogo: openedFromHome(context),
                       showSupport: false,
-                      topPadding: 58.0,
+                      belowStatusBar: true,
                       title: 'Materiales',
                       showMap: false,
                       showCurrency: false,
@@ -530,7 +531,7 @@ class _DHCLIENTMaterialesWidgetState extends State<DHCLIENTMaterialesWidget> {
                         if (_model.isLoading && _model.materialText == null)
                           const Padding(
                             padding: EdgeInsets.symmetric(vertical: 40.0),
-                            child: Center(child: CircularProgressIndicator()),
+                            child: Center(child: DoviaSpinner()),
                           )
                         else ...[
                           _sectionLabel('Material'),

@@ -225,7 +225,7 @@ class _DHCLIENTCalificarWidgetState extends State<DHCLIENTCalificarWidget> {
                     child: DOVIASHAREDHeaderWidget(
                       showLogo: openedFromHome(context),
                       showSupport: false,
-                      topPadding: 58.0,
+                      belowStatusBar: true,
                       showNotifications: true,
                       showSettings: true,
                       title: 'Calificar',

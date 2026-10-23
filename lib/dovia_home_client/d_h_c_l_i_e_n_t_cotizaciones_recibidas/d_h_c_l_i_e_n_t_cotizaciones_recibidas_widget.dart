@@ -22,6 +22,7 @@ import '/backend/api_requests/api_dovia_home.dart';
 import '/backend/api_requests/api_manager.dart';
 
 import 'd_h_c_l_i_e_n_t_cotizaciones_recibidas_model.dart';
+import '/shared_components/dovia_spinner.dart';
 export 'd_h_c_l_i_e_n_t_cotizaciones_recibidas_model.dart';
 
 /// Propuestas que los proveedores enviaron al cliente.
@@ -409,7 +410,7 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
                     child: DOVIASHAREDHeaderWidget(
                       showLogo: openedFromHome(context),
                       showSupport: false,
-                      topPadding: 58.0,
+                      belowStatusBar: true,
                       showNotifications: true,
                       showSettings: true,
                       title: 'Cotizaciones Recibidas',
@@ -429,7 +430,7 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
                         if (!snapshot.hasData) {
                           return const Padding(
                             padding: EdgeInsets.only(top: 60.0),
-                            child: Center(child: CircularProgressIndicator()),
+                            child: Center(child: DoviaSpinner()),
                           );
                         }
 

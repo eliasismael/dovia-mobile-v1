@@ -39,6 +39,25 @@ class _CornerGradientBackgroundWidgetState
 
   @override
   Widget build(BuildContext context) {
+    // Casi todas las pantallas ponen el fondo dentro de un SafeArea: la franja
+    // de la barra de estado quedaba con el color liso del Scaffold y el
+    // brillo de arriba empezaba recién debajo, como un techo. Si arriba hay un
+    // SafeArea, el fondo sube hasta el borde de la pantalla. Se corre al
+    // pintar (no en el layout), así el Stack de la pantalla no lo recorta.
+    final consumedTop = MediaQuery.viewPaddingOf(context).top -
+        MediaQuery.paddingOf(context).top;
+    if (consumedTop <= 0) return _background(context);
+    return Transform.translate(
+      offset: Offset(0.0, -consumedTop),
+      child: OverflowBox(
+        alignment: Alignment.topCenter,
+        maxHeight: double.infinity,
+        child: _background(context),
+      ),
+    );
+  }
+
+  Widget _background(BuildContext context) {
     return SizedBox(
       width: MediaQuery.sizeOf(context).width * 1.0,
       height: MediaQuery.sizeOf(context).height * 1.0,
