@@ -43,13 +43,6 @@ class AjustesScreen extends StatefulWidget {
 class _AjustesScreenState extends State<AjustesScreen> {
   bool _datosExpanded = true;
 
-  // Password controllers
-  final _currentPasswordCtrl = TextEditingController();
-  final _newPasswordCtrl = TextEditingController();
-  final _repeatPasswordCtrl = TextEditingController();
-  bool _obscureCurrent = true;
-  bool _obscureNew = true;
-  bool _obscureRepeat = true;
   bool _cancellingSubscription = false;
   bool _deletingAccount = false;
 
@@ -80,9 +73,6 @@ class _AjustesScreenState extends State<AjustesScreen> {
 
   @override
   void dispose() {
-    _currentPasswordCtrl.dispose();
-    _newPasswordCtrl.dispose();
-    _repeatPasswordCtrl.dispose();
     _cancelReasonCtrl.dispose();
     _deleteReasonCtrl.dispose();
     super.dispose();
@@ -294,33 +284,14 @@ class _AjustesScreenState extends State<AjustesScreen> {
                   fontWeight: FontWeight.w600,
                   color: _textPrimary)),
           const SizedBox(height: 16),
-          _passwordField(
-              'Contraseña actual',
-              _currentPasswordCtrl,
-              _obscureCurrent,
-              () => setState(() => _obscureCurrent = !_obscureCurrent)),
-          const SizedBox(height: 12),
-          _passwordField('Contraseña nueva', _newPasswordCtrl, _obscureNew,
-              () => setState(() => _obscureNew = !_obscureNew)),
-          const SizedBox(height: 4),
-          const Text('Debe tener 8 caracteres',
+          const Text(
+              'Te enviaremos un código a tu correo para que crees una '
+              'contraseña nueva.',
               style: TextStyle(
                   fontFamily: 'Public Sans',
-                  fontSize: 12,
+                  fontSize: 13,
                   color: _textSecondary)),
           const SizedBox(height: 12),
-          _passwordField(
-              'Repetir contraseña nueva',
-              _repeatPasswordCtrl,
-              _obscureRepeat,
-              () => setState(() => _obscureRepeat = !_obscureRepeat)),
-          const SizedBox(height: 4),
-          const Text('Debe ser igual a la nueva contraseña',
-              style: TextStyle(
-                  fontFamily: 'Public Sans',
-                  fontSize: 12,
-                  color: _textSecondary)),
-          const SizedBox(height: 20),
           SizedBox(
             width: double.infinity,
             height: 46,
@@ -372,26 +343,14 @@ class _AjustesScreenState extends State<AjustesScreen> {
           _divider(),
           const SizedBox(height: 28),
 
-          // ── ACCIONES CRÍTICAS ───────────────────────────────────
-          const Text('Acciones críticas',
-              style: TextStyle(
-                  fontFamily: 'Public Sans',
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: _textPrimary)),
-          const SizedBox(height: 16),
-          const Text('Deseo cerrar sesión',
-              style: TextStyle(
-                  fontFamily: 'Public Sans',
-                  fontSize: 13,
-                  color: _textSecondary)),
-          const SizedBox(height: 8),
+          // ── CERRAR SESIÓN ───────────────────────────────────────
           SizedBox(
             width: double.infinity,
             height: 46,
             child: OutlinedButton(
               onPressed: () async => await widget.onSignOut?.call(),
               style: OutlinedButton.styleFrom(
+                backgroundColor: Colors.white,
                 side: const BorderSide(color: _aqua),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(24)),
@@ -404,13 +363,24 @@ class _AjustesScreenState extends State<AjustesScreen> {
                       color: _textPrimary)),
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 36),
+          _divider(),
+          const SizedBox(height: 28),
+
+          // ── ACCIONES CRÍTICAS ───────────────────────────────────
+          const Text('Acciones críticas',
+              style: TextStyle(
+                  fontFamily: 'Public Sans',
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: _textPrimary)),
+          const SizedBox(height: 16),
           const Text('Deseo eliminar mi cuenta',
               style: TextStyle(
                   fontFamily: 'Public Sans',
                   fontSize: 13,
                   color: _textSecondary)),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
           SizedBox(
             width: double.infinity,
             height: 46,
@@ -550,18 +520,19 @@ class _AjustesScreenState extends State<AjustesScreen> {
               onPressed:
                   _cancellingSubscription ? null : _showCancelSubscriptionFlow,
               style: OutlinedButton.styleFrom(
+                backgroundColor: _softRed,
                 side: const BorderSide(color: _softRed),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(24)),
               ),
               child: _cancellingSubscription
-                  ? const DoviaSpinner(small: true, color: _softRed)
+                  ? const DoviaSpinner(small: true, color: Colors.white)
                   : const Text('Cancelar suscripción',
                       style: TextStyle(
                           fontFamily: 'Public Sans',
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: _softRed)),
+                          color: Colors.white)),
             ),
           ),
         ],
@@ -691,9 +662,16 @@ class _AjustesScreenState extends State<AjustesScreen> {
   }
 
   // ── PASSWORD HANDLER ──────────────────────────────────────────────
+  /// El cambio de contraseña va por el flujo verificado de recuperación:
+  /// se abre con el correo del usuario ya cargado para mandarle el código.
+  /// Cambiarla directo desde acá pide el access token de Cognito, que la app
+  /// no guarda.
   void _handleUpdatePassword() {
-    // Redirect to recover-password flow as per business rules
-    context.pushNamed('RecoverPassword_1');
+    final email = context.read<UserRepository>().profile?.email ?? '';
+    context.pushNamed(
+      'RecoverPassword_1',
+      queryParameters: {if (email.isNotEmpty) 'email': email},
+    );
   }
 
   // ── SUBSCRIPTION CANCELLATION FLOW ────────────────────────────────
@@ -915,6 +893,7 @@ class _AjustesScreenState extends State<AjustesScreen> {
                       child: OutlinedButton(
                         onPressed: () => Navigator.pop(context),
                         style: OutlinedButton.styleFrom(
+                          backgroundColor: Colors.white,
                           side: const BorderSide(color: _aqua),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(24),
@@ -1016,51 +995,6 @@ class _AjustesScreenState extends State<AjustesScreen> {
     ]);
   }
 
-  Widget _passwordField(
-    String label,
-    TextEditingController ctrl,
-    bool obscure,
-    VoidCallback onToggle,
-  ) {
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text(label,
-          style: const TextStyle(
-              fontFamily: 'Public Sans', fontSize: 13, color: _textPrimary)),
-      const SizedBox(height: 6),
-      Container(
-        height: 42,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        decoration: BoxDecoration(
-          color: _bgGray,
-          borderRadius: BorderRadius.circular(24),
-        ),
-        child: Row(children: [
-          Expanded(
-            child: TextField(
-              controller: ctrl,
-              obscureText: obscure,
-              decoration: const InputDecoration(
-                  border: InputBorder.none, isDense: true),
-              style: const TextStyle(
-                  fontFamily: 'Public Sans',
-                  fontSize: 14,
-                  color: _textSecondary),
-            ),
-          ),
-          GestureDetector(
-            onTap: onToggle,
-            child: Icon(
-                obscure
-                    ? Icons.visibility_off_outlined
-                    : Icons.visibility_outlined,
-                size: 20,
-                color: _textSecondary),
-          ),
-        ]),
-      ),
-    ]);
-  }
-
   Widget _outlineBtn(String label, VoidCallback onTap) {
     return SizedBox(
       width: double.infinity,
@@ -1068,6 +1002,7 @@ class _AjustesScreenState extends State<AjustesScreen> {
       child: OutlinedButton(
         onPressed: onTap,
         style: OutlinedButton.styleFrom(
+          backgroundColor: Colors.white,
           side: const BorderSide(color: _aqua),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
