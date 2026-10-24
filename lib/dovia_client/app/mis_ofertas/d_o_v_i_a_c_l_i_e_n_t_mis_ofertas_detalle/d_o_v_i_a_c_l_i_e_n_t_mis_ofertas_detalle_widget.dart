@@ -23,7 +23,9 @@ export 'd_o_v_i_a_c_l_i_e_n_t_mis_ofertas_detalle_model.dart';
 /// La pantalla no edita nada —para cambiar el trato están la contraoferta y el
 /// retiro—, así que los campos se dibujan como cajas de texto inhabilitadas.
 /// El pie depende del desenlace:
-/// - en juego → [Retirar Oferta] y [Aceptar], que sólo vuelve al listado;
+/// - en juego → [Retirar Oferta]. No hay [Aceptar]: la oferta la envió el
+///   cliente, así que no tiene nada que aceptar (eso es de las recibidas, en la
+///   negociación);
 /// - rechazada → sin acciones, con el motivo que escribió el propietario.
 class DOVIACLIENTMisOfertasDetalleWidget extends StatefulWidget {
   const DOVIACLIENTMisOfertasDetalleWidget({super.key, this.offerId});
@@ -526,62 +528,31 @@ class _DOVIACLIENTMisOfertasDetalleWidgetState
   }
 
   Widget _actions(ClientOfferDetail detail) {
-    final accept = SizedBox(
+    if (!detail.canWithdraw) return const SizedBox.shrink();
+
+    return SizedBox(
+      width: double.infinity,
       height: 42.0,
       child: OutlinedButton(
-        onPressed: _isWithdrawing ? null : () => context.safePop(),
+        onPressed: _isWithdrawing ? null : _withdraw,
         style: OutlinedButton.styleFrom(
-          backgroundColor: _aqua,
-          side: const BorderSide(color: _aqua),
+          backgroundColor: _destructive,
+          side: const BorderSide(color: _destructive),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(25.0),
           ),
         ),
-        child: Text(
-          'Aceptar',
-          style: GoogleFonts.publicSans(
-            fontSize: 14.0,
-            fontWeight: FontWeight.w600,
-            color: Colors.white,
-          ),
-        ),
-      ),
-    );
-
-    if (!detail.canWithdraw) {
-      return SizedBox(width: double.infinity, child: accept);
-    }
-
-    return Row(
-      children: [
-        Expanded(
-          child: SizedBox(
-            height: 42.0,
-            child: OutlinedButton(
-              onPressed: _isWithdrawing ? null : _withdraw,
-              style: OutlinedButton.styleFrom(
-                backgroundColor: _destructive,
-                side: const BorderSide(color: _destructive),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(25.0),
+        child: _isWithdrawing
+            ? const DoviaSpinner(small: true, color: Colors.white)
+            : Text(
+                'Retirar Oferta',
+                style: GoogleFonts.publicSans(
+                  fontSize: 14.0,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
                 ),
               ),
-              child: _isWithdrawing
-                  ? const DoviaSpinner(small: true, color: Colors.white)
-                  : Text(
-                      'Retirar Oferta',
-                      style: GoogleFonts.publicSans(
-                        fontSize: 14.0,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
-            ),
-          ),
-        ),
-        const SizedBox(width: 17.0),
-        Expanded(child: accept),
-      ],
+      ),
     );
   }
 

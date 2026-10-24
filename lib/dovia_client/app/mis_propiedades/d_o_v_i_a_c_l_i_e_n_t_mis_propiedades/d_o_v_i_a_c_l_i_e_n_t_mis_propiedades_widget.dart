@@ -159,6 +159,68 @@ class _DOVIACLIENTMisPropiedadesWidgetState
       ? firstPropertyPhotoUrl(Map<String, dynamic>.from(house)) ?? ''
       : '';
 
+  /// Aviso de sección vacía, en gris como el de propuestas recientes.
+  Widget _emptyText(String text) {
+    return Align(
+      alignment: AlignmentDirectional.centerStart,
+      child: Text(
+        text,
+        style: FlutterFlowTheme.of(context).bodyMedium.override(
+              font: GoogleFonts.inter(),
+              color: FlutterFlowTheme.of(context).secondaryText,
+            ),
+      ),
+    );
+  }
+
+  Widget _sectionTitle(String text) {
+    return Padding(
+      padding: const EdgeInsetsDirectional.only(top: 33.0),
+      child: Align(
+        alignment: AlignmentDirectional.centerStart,
+        child: Text(
+          text,
+          style: FlutterFlowTheme.of(context).bodyMedium.override(
+                font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
+                fontSize: 17.0,
+                letterSpacing: 0.33,
+                fontWeight: FontWeight.w600,
+                lineHeight: 1.3,
+              ),
+        ),
+      ),
+    );
+  }
+
+  /// Acción principal de la pantalla: va sola, ancha y debajo de las
+  /// propiedades publicadas, en vez de un botón chico junto al título.
+  Widget _publishButton() {
+    return Padding(
+      padding: const EdgeInsetsDirectional.only(top: 24.0),
+      child: FFButtonWidget(
+        onPressed: () async {
+          context.pushNamed(
+              DOVIACLIENTMisPropiedadesAccionesARealizarWidget.routeName);
+        },
+        text: 'Publicar propiedad',
+        options: FFButtonOptions(
+          width: double.infinity,
+          height: 46.0,
+          color: FlutterFlowTheme.of(context).primary,
+          textStyle: FlutterFlowTheme.of(context).titleSmall.override(
+                font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
+                color: Colors.white,
+                fontSize: 15.0,
+                letterSpacing: 0.0,
+                fontWeight: FontWeight.w600,
+              ),
+          elevation: 0.0,
+          borderRadius: BorderRadius.circular(24.0),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -200,84 +262,7 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                         mainAxisSize: MainAxisSize.max,
                         children: [
                           _propuestasRecientesSection(),
-                          Row(
-                            mainAxisSize: MainAxisSize.max,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Align(
-                                alignment:
-                                    const AlignmentDirectional(-1.0, 0.0),
-                                child: Padding(
-                                  padding: const EdgeInsetsDirectional.fromSTEB(
-                                      0.0, 33.0, 0.0, 0.0),
-                                  child: Text(
-                                    'Mis Propiedades\nPublicadas',
-                                    style: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .override(
-                                          font: GoogleFonts.publicSans(
-                                            fontWeight: FontWeight.w600,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .bodyMedium
-                                                    .fontStyle,
-                                          ),
-                                          fontSize: 17.0,
-                                          letterSpacing: 0.33,
-                                          fontWeight: FontWeight.w600,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodyMedium
-                                                  .fontStyle,
-                                          lineHeight: 1.3,
-                                        ),
-                                  ),
-                                ),
-                              ),
-                              FFButtonWidget(
-                                onPressed: () async {
-                                  context.pushNamed(
-                                      DOVIACLIENTMisPropiedadesAccionesARealizarWidget
-                                          .routeName);
-                                },
-                                text: '+ Publicar más',
-                                options: FFButtonOptions(
-                                  height: 40.0,
-                                  padding: const EdgeInsetsDirectional.fromSTEB(
-                                      26.0, 0.0, 26.0, 0.0),
-                                  iconPadding:
-                                      const EdgeInsetsDirectional.fromSTEB(
-                                          0.0, 0.0, 0.0, 0.0),
-                                  color: FlutterFlowTheme.of(context).primary,
-                                  textStyle: FlutterFlowTheme.of(context)
-                                      .titleSmall
-                                      .override(
-                                        font: GoogleFonts.publicSans(
-                                          fontWeight:
-                                              FlutterFlowTheme.of(context)
-                                                  .titleSmall
-                                                  .fontWeight,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .titleSmall
-                                                  .fontStyle,
-                                        ),
-                                        color: Colors.white,
-                                        letterSpacing: 0.0,
-                                        fontWeight: FlutterFlowTheme.of(context)
-                                            .titleSmall
-                                            .fontWeight,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .titleSmall
-                                            .fontStyle,
-                                      ),
-                                  elevation: 0.0,
-                                  borderRadius: BorderRadius.circular(24.0),
-                                ),
-                              ),
-                            ],
-                          ),
+                          _sectionTitle('Mis propiedades publicadas'),
                           Padding(
                             padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
@@ -331,6 +316,12 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                                               '';
                                       return itemName.contains(searchQuery);
                                     }).toList();
+
+                                    if (filteredPublished.isEmpty) {
+                                      return _emptyText(searchQuery.isEmpty
+                                          ? 'Todavía no tienes propiedades publicadas.'
+                                          : 'Ninguna propiedad publicada coincide con tu búsqueda.');
+                                    }
 
                                     return Column(
                                       children: [
@@ -694,43 +685,9 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                               },
                             ),
                           ),
-                          Row(
-                            mainAxisSize: MainAxisSize.max,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Align(
-                                alignment:
-                                    const AlignmentDirectional(-1.0, 0.0),
-                                child: Padding(
-                                  padding: const EdgeInsetsDirectional.fromSTEB(
-                                      0.0, 33.0, 0.0, 0.0),
-                                  child: Text(
-                                    'Propiedades aún no\npublicadas / Pausadas',
-                                    style: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .override(
-                                          font: GoogleFonts.publicSans(
-                                            fontWeight: FontWeight.w600,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .bodyMedium
-                                                    .fontStyle,
-                                          ),
-                                          fontSize: 17.0,
-                                          letterSpacing: 0.33,
-                                          fontWeight: FontWeight.w600,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodyMedium
-                                                  .fontStyle,
-                                          lineHeight: 1.3,
-                                        ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
+                          _publishButton(),
+                          _sectionTitle(
+                              'Propiedades aún no publicadas o pausadas'),
                           Padding(
                             padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 20.0, 0.0, 0.0),
@@ -768,6 +725,12 @@ class _DOVIACLIENTMisPropiedadesWidgetState
                                       '';
                                   return name.contains(searchQuery2);
                                 }).toList();
+
+                                if (filteredPending.isEmpty) {
+                                  return _emptyText(searchQuery2.isEmpty
+                                      ? 'No tienes propiedades pendientes de publicar.'
+                                      : 'Ninguna propiedad pendiente coincide con tu búsqueda.');
+                                }
 
                                 return ListView.builder(
                                   padding: EdgeInsets.zero,

@@ -190,7 +190,9 @@ class _AllPhotosWidgetState extends State<AllPhotosWidget> {
               Expanded(
                 child: SingleChildScrollView(
                   child: Padding(
-                    padding: const EdgeInsets.only(left: 20, top: 0),
+                    // Sin margen a los costados: las fotos van de borde a
+                    // borde y cada fila pone el suyo.
+                    padding: EdgeInsets.zero,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -346,8 +348,9 @@ class _AllPhotosWidgetState extends State<AllPhotosWidget> {
   Widget _buildHeader() {
     return Padding(
       padding: EdgeInsets.only(
-        // Misma altura de header que el resto de las pantallas.
-        top: MediaQuery.of(context).padding.top + 42,
+        // Justo debajo de la barra de estado, como el header del resto de
+        // las pantallas.
+        top: MediaQuery.of(context).padding.top + 12,
         left: 20,
         right: 20,
         bottom: 10,
@@ -418,7 +421,7 @@ class _AllPhotosWidgetState extends State<AllPhotosWidget> {
         children: [
           // Category header row
           Padding(
-            padding: const EdgeInsets.only(right: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -440,42 +443,77 @@ class _AllPhotosWidgetState extends State<AllPhotosWidget> {
 
           const SizedBox(height: 16),
 
-          // Fotos grandes; las flechas van juntas debajo para no taparlas.
+          // Fotos de borde a borde, con las flechas encima, a los costados.
           SizedBox(
             height: 200,
-            child: ListView.separated(
-              controller: _scrollControllers[category.name],
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.only(right: 20),
-              itemCount: category.imagePaths.length,
-              separatorBuilder: (context, index) => const SizedBox(width: 16),
-              itemBuilder: (context, index) {
-                return _buildImageThumbnail(
-                  category.imagePaths[index],
-                  onTap: () => _openPhotoViewer(category.imagePaths, index),
-                );
-              },
-            ),
-          ),
-          const SizedBox(height: 12),
-          Padding(
-            padding: const EdgeInsets.only(right: 20),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+            child: Stack(
+              alignment: Alignment.center,
               children: [
-                _buildNavigationArrow(
-                  isLeft: true,
-                  onTap: () => _scrollLeft(category.name),
+                ListView.separated(
+                  controller: _scrollControllers[category.name],
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  itemCount: category.imagePaths.length,
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(width: 16),
+                  itemBuilder: (context, index) {
+                    return _buildImageThumbnail(
+                      category.imagePaths[index],
+                      onTap: () => _openPhotoViewer(category.imagePaths, index),
+                    );
+                  },
                 ),
-                const SizedBox(width: 16),
-                _buildNavigationArrow(
-                  isLeft: false,
-                  onTap: () => _scrollRight(category.name),
-                ),
+                _sideArrows(category),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  /// Flechas a los costados del carrusel de una categoría. Cada una aparece
+  /// sólo si hay fotos para ese lado.
+  Widget _sideArrows(PhotoCategory category) {
+    final categoryName = category.name;
+    final controller = _scrollControllers[categoryName];
+    if (controller == null) return const SizedBox.shrink();
+    return Positioned.fill(
+      child: AnimatedBuilder(
+        animation: controller,
+        builder: (context, _) {
+          final ready =
+              controller.hasClients && controller.position.hasContentDimensions;
+          // Antes de medirse el carrusel está al principio: hay fotos a la
+          // derecha si hay más de una.
+          final pixels = ready ? controller.position.pixels : 0.0;
+          final max = ready
+              ? controller.position.maxScrollExtent
+              : (category.imagePaths.length > 1 ? double.infinity : 0.0);
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Stack(
+              children: [
+                if (pixels > 1)
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: _buildNavigationArrow(
+                      isLeft: true,
+                      onTap: () => _scrollLeft(categoryName),
+                    ),
+                  ),
+                if (pixels < max - 1)
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: _buildNavigationArrow(
+                      isLeft: false,
+                      onTap: () => _scrollRight(categoryName),
+                    ),
+                  ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }

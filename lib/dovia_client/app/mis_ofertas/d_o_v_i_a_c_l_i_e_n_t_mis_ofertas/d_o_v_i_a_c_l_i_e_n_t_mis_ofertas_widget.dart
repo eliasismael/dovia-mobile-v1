@@ -10,7 +10,6 @@ import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import '../cancelar_oferta_modal_widget.dart';
 import '../client_offer_navigation.dart';
 import '../mi_oferta_card_widget.dart';
 import '../d_o_v_i_a_c_l_i_e_n_t_mis_ofertas_lista/d_o_v_i_a_c_l_i_e_n_t_mis_ofertas_lista_widget.dart';
@@ -308,7 +307,6 @@ class _DOVIACLIENTMisOfertasWidgetState
                       offer.awaitsClientResponse &&
                       hasUnreadClientOfferUpdate(offer),
                   onOpen: () => _openOffer(offer),
-                  onCancel: () => _cancelOffer(offer),
                 );
               },
             ),
@@ -321,36 +319,6 @@ class _DOVIACLIENTMisOfertasWidgetState
     await openClientOffer(context, offer);
     if (!mounted) return;
     await _loadOffers();
-  }
-
-  Future<void> _cancelOffer(ClientOffer offer) async {
-    final reason = await showCancelarOfertaModal(context);
-    if (reason == null || !mounted) return;
-
-    final result = await context.read<OffersRepository>().withdrawMyOffer(
-          offerId: offer.offerId,
-          reason: reason,
-          isInitialOffer: offer.isSentAwaitingOwnerResponse,
-        );
-    if (!mounted) return;
-
-    switch (result) {
-      case Success():
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Retiramos tu oferta.'),
-          backgroundColor: Color(0xFF555555),
-          behavior: SnackBarBehavior.floating,
-        ));
-        await _loadOffers();
-        break;
-      case Failure(:final message):
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(message),
-          backgroundColor: const Color(0xFFE85D75),
-          behavior: SnackBarBehavior.floating,
-        ));
-        break;
-    }
   }
 
   /// "Ver más" del carril: texto sin fondo, igual que en Mis Visitas.

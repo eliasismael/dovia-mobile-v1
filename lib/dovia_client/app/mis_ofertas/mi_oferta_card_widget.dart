@@ -9,7 +9,8 @@ import 'package:google_fonts/google_fonts.dart';
 /// Las acciones dependen del carril donde se renderiza, no sólo del estado de
 /// la oferta, porque el carril "Ofertas realizadas" es el pipeline general y
 /// lleva ofertas de cualquier etapa:
-/// - realizadas → [Ver tu oferta] + [Cancelar oferta]
+/// - realizadas → [Ver tu oferta]. Para retirarla está [Retirar Oferta]
+///   dentro del detalle.
 /// - contraoferta → [Ver contraoferta]
 /// - aceptada → barra de progreso + [Ver proceso legal] / [Calificar]
 class MiOfertaCardWidget extends StatelessWidget {
@@ -18,7 +19,6 @@ class MiOfertaCardWidget extends StatelessWidget {
     required this.offer,
     required this.lane,
     required this.onOpen,
-    this.onCancel,
     this.hasUnreadUpdate = false,
     this.tapToOpen = false,
     this.showActions = true,
@@ -32,9 +32,6 @@ class MiOfertaCardWidget extends StatelessWidget {
 
   final VoidCallback onOpen;
 
-  /// Abre el modal de retiro. Sin este callback no se dibuja el botón.
-  final VoidCallback? onCancel;
-
   /// Enciende el punto rojo: el dueño contraofertó y el usuario no lo abrió.
   final bool hasUnreadUpdate;
 
@@ -47,7 +44,6 @@ class MiOfertaCardWidget extends StatelessWidget {
   final double width;
 
   static const Color _aqua = Color(0xFF007376);
-  static const Color _aquaSoft = Color(0xFFCCE3E4);
   static const Color _aquaDim = Color(0x80007376);
   static const Color _aquaBorder = Color(0xFF3B8F92);
   static const Color _text = Color(0xFF00444B);
@@ -57,14 +53,6 @@ class MiOfertaCardWidget extends StatelessWidget {
   /// La barra de progreso acompaña a todo lo que ya está en manos de Legal HQ,
   /// también cuando la tarjeta se ve desde "Ofertas realizadas".
   bool get _showsProgress => offer.lane == ClientOfferLane.aceptada;
-
-  /// El botón de retirar sólo aparece en el pipeline general, y sólo mientras
-  /// la oferta siga en juego: una vez aceptada o cerrada no hay nada que
-  /// retirar, y el endpoint lo rechazaría.
-  bool get _showsCancel =>
-      lane == ClientOfferLane.realizadas &&
-      offer.isCancellable &&
-      onCancel != null;
 
   String get _actionLabel {
     switch (lane) {
@@ -133,10 +121,6 @@ class MiOfertaCardWidget extends StatelessWidget {
                 if (showActions) ...[
                   const SizedBox(height: 10.0),
                   _openButton(),
-                  if (_showsCancel) ...[
-                    const SizedBox(height: 10.0),
-                    _cancelButton(),
-                  ],
                 ],
               ],
             ),
@@ -259,6 +243,7 @@ class MiOfertaCardWidget extends StatelessWidget {
     return 'Rechazada';
   }
 
+  /// Acción principal de la tarjeta: verde con texto blanco.
   Widget _openButton() {
     return InkWell(
       onTap: onOpen,
@@ -267,49 +252,27 @@ class MiOfertaCardWidget extends StatelessWidget {
         width: double.infinity,
         height: 30.0,
         decoration: BoxDecoration(
-          color: _aquaSoft,
+          color: _aqua,
           borderRadius: BorderRadius.circular(99.0),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.remove_red_eye_outlined, color: _aqua, size: 18.0),
+            const Icon(Icons.remove_red_eye_outlined,
+                color: Colors.white, size: 18.0),
             const SizedBox(width: 5.0),
             Flexible(
               child: Text(
                 _actionLabel,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.publicSans(fontSize: 14.0, color: _aqua),
+                style: GoogleFonts.publicSans(
+                    fontSize: 14.0,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white),
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _cancelButton() {
-    return InkWell(
-      onTap: onCancel,
-      borderRadius: BorderRadius.circular(25.0),
-      child: Container(
-        width: double.infinity,
-        height: 33.0,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          border: Border.all(color: _aqua),
-          borderRadius: BorderRadius.circular(25.0),
-        ),
-        child: Text(
-          'Cancelar oferta',
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: GoogleFonts.publicSans(
-            fontSize: 14.0,
-            fontWeight: FontWeight.w600,
-            color: _aqua,
-          ),
         ),
       ),
     );

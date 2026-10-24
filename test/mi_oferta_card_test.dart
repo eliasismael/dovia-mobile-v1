@@ -38,9 +38,8 @@ Future<({List<int> taps})> _pumpCard(
   ClientOffer offer, {
   required ClientOfferLane lane,
   bool hasUnreadUpdate = false,
-  bool withCancel = true,
 }) async {
-  final taps = [0, 0]; // [abrir, cancelar]
+  final taps = [0]; // [abrir]
   await tester.pumpWidget(MaterialApp(
     home: Scaffold(
       body: MiOfertaCardWidget(
@@ -48,7 +47,6 @@ Future<({List<int> taps})> _pumpCard(
         lane: lane,
         hasUnreadUpdate: hasUnreadUpdate,
         onOpen: () => taps[0]++,
-        onCancel: withCancel ? () => taps[1]++ : null,
       ),
     ),
   ));
@@ -58,12 +56,13 @@ Future<({List<int> taps})> _pumpCard(
 
 void main() {
   group('Acciones segun el carril', () {
-    testWidgets('en el pipeline general ofrece ver y cancelar',
+    testWidgets('en el pipeline general solo ofrece ver la oferta',
         (tester) async {
       await _pumpCard(tester, _offer(), lane: ClientOfferLane.realizadas);
 
       expect(find.text('Ver tu oferta'), findsOneWidget);
-      expect(find.text('Cancelar oferta'), findsOneWidget);
+      // Se retira desde el detalle, no desde la tarjeta.
+      expect(find.text('Cancelar oferta'), findsNothing);
     });
 
     testWidgets('en contraoferta solo abre la negociacion', (tester) async {
@@ -136,14 +135,6 @@ void main() {
 
       expect(find.text('Cancelar oferta'), findsNothing);
     });
-
-    testWidgets('sin callback de cancelacion no se dibuja el boton',
-        (tester) async {
-      await _pumpCard(tester, _offer(),
-          lane: ClientOfferLane.realizadas, withCancel: false);
-
-      expect(find.text('Cancelar oferta'), findsNothing);
-    });
   });
 
   group('Lo que cuenta la tarjeta', () {
@@ -188,17 +179,13 @@ void main() {
   });
 
   group('Interaccion', () {
-    testWidgets('cada boton dispara su propia accion', (tester) async {
-      final result = await _pumpCard(tester, _offer(),
-          lane: ClientOfferLane.realizadas);
+    testWidgets('el boton abre la oferta', (tester) async {
+      final result =
+          await _pumpCard(tester, _offer(), lane: ClientOfferLane.realizadas);
 
       await tester.tap(find.text('Ver tu oferta'));
       await tester.pump();
-      expect(result.taps, [1, 0]);
-
-      await tester.tap(find.text('Cancelar oferta'));
-      await tester.pump();
-      expect(result.taps, [1, 1]);
+      expect(result.taps, [1]);
     });
   });
 }

@@ -30,6 +30,7 @@ import 'package:provider/provider.dart';
 import '/shared_components/notification_badge.dart';
 import 'd_o_v_i_a_c_l_i_e_n_t_home_page_model.dart';
 import '/shared_components/dovia_spinner.dart';
+import '/shared_components/horizontal_fade_edges.dart';
 export 'd_o_v_i_a_c_l_i_e_n_t_home_page_model.dart';
 
 class DOVIACLIENTHomePageWidget extends StatefulWidget {
@@ -96,67 +97,77 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
           );
         }
         if (!response.succeeded) {
-          return Row(
-            children: [
-              const Expanded(
-                child: Text('No pudimos cargar los proyectos nuevos.'),
-              ),
-              TextButton(
-                onPressed: () => safeSetState(() => _newProjectsFuture = null),
-                child: const Text('Reintentar'),
-              ),
-            ],
+          return Padding(
+            padding: _carouselPadding,
+            child: Row(
+              children: [
+                const Expanded(
+                  child: Text('No pudimos cargar los proyectos nuevos.'),
+                ),
+                TextButton(
+                  onPressed: () =>
+                      safeSetState(() => _newProjectsFuture = null),
+                  child: const Text('Reintentar'),
+                ),
+              ],
+            ),
           );
         }
         final projects = NewProject.listFrom(response.jsonBody);
         if (projects.isEmpty) {
-          return const Align(
-            alignment: AlignmentDirectional.centerStart,
-            child: Text('Aún no hay proyectos nuevos.'),
+          return const Padding(
+            padding: _carouselPadding,
+            child: Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: Text('Aún no hay proyectos nuevos.'),
+            ),
           );
         }
         // Con uno o dos proyectos quedaba centrado; va alineado como los
         // demás carruseles.
         return Align(
           alignment: AlignmentDirectional.centerStart,
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                for (final project in projects)
-                  InkWell(
-                    splashColor: Colors.transparent,
-                    focusColor: Colors.transparent,
-                    hoverColor: Colors.transparent,
-                    highlightColor: Colors.transparent,
-                    // Sin ficha en la app: abre su página en el sitio de
-                    // desarrollos, como la web.
-                    onTap: () => _handleRestrictedAction(
-                        () async => launchURL(project.url)),
-                    child: custom_widgets.DoviaClientHouseCard(
-                      width: 210.0,
-                      height: 0.0,
-                      imageUrl: project.imageUrl ?? '',
-                      name: project.name,
-                      type: project.listingType,
-                      priceLabel: project.priceLabel,
-                      priceCaption: project.hasPrice ? 'Precio desde' : null,
-                      propertyType: project.propertyType,
-                      location: project.location,
-                      landArea: project.landArea,
-                      constructionArea: project.constructionArea,
-                      bedrooms: project.bedrooms,
-                      bathrooms: project.bathrooms,
-                      parkingSpots: project.parkingSpots,
-                      dashEmptySpecs: true,
-                      // Flecha al sitio en vez de corazón: no se pueden guardar
-                      // en favoritos.
-                      isNewProject: true,
+          child: HorizontalFadeEdges(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              padding: _carouselPadding,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  for (final project in projects)
+                    InkWell(
+                      splashColor: Colors.transparent,
+                      focusColor: Colors.transparent,
+                      hoverColor: Colors.transparent,
+                      highlightColor: Colors.transparent,
+                      // Sin ficha en la app: abre su página en el sitio de
+                      // desarrollos, como la web.
+                      onTap: () => _handleRestrictedAction(
+                          () async => launchURL(project.url)),
+                      child: custom_widgets.DoviaClientHouseCard(
+                        width: 210.0,
+                        height: 0.0,
+                        imageUrl: project.imageUrl ?? '',
+                        name: project.name,
+                        type: project.listingType,
+                        priceLabel: project.priceLabel,
+                        priceCaption: project.hasPrice ? 'Precio desde' : null,
+                        propertyType: project.propertyType,
+                        location: project.location,
+                        landArea: project.landArea,
+                        constructionArea: project.constructionArea,
+                        bedrooms: project.bedrooms,
+                        bathrooms: project.bathrooms,
+                        parkingSpots: project.parkingSpots,
+                        dashEmptySpecs: true,
+                        // Flecha al sitio en vez de corazón: no se pueden guardar
+                        // en favoritos.
+                        isNewProject: true,
+                      ),
                     ),
-                  ),
-              ].divide(const SizedBox(width: 16.0)),
+                ].divide(const SizedBox(width: 16.0)),
+              ),
             ),
           ),
         );
@@ -379,8 +390,16 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
     return null;
   }
 
+  /// Los carruseles van de borde a borde de la pantalla: las tarjetas se
+  /// ven hasta donde da el teléfono, y la primera arranca alineada con el
+  /// resto de la página.
+  static const double _pageGutter = 20.0;
+  static const EdgeInsets _carouselPadding =
+      EdgeInsets.symmetric(horizontal: _pageGutter);
+
   Widget _carouselEmpty(String text) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12.0),
+        padding:
+            const EdgeInsets.symmetric(horizontal: _pageGutter, vertical: 12.0),
         child: Align(
           alignment: AlignmentDirectional.centerStart,
           child: Text(
@@ -393,23 +412,26 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
 
   /// El servidor siguió fallando después de los reintentos (Ej: un 5xx):
   /// se avisa y se ofrece volver a pedir, en vez de mostrar el carrusel vacío.
-  Widget _carouselError() => Row(
-        children: [
-          Expanded(
-            child: Text(
-              'No pudimos cargar las propiedades.',
-              style: GoogleFonts.publicSans(
-                  color: const Color(0xFF8A8A8A), fontSize: 13.0),
+  Widget _carouselError() => Padding(
+        padding: _carouselPadding,
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                'No pudimos cargar las propiedades.',
+                style: GoogleFonts.publicSans(
+                    color: const Color(0xFF8A8A8A), fontSize: 13.0),
+              ),
             ),
-          ),
-          TextButton(
-            onPressed: () => safeSetState(() {
-              _carouselRetries = 0;
-              _propertiesFuture = null;
-            }),
-            child: const Text('Reintentar'),
-          ),
-        ],
+            TextButton(
+              onPressed: () => safeSetState(() {
+                _carouselRetries = 0;
+                _propertiesFuture = null;
+              }),
+              child: const Text('Reintentar'),
+            ),
+          ],
+        ),
       );
 
   List<dynamic> _carouselPage(String carouselKey, List<dynamic> houses) {
@@ -525,7 +547,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
             }
             return false;
           },
-          child: child,
+          child: HorizontalFadeEdges(child: child),
         ),
         AnimatedBuilder(
           animation: controller,
@@ -537,25 +559,28 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
             final hasPrevious = pixels > 1;
             final hasNext = pixels < max - 1 || hasMore();
             return Positioned.fill(
-              child: Stack(
-                children: [
-                  if (hasPrevious)
-                    Align(
-                      alignment: const AlignmentDirectional(-1.0, 0.0),
-                      child: _carouselArrow(
-                        icon: Icons.chevron_left,
-                        onTap: () => _moveCarousel(carouselKey, -1, total),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Stack(
+                  children: [
+                    if (hasPrevious)
+                      Align(
+                        alignment: const AlignmentDirectional(-1.0, 0.0),
+                        child: _carouselArrow(
+                          icon: Icons.chevron_left,
+                          onTap: () => _moveCarousel(carouselKey, -1, total),
+                        ),
                       ),
-                    ),
-                  if (hasNext)
-                    Align(
-                      alignment: const AlignmentDirectional(1.0, 0.0),
-                      child: _carouselArrow(
-                        icon: Icons.chevron_right,
-                        onTap: () => _moveCarousel(carouselKey, 1, total),
+                    if (hasNext)
+                      Align(
+                        alignment: const AlignmentDirectional(1.0, 0.0),
+                        child: _carouselArrow(
+                          icon: Icons.chevron_right,
+                          onTap: () => _moveCarousel(carouselKey, 1, total),
+                        ),
                       ),
-                    ),
-                ],
+                  ],
+                ),
               ),
             );
           },
@@ -766,7 +791,8 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
       );
     } else if (_searchError != null) {
       body = Padding(
-        padding: const EdgeInsets.symmetric(vertical: 40.0),
+        padding:
+            const EdgeInsets.symmetric(horizontal: _pageGutter, vertical: 40.0),
         child: Column(
           children: [
             Text(_searchError!, style: titleStyle),
@@ -781,7 +807,8 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
       final results = _searchResults();
       if (results.isEmpty) {
         body = Padding(
-          padding: const EdgeInsets.symmetric(vertical: 40.0),
+          padding: const EdgeInsets.symmetric(
+              horizontal: _pageGutter, vertical: 40.0),
           child: Column(
             children: [
               Icon(Icons.search_off_rounded,
@@ -803,6 +830,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
           child: SingleChildScrollView(
             controller: _carouselController('busqueda'),
             scrollDirection: Axis.horizontal,
+            padding: _carouselPadding,
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: page
@@ -819,18 +847,21 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
         ? _searchResults().length
         : null;
     return Padding(
-      padding: const EdgeInsetsDirectional.fromSTEB(20.0, 4.0, 20.0, 0.0),
+      padding: const EdgeInsetsDirectional.only(top: 4.0),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            count == null
-                ? 'Buscando…'
-                : count == 1
-                    ? '1 resultado'
-                    : '$count resultados',
-            style: titleStyle,
+          Padding(
+            padding: _carouselPadding,
+            child: Text(
+              count == null
+                  ? 'Buscando…'
+                  : count == 1
+                      ? '1 resultado'
+                      : '$count resultados',
+              style: titleStyle,
+            ),
           ),
           const SizedBox(height: 8.0),
           body,
@@ -1734,7 +1765,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                         ),
                         Padding(
                           padding: const EdgeInsetsDirectional.fromSTEB(
-                              20.0, 8.0, 20.0, 0.0),
+                              0.0, 8.0, 0.0, 0.0),
                           child: FutureBuilder<ApiCallResponse>(
                             future: _properties(),
                             builder: (context, snapshot) {
@@ -1774,6 +1805,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                       controller:
                                           _carouselController('loNuevo'),
                                       scrollDirection: Axis.horizontal,
+                                      padding: _carouselPadding,
                                       child: Row(
                                         mainAxisSize: MainAxisSize.min,
                                         mainAxisAlignment:
@@ -1821,7 +1853,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                         ),
                         Padding(
                           padding: const EdgeInsetsDirectional.fromSTEB(
-                              20.0, 20.0, 20.0, 0.0),
+                              0.0, 20.0, 0.0, 0.0),
                           child: _buildNewProjects(),
                         ),
                       ],
@@ -1865,7 +1897,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                         ),
                         Padding(
                           padding: const EdgeInsetsDirectional.fromSTEB(
-                              20.0, 20.0, 20.0, 0.0),
+                              0.0, 20.0, 0.0, 0.0),
                           child: FutureBuilder<ApiCallResponse>(
                             future: _properties(),
                             builder: (context, snapshot) {
@@ -1905,6 +1937,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                       controller:
                                           _carouselController('recomendado'),
                                       scrollDirection: Axis.horizontal,
+                                      padding: _carouselPadding,
                                       child: Row(
                                         mainAxisSize: MainAxisSize.min,
                                         mainAxisAlignment:
@@ -2286,7 +2319,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                         ),
                         Padding(
                           padding: const EdgeInsetsDirectional.fromSTEB(
-                              20.0, 20.0, 20.0, 0.0),
+                              0.0, 20.0, 0.0, 0.0),
                           child: FutureBuilder<ApiCallResponse>(
                             future: _properties(),
                             builder: (context, snapshot) {
@@ -2326,6 +2359,7 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
                                       controller: _carouselController(
                                           'vistoRecientemente'),
                                       scrollDirection: Axis.horizontal,
+                                      padding: _carouselPadding,
                                       child: Row(
                                         mainAxisSize: MainAxisSize.min,
                                         mainAxisAlignment:

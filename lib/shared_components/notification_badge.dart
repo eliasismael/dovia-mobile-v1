@@ -64,8 +64,6 @@ class NotificationBadge extends StatelessWidget {
             decoration: BoxDecoration(
               color: FlutterFlowTheme.of(context).primary,
               borderRadius: BorderRadius.circular(10),
-              // Borde blanco: se despega del círculo y de la campana.
-              border: Border.all(color: Colors.white, width: 1.5),
             ),
             alignment: Alignment.center,
             child: Text(

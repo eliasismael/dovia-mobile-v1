@@ -938,67 +938,74 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
                               padding: const EdgeInsetsDirectional.fromSTEB(
                                   0.0, 32.0, 0.0, 0.0),
                               // Carrusel a todo el ancho, con las flechas
-                              // juntas debajo para no tapar las fotos.
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
+                              // encima de las fotos, a los costados.
+                              child: Builder(builder: (context) {
+                                final items = _carouselItems();
+                                final index = _model.carouselCurrentIndex;
+                                return SizedBox(
+                                  height: 220.0,
                                   // Las fotos llegan hasta los bordes de la
                                   // pantalla, sin el margen del contenido.
-                                  SizedBox(
-                                    height: 220.0,
-                                    child: OverflowBox(
-                                      minWidth:
-                                          MediaQuery.sizeOf(context).width,
-                                      maxWidth:
-                                          MediaQuery.sizeOf(context).width,
-                                      child: CarouselSlider(
-                                        items: _carouselItems(),
-                                        carouselController:
-                                            _model.carouselController ??=
-                                                CarouselSliderController(),
-                                        options: CarouselOptions(
-                                          height: 220.0,
-                                          initialPage: 0,
-                                          viewportFraction: 0.92,
-                                          disableCenter: false,
-                                          enlargeCenterPage: false,
-                                          enlargeFactor: 0.0,
-                                          enableInfiniteScroll: false,
-                                          scrollDirection: Axis.horizontal,
-                                          autoPlay: false,
-                                          onPageChanged: (index, _) => _model
-                                              .carouselCurrentIndex = index,
+                                  child: OverflowBox(
+                                    minWidth: MediaQuery.sizeOf(context).width,
+                                    maxWidth: MediaQuery.sizeOf(context).width,
+                                    child: Stack(
+                                      alignment: Alignment.center,
+                                      children: [
+                                        CarouselSlider(
+                                          items: items,
+                                          carouselController:
+                                              _model.carouselController ??=
+                                                  CarouselSliderController(),
+                                          options: CarouselOptions(
+                                            height: 220.0,
+                                            initialPage: 0,
+                                            viewportFraction: 0.92,
+                                            disableCenter: false,
+                                            enlargeCenterPage: false,
+                                            enlargeFactor: 0.0,
+                                            enableInfiniteScroll: false,
+                                            scrollDirection: Axis.horizontal,
+                                            autoPlay: false,
+                                            // Repinta para mostrar u ocultar
+                                            // las flechas de los extremos.
+                                            onPageChanged: (index, _) =>
+                                                safeSetState(() => _model
+                                                        .carouselCurrentIndex =
+                                                    index),
+                                          ),
                                         ),
-                                      ),
+                                        if (index > 0)
+                                          PositionedDirectional(
+                                            start: 12.0,
+                                            child: _carouselArrow(
+                                              Icons.arrow_back_ios_new_rounded,
+                                              () => _model.carouselController
+                                                  ?.previousPage(
+                                                duration: const Duration(
+                                                    milliseconds: 300),
+                                                curve: Curves.ease,
+                                              ),
+                                            ),
+                                          ),
+                                        if (index < items.length - 1)
+                                          PositionedDirectional(
+                                            end: 12.0,
+                                            child: _carouselArrow(
+                                              Icons.arrow_forward_ios_rounded,
+                                              () => _model.carouselController
+                                                  ?.nextPage(
+                                                duration: const Duration(
+                                                    milliseconds: 300),
+                                                curve: Curves.ease,
+                                              ),
+                                            ),
+                                          ),
+                                      ],
                                     ),
                                   ),
-                                  const SizedBox(height: 12.0),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      _carouselArrow(
-                                        Icons.arrow_back_ios_new_rounded,
-                                        () => _model.carouselController
-                                            ?.previousPage(
-                                          duration:
-                                              const Duration(milliseconds: 300),
-                                          curve: Curves.ease,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 16.0),
-                                      _carouselArrow(
-                                        Icons.arrow_forward_ios_rounded,
-                                        () =>
-                                            _model.carouselController?.nextPage(
-                                          duration:
-                                              const Duration(milliseconds: 300),
-                                          curve: Curves.ease,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
+                                );
+                              }),
                             ),
                             Padding(
                               padding: const EdgeInsetsDirectional.fromSTEB(

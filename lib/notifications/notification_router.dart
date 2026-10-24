@@ -153,10 +153,9 @@ NotificationDestination? resolveNotificationTap({
 
 /// A dónde llevar un push tocado: el detalle si se puede, si no la bandeja.
 ///
-/// Hoy el backend no incluye el código del catálogo en los datos del push
-/// (sólo `actionPath`, la entidad y los datos del catálogo), así que lo que
-/// depende de a quién iba dirigida cae en la bandeja. Si algún día manda
-/// `type`, se usa sin cambiar nada acá.
+/// El backend manda en `type` el código del catálogo (Ej:
+/// `VISIT_CONFIRMED_CLIENT`), que dice a quién iba dirigida. Sin él (pushes
+/// viejos) lo que depende de eso cae en la bandeja.
 NotificationDestination destinationForPush({
   required String role,
   required PushMessage message,

@@ -680,112 +680,6 @@ class _VisitCardState extends State<_VisitCard> {
     if (result == true) widget.onRescheduleSuccess?.call();
   }
 
-  void _onCancelTap(BuildContext ctx) {
-    showDialog(
-      context: ctx,
-      builder: (dialogCtx) => Dialog(
-        backgroundColor: Colors.white,
-        insetPadding: const EdgeInsets.symmetric(horizontal: 32),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 340),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 56,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    color: Colors.red.withValues(alpha: 0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.event_busy_outlined,
-                      color: Colors.red, size: 28),
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  'Cancelar visita',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                      fontFamily: 'Public Sans',
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      color: dark),
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  '¿Estás seguro de que deseas cancelar esta visita? '
-                  'Esta acción no se puede deshacer.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                      fontFamily: 'Public Sans',
-                      fontSize: 14,
-                      color: Color(0xFF6B7280)),
-                ),
-                const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  height: 44,
-                  child: ElevatedButton(
-                    onPressed: () => _confirmCancel(ctx, dialogCtx),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24)),
-                    ),
-                    child: const Text('Sí, cancelar',
-                        style: TextStyle(
-                            fontFamily: 'Public Sans',
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white)),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                SizedBox(
-                  width: double.infinity,
-                  height: 44,
-                  child: OutlinedButton(
-                    onPressed: () => Navigator.pop(dialogCtx),
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: primary),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24)),
-                    ),
-                    child: const Text('Volver',
-                        style: TextStyle(
-                            fontFamily: 'Public Sans',
-                            fontWeight: FontWeight.w600,
-                            color: primary)),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Future<void> _confirmCancel(BuildContext ctx, BuildContext dialogCtx) async {
-    // Se toma antes: si la card sale de la lista, su contexto deja de existir.
-    final messenger = ScaffoldMessenger.of(ctx);
-    Navigator.pop(dialogCtx);
-    final res = await DOVIAAPIVisitContextGroup.cancelVisitCall.call(
-      authToken: currentAuthenticationToken,
-      visitId: widget.visitId,
-    );
-    if (res.succeeded) widget.onRescheduleSuccess?.call();
-    messenger.showSnackBar(
-      SnackBar(
-          content: Text(res.succeeded
-              ? 'Visita cancelada'
-              : 'Error al cancelar la visita')),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -796,6 +690,7 @@ class _VisitCardState extends State<_VisitCard> {
   }
 
   Widget _buildCard(BuildContext context) {
+    final actions = _buildActions(context);
     return Container(
       width: 200,
       decoration: BoxDecoration(
@@ -831,7 +726,7 @@ class _VisitCardState extends State<_VisitCard> {
               ),
               const SizedBox(height: 8),
             ],
-            // ── Property name ──────────────────────────────────────────
+            // ── Nombre y estado ───────────────────────────────────────
             Text(
               _displayName,
               style: const TextStyle(
@@ -842,24 +737,26 @@ class _VisitCardState extends State<_VisitCard> {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
-            const SizedBox(height: 4),
-            // ── Badge ─────────────────────────────────────────────────
+            const SizedBox(height: 6),
+            // El estado va debajo del nombre, a todo el ancho de la tarjeta.
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: _labelColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(4),
+                color: _labelColor,
+                borderRadius: BorderRadius.circular(99),
               ),
               child: Text(
                 _label,
-                style: TextStyle(
+                style: const TextStyle(
                     fontFamily: 'Public Sans',
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
-                    color: _labelColor),
+                    color: Colors.white),
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 8),
             // ── Date / info ───────────────────────────────────────────
             if (isPending)
               ..._pendingInfo()
@@ -888,13 +785,15 @@ class _VisitCardState extends State<_VisitCard> {
                         fontSize: 12,
                         color: Colors.grey)),
             ],
-            const SizedBox(height: 10),
-            if (widget.fillHeight)
-              const Spacer()
-            else
-              const SizedBox(height: 12),
-            // ── Actions ───────────────────────────────────────────────
-            ..._buildActions(context),
+            if (actions.isNotEmpty) ...[
+              const SizedBox(height: 10),
+              if (widget.fillHeight)
+                const Spacer()
+              else
+                const SizedBox(height: 12),
+              // ── Actions ─────────────────────────────────────────────
+              ...actions,
+            ],
           ],
         ),
       ),
@@ -916,14 +815,24 @@ class _VisitCardState extends State<_VisitCard> {
       final slot = e.value;
       final date = slot is Map ? (slot['date']?.toString() ?? '') : '';
       final time = slot is Map ? (slot['time']?.toString() ?? '') : '';
+      const style =
+          TextStyle(fontFamily: 'Public Sans', fontSize: 12, color: dark);
+      // Ocupa todo el ancho de la tarjeta: la fecha a la izquierda y la hora
+      // a la derecha.
       return Padding(
-        padding: const EdgeInsets.only(bottom: 2),
-        child: Text(
-          '${e.key + 1}. ${_formatDate(date)} · $time',
-          style: const TextStyle(
-              fontFamily: 'Public Sans', fontSize: 11, color: dark),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
+        padding: const EdgeInsets.only(bottom: 4),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                '${e.key + 1}. ${_formatDate(date)}',
+                style: style,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            Text(time, style: style),
+          ],
         ),
       );
     }).toList();
@@ -942,11 +851,9 @@ class _VisitCardState extends State<_VisitCard> {
             onTap: () => _navigateToDetail(context)),
       ];
     }
-    if (isPending) {
-      return [
-        _cancelPill(context),
-      ];
-    }
+    // Pendiente: sin acción en la tarjeta. Al tocarla se abre "Sobre mi
+    // visita", donde se puede cancelar.
+    if (isPending) return const [];
     if (isReschedule) {
       return [
         _pill(context, Icons.calendar_today, 'Agendar cita',
@@ -957,8 +864,6 @@ class _VisitCardState extends State<_VisitCard> {
       return [
         _pill(context, Icons.remove_red_eye_outlined, 'Sobre mi visita',
             onTap: () => _navigateToDetail(context)),
-        const SizedBox(height: 6),
-        _cancelPill(context),
       ];
     }
     return [
@@ -988,27 +893,6 @@ class _VisitCardState extends State<_VisitCard> {
                     fontWeight: FontWeight.w500,
                     color: primary)),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _cancelPill(BuildContext context) {
-    return GestureDetector(
-      onTap: () => _onCancelTap(context),
-      child: Container(
-        width: double.infinity,
-        height: 30,
-        decoration: BoxDecoration(
-            border: Border.all(color: Colors.red.withOpacity(0.5)),
-            borderRadius: BorderRadius.circular(99)),
-        child: const Center(
-          child: Text('Cancelar visita',
-              style: TextStyle(
-                  fontFamily: 'Public Sans',
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.red)),
         ),
       ),
     );
