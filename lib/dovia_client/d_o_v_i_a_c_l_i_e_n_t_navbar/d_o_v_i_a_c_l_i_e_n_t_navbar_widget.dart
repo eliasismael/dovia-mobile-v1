@@ -37,6 +37,33 @@ class _DOVIACLIENTNavbarWidgetState extends State<DOVIACLIENTNavbarWidget> {
   static const double _barHeight = 62.0;
   static const double _totalHeight = 84.0;
 
+  /// Hueco del botón central entre el segundo y el tercer ítem.
+  static const double _centerGap = 72.0;
+
+  /// Lo que tarda la curva en llegar a la sección nueva. Es fijo: si la
+  /// sección está más lejos, la curva va más rápido.
+  static const Duration _slideDuration = Duration(milliseconds: 350);
+
+  /// Secciones con curva, en el orden en que aparecen en la barra.
+  static final List<String> _tabRoutes = [
+    DOVIACLIENTMisPropiedadesWidget.routeName,
+    DOVIACLIENTMisVisitasWidget.routeName,
+    DOVIACLIENTMisOfertasWidget.routeName,
+    DOVIACLIENTMisFavoritosWidget.routeName,
+  ];
+
+  /// Cada pantalla tiene su propia navbar. La que navega deja anotada su
+  /// sección, y la de la pantalla nueva desliza la curva desde ahí.
+  static int? _pendingSlideFrom;
+
+  /// Desde dónde arranca la curva de esta navbar.
+  late final int? _slideFrom;
+
+  int? get _activeIndex {
+    final i = _tabRoutes.indexOf(widget.activeTab ?? '');
+    return i < 0 ? null : i;
+  }
+
   @override
   void setState(VoidCallback callback) {
     super.setState(callback);
@@ -47,6 +74,8 @@ class _DOVIACLIENTNavbarWidgetState extends State<DOVIACLIENTNavbarWidget> {
   void initState() {
     super.initState();
     _model = createModel(context, () => DOVIACLIENTNavbarModel());
+    _slideFrom = _pendingSlideFrom;
+    _pendingSlideFrom = null;
 
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
@@ -69,7 +98,21 @@ class _DOVIACLIENTNavbarWidgetState extends State<DOVIACLIENTNavbarWidget> {
   /// registro en lugar de navegar.
   Future<void> _openRestricted(String routeName) async {
     if (FFAppState().UserRole != 'VISITOR') {
-      context.pushNamed(routeName);
+      final isTab = _tabRoutes.contains(routeName);
+      _pendingSlideFrom = isTab ? _activeIndex : null;
+      // Entre secciones la pantalla cambia sin animación: lo único que se
+      // mueve es la curva, como en una barra de pestañas fija.
+      context.pushNamed(
+        routeName,
+        extra: isTab
+            ? <String, dynamic>{
+                kTransitionInfoKey: const TransitionInfo(
+                  hasTransition: true,
+                  duration: Duration.zero,
+                ),
+              }
+            : null,
+      );
       return;
     }
     await showDialog(
@@ -139,21 +182,41 @@ class _DOVIACLIENTNavbarWidgetState extends State<DOVIACLIENTNavbarWidget> {
                   ),
             ),
             const SizedBox(height: 3.0),
-            // La curva del diseño marca la seccion abierta. El hueco se
-            // reserva siempre para que las etiquetas no se muevan.
-            SizedBox(
-              height: 8.0,
-              child: active
-                  ? SvgPicture.asset(
-                      'assets/images/navbar-active-indicator.svg',
-                      width: 44.0,
-                      height: 8.0,
-                      fit: BoxFit.contain,
-                    )
-                  : null,
-            ),
+            // Hueco para la curva de la sección abierta, que se dibuja
+            // aparte (ver _activeIndicator) para poder deslizarse.
+            const SizedBox(height: 8.0),
           ],
         ),
+      ),
+    );
+  }
+
+  /// La curva que marca la sección abierta. Es una sola para toda la barra:
+  /// al cambiar de sección se desliza desde la anterior, y si no se viene de
+  /// otra sección aparece directamente en su lugar.
+  Widget _activeIndicator(double rowWidth) {
+    final target = _activeIndex;
+    if (target == null) return const SizedBox.shrink();
+    final itemWidth = (rowWidth - _centerGap) / _tabRoutes.length;
+    double centerOf(int i) =>
+        itemWidth * i + itemWidth / 2 + (i >= 2 ? _centerGap : 0.0);
+    return TweenAnimationBuilder<double>(
+      tween: Tween(
+        begin: centerOf(_slideFrom ?? target),
+        end: centerOf(target),
+      ),
+      duration: _slideDuration,
+      curve: Curves.easeInOutCubic,
+      builder: (context, center, child) => Positioned(
+        left: center - 22.0,
+        bottom: 0.0,
+        child: child!,
+      ),
+      child: SvgPicture.asset(
+        'assets/images/navbar-active-indicator.svg',
+        width: 44.0,
+        height: 8.0,
+        fit: BoxFit.contain,
       ),
     );
   }
@@ -250,48 +313,62 @@ class _DOVIACLIENTNavbarWidgetState extends State<DOVIACLIENTNavbarWidget> {
                       const EdgeInsetsDirectional.fromSTEB(8.0, 0.0, 8.0, 0.0),
                   // Los ítems van pegados abajo: la curva del activo marca el
                   // borde inferior de la barra.
-                  child: Row(
-                    mainAxisSize: MainAxisSize.max,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      _navItem(
-                        asset: 'assets/images/IconoCasaLLave.svg',
-                        label: 'Propiedades',
-                        itemKey: widget.tutorialKeys?['propiedades'],
-                        routeName: DOVIACLIENTMisPropiedadesWidget.routeName,
-                        onTap: () => _openRestricted(
-                            DOVIACLIENTMisPropiedadesWidget.routeName),
-                      ),
-                      _navItem(
-                        asset: 'assets/images/IconoCalendario.svg',
-                        label: 'Visitas',
-                        itemKey: widget.tutorialKeys?['visitas'],
-                        routeName: DOVIACLIENTMisVisitasWidget.routeName,
-                        // El invitado ve el aviso de registro en vez de entrar.
-                        onTap: () => _openRestricted(
-                            DOVIACLIENTMisVisitasWidget.routeName),
-                      ),
-                      // Hueco para el botón central, que va por encima.
-                      const SizedBox(width: 72.0),
-                      _navItem(
-                        asset: 'assets/images/IconoOfertasNegociacion.svg',
-                        label: 'Ofertas',
-                        itemKey: widget.tutorialKeys?['ofertas'],
-                        routeName: DOVIACLIENTMisOfertasWidget.routeName,
-                        onTap: () => _openRestricted(
-                            DOVIACLIENTMisOfertasWidget.routeName),
-                      ),
-                      _navItem(
-                        asset: 'assets/images/IconoCorazon.svg',
-                        label: 'Favoritos',
-                        itemKey: widget.tutorialKeys?['favoritos'],
-                        iconSize: 20.0,
-                        routeName: DOVIACLIENTMisFavoritosWidget.routeName,
-                        // El invitado ve el aviso de registro en vez de entrar.
-                        onTap: () => _openRestricted(
-                            DOVIACLIENTMisFavoritosWidget.routeName),
-                      ),
-                    ],
+                  child: LayoutBuilder(
+                    builder: (context, constraints) => Stack(
+                      children: [
+                        Positioned.fill(
+                          child: Row(
+                            mainAxisSize: MainAxisSize.max,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              _navItem(
+                                asset: 'assets/images/IconoCasaLLave.svg',
+                                label: 'Propiedades',
+                                itemKey: widget.tutorialKeys?['propiedades'],
+                                routeName:
+                                    DOVIACLIENTMisPropiedadesWidget.routeName,
+                                onTap: () => _openRestricted(
+                                    DOVIACLIENTMisPropiedadesWidget.routeName),
+                              ),
+                              _navItem(
+                                asset: 'assets/images/IconoCalendario.svg',
+                                label: 'Visitas',
+                                itemKey: widget.tutorialKeys?['visitas'],
+                                routeName:
+                                    DOVIACLIENTMisVisitasWidget.routeName,
+                                // El invitado ve el aviso de registro en vez de entrar.
+                                onTap: () => _openRestricted(
+                                    DOVIACLIENTMisVisitasWidget.routeName),
+                              ),
+                              // Hueco para el botón central, que va por encima.
+                              const SizedBox(width: _centerGap),
+                              _navItem(
+                                asset:
+                                    'assets/images/IconoOfertasNegociacion.svg',
+                                label: 'Ofertas',
+                                itemKey: widget.tutorialKeys?['ofertas'],
+                                routeName:
+                                    DOVIACLIENTMisOfertasWidget.routeName,
+                                onTap: () => _openRestricted(
+                                    DOVIACLIENTMisOfertasWidget.routeName),
+                              ),
+                              _navItem(
+                                asset: 'assets/images/IconoCorazon.svg',
+                                label: 'Favoritos',
+                                itemKey: widget.tutorialKeys?['favoritos'],
+                                iconSize: 20.0,
+                                routeName:
+                                    DOVIACLIENTMisFavoritosWidget.routeName,
+                                // El invitado ve el aviso de registro en vez de entrar.
+                                onTap: () => _openRestricted(
+                                    DOVIACLIENTMisFavoritosWidget.routeName),
+                              ),
+                            ],
+                          ),
+                        ),
+                        _activeIndicator(constraints.maxWidth),
+                      ],
+                    ),
                   ),
                 ),
               ),
