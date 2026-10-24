@@ -73,6 +73,10 @@ enum _DocType {
 class _OperativeListingProfileState extends State<OperativeListingProfile> {
   bool _datosPersonalesExpanded = true;
   bool _deletingAccount = false;
+
+  /// Cerrar sesión avisa al backend antes de volver al login y tarda: el
+  /// botón muestra el spinner y no acepta otro toque mientras tanto.
+  bool _signingOut = false;
   bool _gananciasExpanded = false;
   bool _documentacionExpanded = false;
 
@@ -461,6 +465,7 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
                   : () => setState(() => _editingDatos = false),
               style: OutlinedButton.styleFrom(
                 foregroundColor: aqua,
+                backgroundColor: Colors.white,
                 side: const BorderSide(color: aqua),
                 minimumSize: const Size.fromHeight(44),
                 shape: RoundedRectangleBorder(
@@ -923,11 +928,18 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
   Widget _buildCerrarSesionButton() {
     return _buildOutlinedButton(
       label: 'Cerrar sesión',
+      loading: _signingOut,
       onTap: () async {
-        if (widget.onLogout != null) {
-          await widget.onLogout!.call();
-        } else if (widget.onSignOut != null) {
-          await widget.onSignOut!.call();
+        if (_signingOut) return;
+        setState(() => _signingOut = true);
+        try {
+          if (widget.onLogout != null) {
+            await widget.onLogout!.call();
+          } else if (widget.onSignOut != null) {
+            await widget.onSignOut!.call();
+          }
+        } finally {
+          if (mounted) setState(() => _signingOut = false);
         }
       },
     );
@@ -1228,7 +1240,11 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
     );
   }
 
-  Widget _buildOutlinedButton({required String label, VoidCallback? onTap}) {
+  Widget _buildOutlinedButton({
+    required String label,
+    VoidCallback? onTap,
+    bool loading = false,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -1240,16 +1256,18 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
           borderRadius: BorderRadius.circular(24),
           border: Border.all(color: aqua, width: 1),
         ),
-        child: Text(
-          label,
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            fontFamily: 'Public Sans',
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: textPrimary,
-          ),
-        ),
+        child: loading
+            ? const DoviaSpinner(small: true, color: aqua)
+            : Text(
+                label,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontFamily: 'Public Sans',
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: textPrimary,
+                ),
+              ),
       ),
     );
   }
@@ -1460,6 +1478,7 @@ class _DeleteConfirmDialog extends StatelessWidget {
                     child: OutlinedButton(
                       onPressed: () => Navigator.pop(context),
                       style: OutlinedButton.styleFrom(
+                        backgroundColor: Colors.white,
                         side: const BorderSide(
                             color: Color(0xFF007376), width: 1.5),
                         shape: RoundedRectangleBorder(

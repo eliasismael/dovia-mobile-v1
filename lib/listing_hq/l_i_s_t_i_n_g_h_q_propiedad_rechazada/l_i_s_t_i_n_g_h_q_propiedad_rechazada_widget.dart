@@ -463,8 +463,7 @@ class _LISTINGHQPropiedadRechazadaWidgetState
                                   options: FFButtonOptions(
                                     width: double.infinity,
                                     height: 50.0,
-                                    color: FlutterFlowTheme.of(context)
-                                        .secondaryBackground,
+                                    color: Colors.white,
                                     textStyle: FlutterFlowTheme.of(context)
                                         .titleSmall
                                         .override(

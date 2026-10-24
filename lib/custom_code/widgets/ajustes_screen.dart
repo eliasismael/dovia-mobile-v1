@@ -46,6 +46,10 @@ class _AjustesScreenState extends State<AjustesScreen> {
   bool _cancellingSubscription = false;
   bool _deletingAccount = false;
 
+  /// Cerrar sesión avisa al backend antes de volver al login y tarda: el
+  /// botón muestra el spinner y no acepta otro toque mientras tanto.
+  bool _signingOut = false;
+
   final _cancelReasonCtrl = TextEditingController();
   final _deleteReasonCtrl = TextEditingController();
 
@@ -348,19 +352,29 @@ class _AjustesScreenState extends State<AjustesScreen> {
             width: double.infinity,
             height: 46,
             child: OutlinedButton(
-              onPressed: () async => await widget.onSignOut?.call(),
+              onPressed: () async {
+                if (_signingOut) return;
+                setState(() => _signingOut = true);
+                try {
+                  await widget.onSignOut?.call();
+                } finally {
+                  if (mounted) setState(() => _signingOut = false);
+                }
+              },
               style: OutlinedButton.styleFrom(
                 backgroundColor: Colors.white,
                 side: const BorderSide(color: _aqua),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(24)),
               ),
-              child: const Text('Cerrar sesión',
-                  style: TextStyle(
-                      fontFamily: 'Public Sans',
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: _textPrimary)),
+              child: _signingOut
+                  ? const DoviaSpinner(small: true, color: _aqua)
+                  : const Text('Cerrar sesión',
+                      style: TextStyle(
+                          fontFamily: 'Public Sans',
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: _textPrimary)),
             ),
           ),
           const SizedBox(height: 36),
