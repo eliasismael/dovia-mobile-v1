@@ -4,6 +4,7 @@ import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/legal_associate/l_e_g_a_l_a_s_s_o_c_a_i_t_e_navbar/l_e_g_a_l_a_s_s_o_c_a_i_t_e_navbar_widget.dart';
 import '/legal_associate/legal_associate_header/legal_associate_header_widget.dart';
+import '/listing_hq/listing_hq_ui.dart';
 import '/legal_hq/legal_hq_process_data.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/index.dart';
@@ -238,16 +239,7 @@ class _LEGALASSOCIATEDocumentosWidgetState
     );
   }
 
-  Widget _notice(String text) => Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: const Color(0x2670ACAD),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Text(text,
-            style: GoogleFonts.publicSans(
-                color: _textDark, fontSize: 13, fontWeight: FontWeight.w500)),
-      );
+  Widget _notice(String text) => ListingHqUi.emptyText(context, text);
 
   Widget _counter(String value, String label) => Container(
         padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
@@ -266,19 +258,13 @@ class _LEGALASSOCIATEDocumentosWidgetState
         ),
       );
 
-  static final _cardDecoration = BoxDecoration(
-    color: Colors.white,
-    borderRadius: BorderRadius.circular(16),
-    boxShadow: const [
-      BoxShadow(color: Color(0x14000000), blurRadius: 12, offset: Offset(0, 4)),
-    ],
-  );
+  BoxDecoration get _cardDecoration => ListingHqUi.cardDecoration(context);
 
   Widget _processCard(_InboxProcess p) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         onTap: () => _openProcess(p),
         child: Ink(
           decoration: _cardDecoration,
@@ -309,15 +295,8 @@ class _LEGALASSOCIATEDocumentosWidgetState
                       fontWeight: FontWeight.w600)),
               const Divider(height: 22, color: Color(0xFFEDEDED)),
               for (final item in p.items) _itemRow(item),
-              const SizedBox(height: 4),
-              Align(
-                alignment: Alignment.centerRight,
-                child: Text('Ver trámite →',
-                    style: GoogleFonts.publicSans(
-                        color: _primary,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600)),
-              ),
+              const SizedBox(height: 6),
+              ListingHqUi.cardButton('Ver trámite', () => _openProcess(p)),
             ],
           ),
         ),
@@ -327,8 +306,8 @@ class _LEGALASSOCIATEDocumentosWidgetState
 
   Widget _itemRow(_InboxItem item) {
     final (label, color) = switch (item.todo) {
-      _Todo.review => ('Por revisar', const Color(0xFFE08A00)),
-      _Todo.hqRejected => ('Rechazado por HQ', const Color(0xFFD64545)),
+      _Todo.review => ('Por revisar', ListingHqUi.pending),
+      _Todo.hqRejected => ('Rechazado por HQ', ListingHqUi.alert),
       _Todo.missing => ('Falta cargar', _grey),
       _Todo.waitingFix => ('Esperando corrección', _grey),
     };
@@ -346,12 +325,14 @@ class _LEGALASSOCIATEDocumentosWidgetState
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.12),
+              color: color,
               borderRadius: BorderRadius.circular(100),
             ),
             child: Text(label,
                 style: GoogleFonts.publicSans(
-                    color: color, fontSize: 11, fontWeight: FontWeight.w600)),
+                    color: Colors.white,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600)),
           ),
         ],
       ),

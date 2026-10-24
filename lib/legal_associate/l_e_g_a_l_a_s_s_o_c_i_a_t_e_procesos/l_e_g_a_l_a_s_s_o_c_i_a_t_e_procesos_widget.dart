@@ -6,6 +6,7 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/index.dart';
 import '/legal_associate/l_e_g_a_l_a_s_s_o_c_a_i_t_e_navbar/l_e_g_a_l_a_s_s_o_c_a_i_t_e_navbar_widget.dart';
 import '/legal_associate/legal_associate_header/legal_associate_header_widget.dart';
+import '/listing_hq/listing_hq_ui.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -196,7 +197,7 @@ class _LEGALASSOCIATEProcesosWidgetState
                   ),
                   SliverToBoxAdapter(child: _buildFilters(context)),
                   SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 110),
+                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 120),
                     sliver: SliverLayoutBuilder(builder: (context, c) {
                       // Tablet: dos columnas como en el diseño.
                       final cols = c.crossAxisExtent >= 700 ? 2 : 1;
@@ -244,7 +245,7 @@ class _LEGALASSOCIATEProcesosWidgetState
   }
 
   Widget _buildFilters(BuildContext context) {
-    final theme = FlutterFlowTheme.of(context);
+    final primary = FlutterFlowTheme.of(context).primary;
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
@@ -252,33 +253,28 @@ class _LEGALASSOCIATEProcesosWidgetState
         children: [
           for (final f in _filters)
             Padding(
-              padding: const EdgeInsets.only(right: 10),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(24),
-                onTap: () => _select(f),
-                child: Container(
-                  height: 36,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: f.key == _filter.key
-                        ? theme.primary
-                        : const Color(0xFFCFE3E3),
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  child: Text(
-                    f.label,
-                    style: GoogleFonts.publicSans(
-                      fontSize: 14,
-                      fontWeight: f.key == _filter.key
-                          ? FontWeight.w600
-                          : FontWeight.w500,
-                      color: f.key == _filter.key
-                          ? Colors.white
-                          : const Color(0xFF1F5F63),
-                    ),
-                  ),
+              padding: const EdgeInsets.only(right: 8),
+              child: ChoiceChip(
+                label: Text(f.label),
+                selected: f.key == _filter.key,
+                showCheckmark: false,
+                onSelected: (_) => _select(f),
+                selectedColor: Colors.white,
+                backgroundColor: const Color(0xFFEFF3F4),
+                side: BorderSide.none,
+                labelStyle: GoogleFonts.publicSans(
+                  color: f.key == _filter.key
+                      ? ListingHqUi.textDark
+                      : const Color(0xFF8A8A8A),
+                  fontWeight: f.key == _filter.key
+                      ? FontWeight.w600
+                      : FontWeight.w400,
                 ),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20)),
+                elevation: f.key == _filter.key ? 1 : 0,
+                pressElevation: 0,
+                shadowColor: primary.withValues(alpha: 0.3),
               ),
             ),
         ],
@@ -294,32 +290,20 @@ class _LEGALASSOCIATEProcesosWidgetState
       );
     }
     if (_items.isEmpty) {
-      return Padding(
-        padding: const EdgeInsets.all(24),
-        child: Text(
-          'No tienes procesos en este estado',
-          textAlign: TextAlign.center,
-          style: GoogleFonts.publicSans(
-            fontSize: 14,
-            color: FlutterFlowTheme.of(context).secondaryText,
-          ),
-        ),
-      );
+      return ListingHqUi.emptyText(
+          context, 'No tienes procesos en este estado.');
     }
     return const SizedBox.shrink();
   }
 
   Widget _buildCard(BuildContext context, _Process p) {
     final theme = FlutterFlowTheme.of(context);
-    final value =
-        GoogleFonts.publicSans(fontSize: 14, color: theme.primaryText);
+    final detail = GoogleFonts.publicSans(
+        fontSize: 13, color: theme.secondaryText, height: 1.3);
     final badge = _badge(p.status);
     return Container(
       clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        color: theme.secondaryBackground,
-        borderRadius: BorderRadius.circular(8),
-      ),
+      decoration: ListingHqUi.cardDecoration(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -335,7 +319,7 @@ class _LEGALASSOCIATEProcesosWidgetState
                 : _placeholder(),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+            padding: const EdgeInsets.all(12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -343,62 +327,27 @@ class _LEGALASSOCIATEProcesosWidgetState
                   p.name.isNotEmpty ? p.name : 'Propiedad',
                   style: GoogleFonts.publicSans(
                       fontSize: 15,
-                      fontWeight: FontWeight.w500,
-                      color: theme.primaryText),
+                      fontWeight: FontWeight.w600,
+                      color: ListingHqUi.textDark),
                 ),
                 const SizedBox(height: 4),
                 Text(p.address.isNotEmpty ? p.address : 'Sin dirección',
-                    style: value),
+                    style: detail),
                 const SizedBox(height: 2),
-                Text(_typeLabel(p.propertyType), style: value),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    Text('Estatus', style: value),
-                    const Spacer(),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: badge.$2,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        badge.$1,
-                        style: GoogleFonts.publicSans(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: badge.$3),
-                      ),
-                    ),
-                  ],
-                ),
+                Text(_typeLabel(p.propertyType), style: detail),
                 const SizedBox(height: 12),
-                SizedBox(
-                  height: 30,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      // La pantalla del trámite muestra el paso que
-                      // corresponde al estado.
-                      context.pushNamed(
-                        LEGALASSOCIATEProcesos2Widget.routeName,
-                        queryParameters: {
-                          'processId': p.id,
-                          'propertyName': p.name,
-                        },
-                      );
+                ListingHqUi.statusPill(badge.$1, badge.$2),
+                const SizedBox(height: 10),
+                // La pantalla del trámite muestra el paso que corresponde
+                // al estado.
+                ListingHqUi.cardButton(
+                  'Detalle del proceso',
+                  () => context.pushNamed(
+                    LEGALASSOCIATEProcesos2Widget.routeName,
+                    queryParameters: {
+                      'processId': p.id,
+                      'propertyName': p.name,
                     },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: theme.primary,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24)),
-                    ),
-                    child: Text(
-                      'Detalle del proceso',
-                      style: GoogleFonts.publicSans(
-                          fontSize: 14, color: Colors.white),
-                    ),
                   ),
                 ),
               ],
@@ -415,34 +364,23 @@ class _LEGALASSOCIATEProcesosWidgetState
             const Icon(Icons.home_outlined, size: 48, color: Color(0xFF2F6F73)),
       );
 
-  /// (texto, fondo, color de texto) según el estado del trámite.
-  static (String, Color, Color) _badge(String status) {
+  /// (texto, color) del estado del trámite: color sólido con el texto en
+  /// blanco, como en el inicio.
+  static (String, Color) _badge(String status) {
     switch (status) {
       case 'DRAFTING':
-        return (
-          'En redacción',
-          const Color(0xFFD6E4FF),
-          const Color(0xFF1D5FD1)
-        );
+        return ('En redacción', const Color(0xFFF5A700));
       case 'MEETING_SCHEDULED':
-        return (
-          'Reunión agendada',
-          const Color(0xFFEFE3FF),
-          const Color(0xFF7B3FD1)
-        );
+        return ('Reunión agendada', ListingHqUi.aqua);
       case 'LEGAL_HQ_REVIEW':
-        return (
-          'En revisión Legal HQ',
-          const Color(0xFFFFE7D1),
-          const Color(0xFFE06A00)
-        );
+        return ('En revisión Legal HQ', ListingHqUi.pending);
       case 'REJECTED':
-        return ('Rechazado', const Color(0xFFFFE1E1), const Color(0xFFC90A0A));
+        return ('Rechazado', ListingHqUi.alert);
       case 'APPROVED':
       case 'FINISHED':
-        return ('Aprobado', const Color(0xFFE6F4EA), const Color(0xFF1E8E3E));
+        return ('Aprobado', const Color(0xFF249689));
       default:
-        return ('Pendiente', const Color(0xFFFFF3CC), const Color(0xFFD59E08));
+        return ('Pendiente', const Color(0xFFF5A700));
     }
   }
 

@@ -72,7 +72,7 @@ class _LEGALASSOCIATENotificationsWidgetState
                     ),
                     const Padding(
                       padding: EdgeInsetsDirectional.fromSTEB(
-                          20.0, 20.0, 20.0, 100.0),
+                          20.0, 20.0, 20.0, 120.0),
                       child: NotificationsInboxWidget(),
                     ),
                   ],

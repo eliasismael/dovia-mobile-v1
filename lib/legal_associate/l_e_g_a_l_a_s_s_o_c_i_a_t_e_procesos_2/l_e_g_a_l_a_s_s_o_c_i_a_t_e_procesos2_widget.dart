@@ -8,6 +8,7 @@ import '/flutter_flow/upload_data.dart';
 import '/legal_associate/l_e_g_a_l_a_s_s_o_c_a_i_t_e_navbar/l_e_g_a_l_a_s_s_o_c_a_i_t_e_navbar_widget.dart';
 import '/legal_associate/legal_associate_header/legal_associate_header_widget.dart';
 import '/legal_hq/legal_hq_process_data.dart';
+import '/listing_hq/listing_hq_ui.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -56,8 +57,6 @@ class _LEGALASSOCIATEProcesos2WidgetState
   static const _primary = Color(0xFF007376);
   static const _textDark = Color(0xFF00444B);
   static const _banner = Color(0xFFDCE9EA);
-  static const _pill = Color(0xFFCFE3E3);
-  static const _strip = Color(0xFFE9E8E2);
 
   LegalHqProcessDetail? _detail;
   bool _loading = true;
@@ -594,9 +593,9 @@ class _LEGALASSOCIATEProcesos2WidgetState
   @override
   Widget build(BuildContext context) {
     final detail = _detail;
-    final title = (widget.propertyName?.isNotEmpty ?? false)
+    final propertyName = (widget.propertyName?.isNotEmpty ?? false)
         ? widget.propertyName!
-        : (detail?.process.title ?? 'Proceso');
+        : (detail?.process.title ?? '');
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
@@ -614,12 +613,13 @@ class _LEGALASSOCIATEProcesos2WidgetState
               RefreshIndicator(
                 onRefresh: _load,
                 child: ListView(
-                  padding: const EdgeInsets.only(bottom: 110),
+                  padding: const EdgeInsets.only(bottom: 120),
                   children: [
                     wrapWithModel(
                       model: _model.legalAssociateHeaderModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: LegalAssociateHeaderWidget(titleText: title),
+                      child: const LegalAssociateHeaderWidget(
+                          titleText: 'Detalle del proceso'),
                     ),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
@@ -631,7 +631,7 @@ class _LEGALASSOCIATEProcesos2WidgetState
                           : detail == null
                               ? _text('No se pudo cargar el trámite.',
                                   align: TextAlign.center)
-                              : _buildBody(detail),
+                              : _buildBody(detail, propertyName),
                     ),
                   ],
                 ),
@@ -651,7 +651,7 @@ class _LEGALASSOCIATEProcesos2WidgetState
     );
   }
 
-  Widget _buildBody(LegalHqProcessDetail d) {
+  Widget _buildBody(LegalHqProcessDetail d, String propertyName) {
     final Widget step = switch (d.process.status) {
       'DRAFTING' => _buildDrafting(d),
       'MEETING_COORDINATION' || 'MEETING_SCHEDULED' => _buildMeeting(d),
@@ -660,9 +660,24 @@ class _LEGALASSOCIATEProcesos2WidgetState
       'APPROVED' || 'FINISHED' => _buildApproved(d),
       _ => _buildClauses(d),
     };
+    final (statusLabel, statusColor) = _badge;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if (propertyName.isNotEmpty) ...[
+          Text(
+            propertyName,
+            style: GoogleFonts.publicSans(
+              color: _textDark,
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              height: 1.3,
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
+        ListingHqUi.statusPill(statusLabel, statusColor),
+        const SizedBox(height: 16),
         _buildStepper(),
         const SizedBox(height: 16),
         _buildSummary(d),
@@ -808,8 +823,7 @@ class _LEGALASSOCIATEProcesos2WidgetState
                   onPressed: _continuing ? null : _schedule,
                   iconSize: 64,
                   tooltip: 'Agendar reunión',
-                  icon: const Icon(Icons.add_circle_outline,
-                      color: Color(0xFF3F9A9C)),
+                  icon: const Icon(Icons.add_circle_outline, color: _primary),
                 ),
               ],
             ),
@@ -944,7 +958,7 @@ class _LEGALASSOCIATEProcesos2WidgetState
                       error: 'No se pudo abrir el mapa',
                     ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF6FAFAF),
+              backgroundColor: _primary,
               elevation: 0,
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(24)),
@@ -1199,34 +1213,17 @@ class _LEGALASSOCIATEProcesos2WidgetState
     );
   }
 
-  (String, Color, Color) get _badge => switch (_status) {
-        'DRAFTING' => ('En redacción', _primary, _pill),
+  (String, Color) get _badge => switch (_status) {
+        'DRAFTING' => ('En redacción', const Color(0xFFF5A700)),
         'MEETING_COORDINATION' || 'MEETING_SCHEDULED' => (
             'Reunión agendada',
-            const Color(0xFF2F2A9E),
-            const Color(0xFFD9D5F2)
+            _primary
           ),
-        'LEGAL_HQ_REVIEW' => (
-            'En revisión Legal HQ',
-            const Color(0xFFF07E00),
-            const Color(0xFFFFDDB8)
-          ),
-        'REJECTED' => (
-            'Rechazado',
-            const Color(0xFFE0201B),
-            const Color(0xFFFFD6D6)
-          ),
-        'APPROVED' => (
-            'Aprobado',
-            const Color(0xFF1E8A2E),
-            const Color(0xFFBDF5B8)
-          ),
-        'FINISHED' => (
-            'Finalizado',
-            const Color(0xFF1E8A2E),
-            const Color(0xFFBDF5B8)
-          ),
-        _ => ('Pendiente', const Color(0xFFF5A700), const Color(0xFFFFF1BC)),
+        'LEGAL_HQ_REVIEW' => ('En revisión Legal HQ', ListingHqUi.pending),
+        'REJECTED' => ('Rechazado', ListingHqUi.alert),
+        'APPROVED' => ('Aprobado', const Color(0xFF249689)),
+        'FINISHED' => ('Finalizado', const Color(0xFF249689)),
+        _ => ('Pendiente', const Color(0xFFF5A700)),
       };
 
   Widget _buildSummary(LegalHqProcessDetail d) {
@@ -1236,28 +1233,11 @@ class _LEGALASSOCIATEProcesos2WidgetState
         : category == 'SALE'
             ? 'Venta'
             : category;
-    final (label, fg, bg) = _badge;
     return _card(
       Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _text('Tipo: $type'),
-          const SizedBox(height: 4),
-          Row(
-            children: [
-              _text('Estatus', color: _primary),
-              const Spacer(),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
-                decoration: BoxDecoration(
-                  color: bg,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: _text(label, color: fg, size: 13),
-              ),
-            ],
-          ),
           const SizedBox(height: 4),
           _text(
               'Dirección: ${d.process.address.isNotEmpty ? d.process.address : '—'}'),
@@ -1277,12 +1257,14 @@ class _LEGALASSOCIATEProcesos2WidgetState
       children: [
         InkWell(
           onTap: onToggle,
+          borderRadius: BorderRadius.circular(20),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            color: Colors.white,
+            decoration: ListingHqUi.cardDecoration(context),
             child: Row(
               children: [
-                Expanded(child: _text(title, size: 15)),
+                Expanded(
+                    child: _text(title, size: 15, weight: FontWeight.w600)),
                 Icon(open ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
                     color: _textDark),
               ],
@@ -1347,10 +1329,7 @@ class _LEGALASSOCIATEProcesos2WidgetState
   }) {
     return Container(
       padding: const EdgeInsets.fromLTRB(14, 10, 8, 10),
-      decoration: BoxDecoration(
-        color: _strip,
-        borderRadius: BorderRadius.circular(6),
-      ),
+      decoration: ListingHqUi.cardDecoration(context),
       child: Row(
         children: [
           Expanded(
@@ -1394,7 +1373,7 @@ class _LEGALASSOCIATEProcesos2WidgetState
       Padding(
         padding: const EdgeInsets.only(left: 6),
         child: Material(
-          color: Colors.white,
+          color: FlutterFlowTheme.of(context).accent1,
           shape: const CircleBorder(),
           child: InkWell(
             customBorder: const CircleBorder(),
@@ -1403,7 +1382,7 @@ class _LEGALASSOCIATEProcesos2WidgetState
               message: tooltip,
               child: Padding(
                 padding: const EdgeInsets.all(7),
-                child: Icon(icon, size: 18, color: _textDark),
+                child: Icon(icon, size: 18, color: _primary),
               ),
             ),
           ),
@@ -1555,18 +1534,21 @@ class _LEGALASSOCIATEProcesos2WidgetState
   /// Acción de la tarjeta: botón de ancho completo, una debajo de la otra.
   Widget _docAction(
       IconData icon, String label, Color color, VoidCallback onTap) {
+    final filled = color == Colors.red;
+    final fg = filled ? Colors.white : color;
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: SizedBox(
         height: 32,
         child: TextButton.icon(
           onPressed: _busyDocId != null ? null : onTap,
-          icon: Icon(icon, size: 16, color: color),
-          label: _text(label, size: 12, color: color, weight: FontWeight.w600),
+          icon: Icon(icon, size: 16, color: fg),
+          label: _text(label, size: 12, color: fg, weight: FontWeight.w600),
           style: TextButton.styleFrom(
             alignment: Alignment.centerLeft,
             padding: const EdgeInsets.symmetric(horizontal: 10),
-            backgroundColor: color.withValues(alpha: 0.08),
+            backgroundColor: filled ? color : Colors.white,
+            side: filled ? null : BorderSide(color: color),
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           ),
@@ -1595,17 +1577,7 @@ class _LEGALASSOCIATEProcesos2WidgetState
 
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x14000000),
-            blurRadius: 12,
-            offset: Offset(0, 4),
-          ),
-        ],
-      ),
+      decoration: ListingHqUi.cardDecoration(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -1710,7 +1682,8 @@ class _LEGALASSOCIATEProcesos2WidgetState
         icon: Icon(icon, size: 18, color: fg),
         label: _text(label, color: fg, size: 13, weight: FontWeight.w600),
         style: TextButton.styleFrom(
-          backgroundColor: filled ? _primary : const Color(0x1A007376),
+          backgroundColor: filled ? _primary : Colors.white,
+          side: filled ? null : const BorderSide(color: _primary),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         ),
@@ -1849,13 +1822,7 @@ class _LEGALASSOCIATEProcesos2WidgetState
 
   Widget _card(Widget child) => Container(
         padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(10),
-          boxShadow: const [
-            BoxShadow(color: Color(0x14000000), blurRadius: 6),
-          ],
-        ),
+        decoration: ListingHqUi.cardDecoration(context),
         child: child,
       );
 
@@ -1863,7 +1830,7 @@ class _LEGALASSOCIATEProcesos2WidgetState
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
           color: _banner,
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(12),
         ),
         child: _text(text, align: TextAlign.center),
       );

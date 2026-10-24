@@ -119,17 +119,19 @@ class _DOVIASHAREDHeaderWidgetState extends State<DOVIASHAREDHeaderWidget> {
     return back + gap + logo;
   }
 
-  /// Avisos y ajustes llevan a las pantallas del rol: Lister HQ y Operative
-  /// Lister tienen las suyas; el resto usa las del cliente.
+  /// Avisos y ajustes llevan a las pantallas del rol: Lister HQ, Operative
+  /// Lister y Legal Associate tienen las suyas; el resto usa las del cliente.
   String get _notificationsRoute => switch (FFAppState().UserRole) {
         'LISTER_HQ' => LISTINGHQNotificationsWidget.routeName,
         'OPERATIVE_LISTER' => OPERATIVELISTINGNotificationsWidget.routeName,
+        'LEGAL_ASSOCIATE' => LEGALASSOCIATENotificationsWidget.routeName,
         _ => DOVIACLIENTNotificacionesWidget.routeName,
       };
 
   String get _settingsRoute => switch (FFAppState().UserRole) {
         'LISTER_HQ' => LISTINGHQProfileWidget.routeName,
         'OPERATIVE_LISTER' => OPERATIVELISTINGProfileWidget.routeName,
+        'LEGAL_ASSOCIATE' => LEGALASSOCIATEAjustesWidget.routeName,
         _ => DOVIACLIENTAjustesWidget.routeName,
       };
 

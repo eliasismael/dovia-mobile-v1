@@ -7,6 +7,7 @@ import '/legal_associate/l_e_g_a_l_a_s_s_o_c_a_i_t_e_navbar/l_e_g_a_l_a_s_s_o_c_
 import '/legal_associate/legal_associate_header/legal_associate_header_widget.dart';
 import '/legal_associate/l_e_g_a_l_a_s_s_o_c_i_a_t_e_procesos/l_e_g_a_l_a_s_s_o_c_i_a_t_e_procesos_widget.dart';
 import '/legal_associate/l_e_g_a_l_a_s_s_o_c_i_a_t_e_procesos_2/l_e_g_a_l_a_s_s_o_c_i_a_t_e_procesos2_widget.dart';
+import '/listing_hq/listing_hq_ui.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -182,15 +183,11 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
   static const Color _aqua = Color(0xFF007376);
   // Text dark
   static const Color _textDark = Color(0xFF00444B);
-  // Badge: yellow / in-progress
-  static const Color _badgeYellowBg = Color(0xFFFFF1BC);
-  static const Color _badgeYellowText = Color(0xFFF5A700);
-  // Badge: orange / revision HQ
-  static const Color _badgeOrangeBg = Color(0xFFFFDBBC);
-  static const Color _badgeOrangeText = Color(0xFFF57E00);
-  // Badge: completed/success – reusing theme success (#249689) with tinted bg
-  static const Color _badgeSuccessBg = Color(0x1A249689);
-  static const Color _badgeSuccessText = Color(0xFF249689);
+  // Estados: color sólido con el texto en blanco, como en Mis visitas del
+  // cliente.
+  static const Color _statusInProgress = Color(0xFFF5A700);
+  static const Color _statusReview = ListingHqUi.pending;
+  static const Color _statusDone = Color(0xFF249689);
 
   // ── Lifecycle ─────────────────────────────────────────────────────────────
 
@@ -272,7 +269,7 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                       model: _model.legalAssociateHeaderModel,
                       updateCallback: () => safeSetState(() {}),
                       child: const LegalAssociateHeaderWidget(
-                        titleText: 'Home',
+                        titleText: 'Inicio',
                       ),
                     ),
 
@@ -280,65 +277,21 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                     Padding(
                       padding: const EdgeInsetsDirectional.fromSTEB(
                           20.0, 16.0, 20.0, 0.0),
-                      child: Container(
-                        width: double.infinity,
-                        height: 48.0,
-                        decoration: BoxDecoration(
-                          color:
-                              FlutterFlowTheme.of(context).secondaryBackground,
-                          borderRadius: BorderRadius.circular(100.0),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsetsDirectional.fromSTEB(
-                              15.0, 0.0, 15.0, 0.0),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.search,
-                                color:
-                                    FlutterFlowTheme.of(context).secondaryText,
-                                size: 24.0,
-                              ),
-                              const SizedBox(width: 12.0),
-                              Expanded(
-                                child: TextField(
-                                  controller: _searchController,
-                                  onChanged: (v) =>
-                                      safeSetState(() => _query = v.trim()),
-                                  style: GoogleFonts.publicSans(
-                                      color: _textDark, fontSize: 15.0),
-                                  decoration: InputDecoration(
-                                    isDense: true,
-                                    border: InputBorder.none,
-                                    hintText:
-                                        'Propietario, dirección o ID de trámite',
-                                    hintStyle: GoogleFonts.publicSans(
-                                      color: FlutterFlowTheme.of(context)
-                                          .secondaryText,
-                                      fontSize: 15.0,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              if (_query.isNotEmpty)
-                                InkWell(
-                                  onTap: () {
-                                    _searchController.clear();
-                                    safeSetState(() => _query = '');
-                                  },
-                                  child: const Icon(Icons.close,
-                                      size: 20, color: _textDark),
-                                ),
-                            ],
-                          ),
-                        ),
+                      child: ListingHqSearchField(
+                        controller: _searchController,
+                        hintText: 'Propietario, dirección o ID de trámite',
+                        onChanged: (v) => safeSetState(() => _query = v.trim()),
+                        onClear: () {
+                          _searchController.clear();
+                          safeSetState(() => _query = '');
+                        },
                       ),
                     ),
 
                     // ── Body with carousels ─────────────────────────────
                     Padding(
                       padding: const EdgeInsetsDirectional.fromSTEB(
-                          20.0, 20.0, 20.0, 100.0),
+                          20.0, 0.0, 20.0, 120.0),
                       child: _query.isNotEmpty
                           ? _buildSearchResults(context)
                           : Column(
@@ -350,7 +303,7 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                                 // ────────────────────────────────────────────────
                                 _buildSectionHeader(
                                   context,
-                                  title: 'Tus siguientes inmuebles\nasignados',
+                                  title: 'Tus siguientes inmuebles asignados',
                                   onVerMas: () {
                                     context.pushNamed(
                                       LEGALASSOCIATEProcesosWidget.routeName,
@@ -358,7 +311,6 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                                     );
                                   },
                                 ),
-                                const SizedBox(height: 14.0),
                                 _buildFutureCarousel<_LegalProcess>(
                                   future: _newAssignmentsFuture,
                                   height: 158.0,
@@ -367,14 +319,12 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                                       _buildAssignedCard(context, process),
                                 ),
 
-                                const SizedBox(height: 30.0),
-
                                 // ────────────────────────────────────────────────
                                 // CAROUSEL 2: Propiedades pendientes por revisar
                                 // ────────────────────────────────────────────────
                                 _buildSectionHeader(
                                   context,
-                                  title: 'Propiedades pendientes\npor revisar',
+                                  title: 'Propiedades pendientes por revisar',
                                   onVerMas: () {
                                     context.pushNamed(
                                       LEGALASSOCIATEProcesosWidget.routeName,
@@ -382,7 +332,6 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                                     );
                                   },
                                 ),
-                                const SizedBox(height: 14.0),
                                 _buildFutureCarousel<_LegalProcess>(
                                   future: _inProgressFuture,
                                   height: 136.0,
@@ -394,14 +343,12 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                                   ),
                                 ),
 
-                                const SizedBox(height: 30.0),
-
                                 // ────────────────────────────────────────────────
                                 // CAROUSEL 3: Propiedades Completadas
                                 // ────────────────────────────────────────────────
                                 _buildSectionHeader(
                                   context,
-                                  title: 'Propiedades Completadas',
+                                  title: 'Propiedades completadas',
                                   onVerMas: () {
                                     context.pushNamed(
                                       LEGALASSOCIATEProcesosWidget.routeName,
@@ -409,7 +356,6 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                                     );
                                   },
                                 ),
-                                const SizedBox(height: 14.0),
                                 _buildFutureCarousel<_LegalProcess>(
                                   future: _completedFuture,
                                   height: 136.0,
@@ -473,6 +419,7 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            const SizedBox(height: 24.0),
             Text(
               results.isEmpty
                   ? 'Sin resultados para "$_query"'
@@ -529,76 +476,31 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
             .toList();
 
         if (items.isEmpty) {
-          return SizedBox(
-            height: height,
-            child: Center(
-              child: Text(
-                _query.isNotEmpty
-                    ? 'Sin resultados para "$_query"'
-                    : emptyMessage,
-                style: GoogleFonts.publicSans(
-                  color: _textDark,
-                  fontSize: 14.0,
-                  fontWeight: FontWeight.normal,
-                ),
-              ),
-            ),
+          return ListingHqUi.emptyText(
+            context,
+            _query.isNotEmpty ? 'Sin resultados para "$_query"' : emptyMessage,
           );
         }
 
-        return SizedBox(
+        return ListingHqCarousel(
           height: height,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemCount: items.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 14.0),
-            itemBuilder: (context, index) => cardBuilder(items[index]),
-          ),
+          children: [for (final item in items) cardBuilder(item)],
         );
       },
     );
   }
 
-  // ── Section header (title + "Ver más" pill) ───────────────────────────────
+  // ── Section header ────────────────────────────────────────────────────────
 
   Widget _buildSectionHeader(
     BuildContext context, {
     required String title,
     required VoidCallback onVerMas,
   }) {
-    return Row(
-      mainAxisSize: MainAxisSize.max,
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Expanded(
-          child: Text(
-            title,
-            style: FlutterFlowTheme.of(context).bodyMedium.override(
-                  font: GoogleFonts.publicSans(
-                    fontWeight: FontWeight.w600,
-                  ),
-                  color: _textDark,
-                  fontSize: 17.0,
-                  letterSpacing: 0.34,
-                  fontWeight: FontWeight.w600,
-                  lineHeight: 1.3,
-                ),
-          ),
-        ),
-        // "Ver más" como texto sin fondo, igual que en el resto de la app.
-        InkWell(
-          onTap: onVerMas,
-          child: Text(
-            'Ver más',
-            style: FlutterFlowTheme.of(context).bodyMedium.override(
-                  font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
-                  color: FlutterFlowTheme.of(context).primary,
-                  fontSize: 14.0,
-                ),
-          ),
-        ),
-      ],
+    return ListingHqSectionHeader(
+      title: title,
+      linkText: 'Ver más',
+      onLinkTap: onVerMas,
     );
   }
 
@@ -606,34 +508,19 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
 
   // ── Tarjetas ──────────────────────────────────────────────────────────────
 
-  static const List<BoxShadow> _cardShadow = [
-    BoxShadow(
-      color: Color(0x14000000),
-      blurRadius: 10.0,
-      offset: Offset(0.0, 3.0),
-    ),
-  ];
-
-  /// Marco común: blanco, esquinas redondeadas y sombra suave. Deja margen
-  /// vertical para que la sombra no quede cortada por el carrusel.
+  /// Marco común, el de las tarjetas del cliente: blanco, bien redondeado y
+  /// con sombra suave.
   Widget _cardFrame({required Widget child, VoidCallback? onTap}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6.0),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(16.0),
-          child: Container(
-            width: 290.0,
-            padding: const EdgeInsets.all(12.0),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16.0),
-              boxShadow: _cardShadow,
-            ),
-            child: child,
-          ),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20.0),
+        child: Container(
+          width: 290.0,
+          padding: const EdgeInsets.all(12.0),
+          decoration: ListingHqUi.cardDecoration(context),
+          child: child,
         ),
       ),
     );
@@ -714,30 +601,8 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 8.0),
-                SizedBox(
-                  width: double.infinity,
-                  height: 32.0,
-                  child: ElevatedButton(
-                    onPressed: () => _openProcess(process),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _aqua,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(25.0),
-                      ),
-                      padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                    ),
-                    child: Text(
-                      'Ver detalles',
-                      style: GoogleFonts.publicSans(
-                        fontSize: 13.0,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
+                ListingHqUi.cardButton(
+                    'Ver detalles', () => _openProcess(process)),
               ],
             ),
           ),
@@ -833,74 +698,49 @@ class _LegalAssociateHomeWidgetState extends State<LegalAssociateHomeWidget> {
 
   Widget _buildStatusBadge(String status, String category, bool isCompleted) {
     late String label;
-    late Color bgColor;
-    late Color textColor;
+    late Color color;
 
     if (isCompleted) {
       // Completed properties always get a definitive green success badge,
       // worded by deal type (overrides any "pending" state from the mockup).
       label = _completedLabel(category);
-      bgColor = _badgeSuccessBg;
-      textColor = _badgeSuccessText;
+      color = _statusDone;
     } else {
       // Map API status to badge appearance
       switch (status) {
         case 'IN_PROGRESS':
           label = 'Proceso de documentación';
-          bgColor = _badgeYellowBg;
-          textColor = _badgeYellowText;
+          color = _statusInProgress;
           break;
         case 'DRAFTING':
           label = 'Redacción de contrato';
-          bgColor = _badgeYellowBg;
-          textColor = _badgeYellowText;
+          color = _statusInProgress;
           break;
         case 'MEETING_COORDINATION':
         case 'MEETING_SCHEDULED':
           label = 'Pendiente';
-          bgColor = _badgeYellowBg;
-          textColor = _badgeYellowText;
+          color = _statusInProgress;
           break;
         case 'LEGAL_HQ_REVIEW':
           label = 'En revisión Legal HQ';
-          bgColor = _badgeOrangeBg;
-          textColor = _badgeOrangeText;
+          color = _statusReview;
           break;
         case 'APPROVED':
           label = 'Aprobado – falta finalizar';
-          bgColor = _badgeYellowBg;
-          textColor = _badgeYellowText;
+          color = _statusInProgress;
           break;
         case 'REJECTED':
           label = 'Rechazado – corregir';
-          bgColor = _badgeOrangeBg;
-          textColor = _badgeOrangeText;
+          color = _statusReview;
           break;
         default:
           label = 'Pendiente';
-          bgColor = _badgeYellowBg;
-          textColor = _badgeYellowText;
+          color = _statusInProgress;
           break;
       }
     }
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(100.0),
-      ),
-      child: Text(
-        label,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: GoogleFonts.publicSans(
-          color: textColor,
-          fontSize: 11.5,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
+    return ListingHqUi.statusPill(label, color);
   }
 
   // ── Helper: format ISO date to dd/MM/yyyy ─────────────────────────────────

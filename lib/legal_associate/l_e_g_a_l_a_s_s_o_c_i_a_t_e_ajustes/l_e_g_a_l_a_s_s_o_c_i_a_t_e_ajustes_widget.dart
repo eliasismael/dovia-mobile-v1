@@ -75,7 +75,7 @@ class _LEGALASSOCIATEAjustesWidgetState
                     ),
                     Padding(
                       padding: const EdgeInsetsDirectional.fromSTEB(
-                          20.0, 40.0, 20.0, 100.0),
+                          20.0, 8.0, 20.0, 120.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         crossAxisAlignment: CrossAxisAlignment.stretch,
