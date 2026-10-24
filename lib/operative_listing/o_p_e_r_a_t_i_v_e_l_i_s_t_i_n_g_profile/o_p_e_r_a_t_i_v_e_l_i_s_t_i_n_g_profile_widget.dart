@@ -73,13 +73,13 @@ class _OPERATIVELISTINGProfileWidgetState
                       model: _model.oPERATIVELISTINGHeaderModel,
                       updateCallback: () => safeSetState(() {}),
                       child: const OPERATIVELISTINGHeaderWidget(
-                        titleText: 'Perfil',
+                        titleText: 'Ajustes',
                         showLocation: false,
                       ),
                     ),
                     Padding(
                       padding: const EdgeInsetsDirectional.fromSTEB(
-                          20.0, 20.0, 20.0, 100.0),
+                          20.0, 8.0, 20.0, 120.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         children: [

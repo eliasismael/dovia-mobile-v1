@@ -27,6 +27,7 @@ class DOVIASHAREDHeaderWidget extends StatefulWidget {
     this.showSupport = true,
     this.onChatTap,
     this.topPadding,
+    this.extraActions = const [],
   }) : title = title ?? '[title]';
 
   final String title;
@@ -61,6 +62,10 @@ class DOVIASHAREDHeaderWidget extends StatefulWidget {
   /// Margen superior fijo. Sin él, el header va justo debajo de la barra de
   /// estado ([topBelowStatusBar]).
   final double? topPadding;
+
+  /// Íconos propios del rol, a la izquierda de los demás (Ej: la próxima
+  /// visita del Operative Lister). Cada uno es un círculo de 40.
+  final List<Widget> extraActions;
 
   /// Distancia del header al techo: el alto de la barra de estado que todavía
   /// no se descontó, más un poco de aire. Funciona igual con SafeArea arriba
@@ -114,27 +119,30 @@ class _DOVIASHAREDHeaderWidgetState extends State<DOVIASHAREDHeaderWidget> {
     return back + gap + logo;
   }
 
-  bool get _isListerHq => FFAppState().UserRole == 'LISTER_HQ';
+  /// Avisos y ajustes llevan a las pantallas del rol: Lister HQ y Operative
+  /// Lister tienen las suyas; el resto usa las del cliente.
+  String get _notificationsRoute => switch (FFAppState().UserRole) {
+        'LISTER_HQ' => LISTINGHQNotificationsWidget.routeName,
+        'OPERATIVE_LISTER' => OPERATIVELISTINGNotificationsWidget.routeName,
+        _ => DOVIACLIENTNotificacionesWidget.routeName,
+      };
 
-  /// Avisos y ajustes llevan a las pantallas del rol: Lister HQ tiene las
-  /// suyas; el resto usa las del cliente.
-  String get _notificationsRoute => _isListerHq
-      ? LISTINGHQNotificationsWidget.routeName
-      : DOVIACLIENTNotificacionesWidget.routeName;
-
-  String get _settingsRoute => _isListerHq
-      ? LISTINGHQProfileWidget.routeName
-      : DOVIACLIENTAjustesWidget.routeName;
+  String get _settingsRoute => switch (FFAppState().UserRole) {
+        'LISTER_HQ' => LISTINGHQProfileWidget.routeName,
+        'OPERATIVE_LISTER' => OPERATIVELISTINGProfileWidget.routeName,
+        _ => DOVIACLIENTAjustesWidget.routeName,
+      };
 
   double get _actionsWidth {
     if (widget.hideActions) return 0.0;
-    final icons = [
-      widget.showMap,
-      widget.showCart,
-      _showChat,
-      widget.showNotifications,
-      widget.showSettings,
-    ].where((shown) => shown).length;
+    final icons = widget.extraActions.length +
+        [
+          widget.showMap,
+          widget.showCart,
+          _showChat,
+          widget.showNotifications,
+          widget.showSettings,
+        ].where((shown) => shown).length;
     final iconsWidth =
         icons == 0 ? 0.0 : icons * _iconSize + (icons - 1) * _gap;
     return widget.showCurrency
@@ -149,6 +157,11 @@ class _DOVIASHAREDHeaderWidgetState extends State<DOVIASHAREDHeaderWidget> {
     // flecha y los íconos.
     final sideWidth =
         _leadingWidth > _actionsWidth ? _leadingWidth : _actionsWidth;
+    // Con íconos extra la derecha es mucho más ancha: reservarla también a la
+    // izquierda dejaba al título sin lugar en un celular angosto.
+    final asymmetric = widget.extraActions.isNotEmpty;
+    final leadingWidth = asymmetric ? _leadingWidth : sideWidth;
+    final actionsWidth = asymmetric ? _actionsWidth : sideWidth;
     return Padding(
       padding: EdgeInsetsDirectional.fromSTEB(
           20.0,
@@ -161,7 +174,7 @@ class _DOVIASHAREDHeaderWidgetState extends State<DOVIASHAREDHeaderWidget> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           SizedBox(
-            width: sideWidth,
+            width: leadingWidth,
             child: Row(
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.start,
@@ -266,7 +279,7 @@ class _DOVIASHAREDHeaderWidgetState extends State<DOVIASHAREDHeaderWidget> {
             ),
           ),
           SizedBox(
-            width: sideWidth,
+            width: actionsWidth,
             child: widget.hideActions
                 ? null
                 : Column(
@@ -276,6 +289,7 @@ class _DOVIASHAREDHeaderWidgetState extends State<DOVIASHAREDHeaderWidget> {
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
+                          ...widget.extraActions,
                           if (widget.showMap)
                             // Abre el mapa de propiedades, el mismo del
                             // inicio. Antes el ícono no tenía acción.

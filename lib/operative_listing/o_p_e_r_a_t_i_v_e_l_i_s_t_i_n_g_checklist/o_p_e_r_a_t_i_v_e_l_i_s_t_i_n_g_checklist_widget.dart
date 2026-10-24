@@ -117,7 +117,6 @@ class _OPERATIVELISTINGChecklistWidgetState
 
   static const Color _primary = Color(0xFF007376);
   static const Color _dark = Color(0xFF00444B);
-  static const Color _pillBg = Color(0xFFCCE3E4);
 
   @override
   void initState() {
@@ -543,23 +542,16 @@ class _OPERATIVELISTINGChecklistWidgetState
             ),
           ),
           const SizedBox(width: 8),
+          // Link de texto, con el estilo de los "Ver más" del resto de la app.
           GestureDetector(
             onTap: onVerMas,
-            child: Container(
-              height: 30,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              decoration: BoxDecoration(
-                color: _pillBg,
-                borderRadius: BorderRadius.circular(100),
-              ),
-              alignment: Alignment.center,
-              child: Text(
-                expanded ? 'Ver menos' : 'Ver más',
-                style: const TextStyle(
-                  fontFamily: 'Public Sans',
-                  color: _primary,
-                  fontSize: 14,
-                ),
+            child: Text(
+              expanded ? 'Ver menos' : 'Ver más',
+              style: const TextStyle(
+                fontFamily: 'Public Sans',
+                color: _primary,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),
