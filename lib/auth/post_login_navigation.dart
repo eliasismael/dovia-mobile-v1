@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '/auth/custom_auth/auth_util.dart';
 import '/auth/registration_progress.dart';
+import '/auth/sign_out.dart';
 import '/backend/api_requests/api_users.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/index.dart';
@@ -20,11 +22,87 @@ const associateRoles = [
   'HQ_ADMIN',
 ];
 
+/// Rol de administrador: se gestiona desde el panel web, no desde la app.
+const adminRole = 'HQ_ADMIN';
+
+/// Si alguno de los roles del perfil es de administrador.
+bool hasAdminRole(dynamic profileBody) {
+  final roles = getJsonField(profileBody, r'$.data.roles');
+  return roles is List && roles.contains(adminRole);
+}
+
+/// Avisa que el administrador tiene que entrar desde la web. Mismo diseño
+/// que los modales de DOVIA (p. ej. el de retirar una oferta).
+Future<void> showAdminWebOnlyDialog(BuildContext context) {
+  const text = Color(0xFF00444B);
+  const aqua = Color(0xFF007376);
+  return showDialog<void>(
+    context: context,
+    builder: (dialogContext) => Dialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 48),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      backgroundColor: Colors.white,
+      elevation: 15,
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Ingresa desde la web',
+              style: GoogleFonts.publicSans(
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+                color: text,
+                height: 1.4,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Las cuentas de administrador no tienen acceso a la app. Para '
+              'gestionar DOVIA, inicia sesión en el panel web desde tu '
+              'computadora.',
+              style: GoogleFonts.publicSans(
+                fontSize: 14,
+                color: const Color(0xFF717182),
+                height: 1.5,
+              ),
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              height: 42,
+              child: FilledButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                style: FilledButton.styleFrom(
+                  backgroundColor: aqua,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(25)),
+                ),
+                child: Text(
+                  'Entendido',
+                  style: GoogleFonts.publicSans(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
 /// Lleva a donde corresponde después de iniciar sesión (con contraseña o con
 /// Google), según el perfil de `GET /users/me`:
 /// - sin rol: retoma el registro (identificación, términos y rol);
 /// - asociado sin el formulario enviado: el formulario;
 /// - asociado pendiente de aprobación: "solicitud en revisión";
+/// - administrador: cierra la sesión y avisa que entre desde la web;
 /// - si no, el home de su rol.
 ///
 /// [roleSelected], [associateProfileComplete] y [verified] vienen del
@@ -38,6 +116,17 @@ Future<void> navigateAfterSignIn(
 }) async {
   final profileCall = DOVIAAPIUserContextGroup.getAuthenticatedUserProfileCall;
   final userRole = profileCall.userRole(profileBody);
+
+  // El administrador no usa la app: se cierra la sesión recién abierta y,
+  // ya de vuelta en el login, se le explica dónde entrar.
+  if (hasAdminRole(profileBody)) {
+    await signOutAndGoToLogin(context);
+    await WidgetsBinding.instance.endOfFrame;
+    final loginContext = appNavigatorKey.currentContext;
+    if (loginContext == null || !loginContext.mounted) return;
+    await showAdminWebOnlyDialog(loginContext);
+    return;
+  }
 
   // La aprobación del asociado es `verified`: select-role lo deja en false y
   // HQ Admin lo pasa a true. `active` es otra cosa (cuenta deshabilitada): con
