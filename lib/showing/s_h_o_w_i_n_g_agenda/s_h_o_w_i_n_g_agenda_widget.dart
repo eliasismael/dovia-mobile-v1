@@ -11,6 +11,7 @@ import '/showing/s_h_o_w_i_n_g_navbar/s_h_o_w_i_n_g_navbar_widget.dart';
 import '/showing/s_h_o_w_i_n_g_propiedad_a_mostrar/s_h_o_w_i_n_g_propiedad_a_mostrar_widget.dart';
 import '/showing/s_h_o_w_i_n_g_report_popup/s_h_o_w_i_n_g_report_popup_widget.dart';
 import '/showing/s_h_o_w_i_n_g_to_navegation_app/s_h_o_w_i_n_g_to_navegation_app_widget.dart';
+import '/listing_hq/listing_hq_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -449,7 +450,7 @@ class _SHOWINGAgendaWidgetState extends State<SHOWINGAgendaWidget> {
                     child: SingleChildScrollView(
                       child: Padding(
                         padding: const EdgeInsetsDirectional.fromSTEB(
-                            20.0, 0.0, 20.0, 100.0),
+                            20.0, 0.0, 20.0, 120.0),
                         child: Column(
                           mainAxisSize: MainAxisSize.max,
                           children: [
@@ -484,12 +485,12 @@ class _SHOWINGAgendaWidgetState extends State<SHOWINGAgendaWidget> {
                             else if (visibleDates.isEmpty)
                               Padding(
                                 padding:
-                                    const EdgeInsets.symmetric(vertical: 60.0),
-                                child: Text(
+                                    const EdgeInsets.symmetric(vertical: 24.0),
+                                child: ListingHqUi.emptyText(
+                                  context,
                                   _model.selectedDate != null
                                       ? 'No tienes visitas agendadas para esta fecha.'
                                       : 'No tienes visitas agendadas para este mes.',
-                                  style: const TextStyle(color: Colors.grey),
                                 ),
                               )
                             else
@@ -505,14 +506,8 @@ class _SHOWINGAgendaWidgetState extends State<SHOWINGAgendaWidget> {
                                         _isToday(dateKey)
                                             ? 'Hoy ${_formatDateString(dateKey)}'
                                             : _formatDateString(dateKey),
-                                        style: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .override(
-                                              font: GoogleFonts.inter(
-                                                  fontWeight: FontWeight.w600),
-                                              fontSize: 16.0,
-                                              fontWeight: FontWeight.w600,
-                                            ),
+                                        style:
+                                            ListingHqUi.sectionTitle(context),
                                       ),
                                     ),
                                     ..._groupedVisits[dateKey]!.map((visit) {
@@ -559,9 +554,9 @@ class _SHOWINGAgendaWidgetState extends State<SHOWINGAgendaWidget> {
             child: Text(
               'Mostrando ${_formatDateString(filterDateStr)}',
               style: FlutterFlowTheme.of(context).bodyMedium.override(
-                    font: GoogleFonts.inter(
+                    font: GoogleFonts.publicSans(
                         fontWeight: FontWeight.w600, fontSize: 14.0),
-                    color: const Color(0xFF0F3E48),
+                    color: ListingHqUi.textDark,
                   ),
             ),
           ),
@@ -571,7 +566,7 @@ class _SHOWINGAgendaWidgetState extends State<SHOWINGAgendaWidget> {
               padding:
                   const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
               decoration: BoxDecoration(
-                color: primary.withValues(alpha: 0.1),
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(24.0),
                 border: Border.all(color: primary, width: 1.0),
               ),
@@ -583,7 +578,7 @@ class _SHOWINGAgendaWidgetState extends State<SHOWINGAgendaWidget> {
                   Text(
                     'Ver todo el mes',
                     style: FlutterFlowTheme.of(context).bodyMedium.override(
-                          font: GoogleFonts.inter(
+                          font: GoogleFonts.publicSans(
                               fontWeight: FontWeight.w600, fontSize: 12.0),
                           color: primary,
                         ),
@@ -604,17 +599,7 @@ class _SHOWINGAgendaWidgetState extends State<SHOWINGAgendaWidget> {
 
     return Container(
       width: double.infinity,
-      decoration: BoxDecoration(
-        color: FlutterFlowTheme.of(context).secondaryBackground,
-        borderRadius: BorderRadius.circular(12.0),
-        boxShadow: const [
-          BoxShadow(
-            blurRadius: 4.0,
-            color: Color(0x33000000),
-            offset: Offset(0.0, 2.0),
-          )
-        ],
-      ),
+      decoration: ListingHqUi.cardDecoration(context),
       child: Padding(
         padding: const EdgeInsetsDirectional.fromSTEB(10.0, 10.0, 10.0, 10.0),
         child: Row(
@@ -656,9 +641,9 @@ class _SHOWINGAgendaWidgetState extends State<SHOWINGAgendaWidget> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: FlutterFlowTheme.of(context).bodyMedium.override(
-                          font: GoogleFonts.inter(
-                              fontWeight: FontWeight.w600, fontSize: 16.0),
-                          color: const Color(0xFF0F3E48),
+                          font: GoogleFonts.publicSans(
+                              fontWeight: FontWeight.w600, fontSize: 15.0),
+                          color: ListingHqUi.textDark,
                         ),
                   ),
                   const SizedBox(height: 4.0),
@@ -668,7 +653,7 @@ class _SHOWINGAgendaWidgetState extends State<SHOWINGAgendaWidget> {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: FlutterFlowTheme.of(context).bodyMedium.override(
-                            font: GoogleFonts.inter(fontSize: 12.0),
+                            font: GoogleFonts.publicSans(fontSize: 12.0),
                             color: primary,
                           ),
                     ),
@@ -676,7 +661,7 @@ class _SHOWINGAgendaWidgetState extends State<SHOWINGAgendaWidget> {
                     Text(
                       'Hora: ${visit.time}',
                       style: FlutterFlowTheme.of(context).bodyMedium.override(
-                            font: GoogleFonts.inter(fontSize: 12.0),
+                            font: GoogleFonts.publicSans(fontSize: 12.0),
                             color: primary,
                           ),
                     ),
@@ -684,7 +669,7 @@ class _SHOWINGAgendaWidgetState extends State<SHOWINGAgendaWidget> {
                     Text(
                       visit.ownerName,
                       style: FlutterFlowTheme.of(context).bodyMedium.override(
-                            font: GoogleFonts.inter(fontSize: 12.0),
+                            font: GoogleFonts.publicSans(fontSize: 12.0),
                             color: primary,
                           ),
                     ),
@@ -697,7 +682,7 @@ class _SHOWINGAgendaWidgetState extends State<SHOWINGAgendaWidget> {
                           'Estatus',
                           style:
                               FlutterFlowTheme.of(context).bodyMedium.override(
-                                    font: GoogleFonts.inter(fontSize: 12.0),
+                                    font: GoogleFonts.publicSans(fontSize: 12.0),
                                     color: primary,
                                   ),
                         ),
@@ -716,8 +701,10 @@ class _SHOWINGAgendaWidgetState extends State<SHOWINGAgendaWidget> {
                         color: const Color(0xFFC90A0A),
                         textStyle:
                             FlutterFlowTheme.of(context).titleSmall.override(
-                                  font: GoogleFonts.inter(
-                                      color: Colors.white, fontSize: 14.0),
+                                  font: GoogleFonts.publicSans(
+                                      color: Colors.white,
+                                      fontSize: 14.0,
+                                      fontWeight: FontWeight.w600),
                                 ),
                         elevation: 0.0,
                         borderRadius: BorderRadius.circular(24.0),
@@ -740,12 +727,14 @@ class _SHOWINGAgendaWidgetState extends State<SHOWINGAgendaWidget> {
                             text: 'Detalles',
                             options: FFButtonOptions(
                               height: 30.0,
-                              color: Colors.transparent,
+                              color: Colors.white,
                               textStyle: FlutterFlowTheme.of(context)
                                   .titleSmall
                                   .override(
-                                    font: GoogleFonts.inter(
-                                        color: primary, fontSize: 14.0),
+                                    font: GoogleFonts.publicSans(
+                                        color: primary,
+                                        fontSize: 14.0,
+                                        fontWeight: FontWeight.w600),
                                   ),
                               elevation: 0.0,
                               borderSide:
@@ -766,8 +755,10 @@ class _SHOWINGAgendaWidgetState extends State<SHOWINGAgendaWidget> {
                                 textStyle: FlutterFlowTheme.of(context)
                                     .titleSmall
                                     .override(
-                                      font: GoogleFonts.inter(
-                                          color: Colors.white, fontSize: 14.0),
+                                      font: GoogleFonts.publicSans(
+                                          color: Colors.white,
+                                          fontSize: 14.0,
+                                          fontWeight: FontWeight.w600),
                                     ),
                                 elevation: 0.0,
                                 borderRadius: BorderRadius.circular(24.0),
@@ -786,48 +777,42 @@ class _SHOWINGAgendaWidgetState extends State<SHOWINGAgendaWidget> {
     );
   }
 
+  /// Estado de la visita: color sólido con el texto en blanco.
   Widget _buildStatusPill(String status, String substatus) {
     String statusStr = 'Pendiente';
-    Color bgColor = const Color(0xFFFFD78D);
-    Color textColor = Colors.orange;
+    Color color = ListingHqUi.pending;
 
     if (status == 'COMPLETED') {
       statusStr = 'Registrada';
-      bgColor = const Color(0xFFE6F4EA);
-      textColor = const Color(0xFF007376);
+      color = const Color(0xFF249689);
     } else if (status == 'CANCELLED' ||
         substatus == 'CANCELLED' ||
         substatus == 'PROBLEM_REPORTED' ||
         substatus == 'NOT_COMPLETED_REPORTED') {
       statusStr = 'Cancelada';
-      bgColor = const Color(0xFFFFF1F0);
-      textColor = const Color(0xFFF5222D);
+      color = ListingHqUi.alert;
     } else if (substatus == 'REPORT_EXPIRED') {
       statusStr = 'Vencida';
-      bgColor = const Color(0xFFFFF1F0);
-      textColor = const Color(0xFFC90A0A);
+      color = ListingHqUi.alert;
     } else if (status == 'IN_PROGRESS' ||
         substatus == 'VISIT_IN_PROGRESS' ||
         substatus == 'AWAITING_REPORT') {
       statusStr = 'En proceso';
-      bgColor = const Color(0xFFD6E4FF);
-      textColor = const Color(0xFF1890FF);
+      color = ListingHqUi.aqua;
     }
 
     return Container(
+      padding: const EdgeInsetsDirectional.fromSTEB(12.0, 2.0, 12.0, 2.0),
       decoration: BoxDecoration(
-        color: bgColor,
+        color: color,
         borderRadius: BorderRadius.circular(24.0),
       ),
-      child: Padding(
-        padding: const EdgeInsetsDirectional.fromSTEB(12.0, 2.0, 12.0, 2.0),
-        child: Text(
-          statusStr,
-          style: FlutterFlowTheme.of(context).bodyMedium.override(
-                font: GoogleFonts.inter(
-                    fontWeight: FontWeight.w600, fontSize: 12.0),
-                color: textColor,
-              ),
+      child: Text(
+        statusStr,
+        style: GoogleFonts.publicSans(
+          color: Colors.white,
+          fontWeight: FontWeight.w600,
+          fontSize: 12.0,
         ),
       ),
     );

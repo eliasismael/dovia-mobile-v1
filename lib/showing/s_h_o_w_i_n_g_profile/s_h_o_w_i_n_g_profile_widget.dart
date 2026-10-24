@@ -68,12 +68,12 @@ class _SHOWINGProfileWidgetState extends State<SHOWINGProfileWidget> {
                       model: _model.sHOWINGHeaderModel,
                       updateCallback: () => safeSetState(() {}),
                       child: const SHOWINGHeaderWidget(
-                        title: 'Profile',
+                        title: 'Ajustes',
                       ),
                     ),
                     Padding(
                       padding: const EdgeInsetsDirectional.fromSTEB(
-                          20.0, 20.0, 20.0, 100.0),
+                          20.0, 8.0, 20.0, 120.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         children: [

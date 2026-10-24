@@ -15,6 +15,7 @@ import '/showing/s_h_o_w_i_n_g_visit_already_accepted_popup/s_h_o_w_i_n_g_visit_
 import '/showing/s_h_o_w_i_n_g_registro_de_visita/s_h_o_w_i_n_g_registro_de_visita_widget.dart';
 import '/showing/s_h_o_w_i_n_g_registro_de_visita_2/s_h_o_w_i_n_g_registro_de_visita2_widget.dart';
 import '/showing/s_h_o_w_i_n_g_report_popup/s_h_o_w_i_n_g_report_popup_widget.dart';
+import '/listing_hq/listing_hq_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 's_h_o_w_i_n_g_home_model.dart';
@@ -493,19 +494,18 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                       updateCallback: () => safeSetState(() {}),
                       child: const SHOWINGHeaderWidget(
                         showRouteButton: true,
-                        title: 'Home',
+                        title: 'Inicio',
                       ),
                     ),
                     Padding(
                       padding: const EdgeInsetsDirectional.fromSTEB(
-                          20.0, 0.0, 20.0, 100.0),
+                          20.0, 0.0, 20.0, 120.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           // 1. Visitas que puedes aceptar (unassigned)
-                          _sectionTitle('Visitas que puedes aceptar',
-                              topPadding: 20),
+                          _sectionTitle('Visitas que puedes aceptar'),
                           _horizontalList(
                             future: _acceptableFuture,
                             emptyMsg: 'No hay visitas disponibles por ahora.',
@@ -605,55 +605,12 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
   }
 
   // ── Section + list scaffolding ───────────────────────────────────────────
-  Widget _sectionTitle(String title, {double topPadding = 30}) {
-    return Padding(
-      padding: EdgeInsetsDirectional.fromSTEB(0.0, topPadding, 0.0, 10.0),
-      child: Text(
-        title,
-        style: FlutterFlowTheme.of(context).bodyMedium.override(
-              font: GoogleFonts.inter(fontWeight: FontWeight.w600),
-              fontSize: 16.0,
-              fontWeight: FontWeight.w600,
-            ),
-      ),
-    );
-  }
+  Widget _sectionTitle(String title) => ListingHqSectionHeader(title: title);
 
   Widget _sectionTitleWithAction(String title,
-      {required VoidCallback onVerTodo}) {
-    return Padding(
-      padding: const EdgeInsetsDirectional.fromSTEB(0.0, 30.0, 0.0, 10.0),
-      child: Row(
-        mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Text(
-            title,
-            style: FlutterFlowTheme.of(context).bodyMedium.override(
-                  font: GoogleFonts.inter(fontWeight: FontWeight.w600),
-                  fontSize: 16.0,
-                  fontWeight: FontWeight.w600,
-                ),
-          ),
-          // Link de texto, con el estilo de los "Ver más" del resto de la app.
-          InkWell(
-            splashColor: Colors.transparent,
-            highlightColor: Colors.transparent,
-            onTap: onVerTodo,
-            child: Text(
-              'Ver todo',
-              style: GoogleFonts.publicSans(
-                color: const Color(0xFF007376),
-                fontSize: 14.0,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+          {required VoidCallback onVerTodo}) =>
+      ListingHqSectionHeader(
+          title: title, linkText: 'Ver todo', onLinkTap: onVerTodo);
 
   Widget _horizontalList({
     required Future<List<_ShowingVisit>>? future,
@@ -671,16 +628,7 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
           );
         }
         if (snap.data!.isEmpty) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 4),
-            child: Text(
-              emptyMsg,
-              style: FlutterFlowTheme.of(context).bodyMedium.override(
-                    font: GoogleFonts.inter(),
-                    color: FlutterFlowTheme.of(context).secondaryText,
-                  ),
-            ),
-          );
+          return ListingHqUi.emptyText(context, emptyMsg);
         }
         // Agrupar las visitas por fecha: cada bloque tiene un subtítulo con la
         // fecha y debajo un carrusel horizontal con las visitas de ese día.
@@ -698,29 +646,17 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                       const EdgeInsetsDirectional.fromSTEB(0.0, 4.0, 0.0, 10.0),
                   child: Text(
                     _formatDateHeader(entry.key),
-                    style: FlutterFlowTheme.of(context).bodyMedium.override(
-                          font: GoogleFonts.inter(fontWeight: FontWeight.w600),
-                          fontSize: 14.0,
-                          fontWeight: FontWeight.w600,
-                          color: _primary,
-                        ),
+                    style: GoogleFonts.publicSans(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14.0,
+                      color: _primary,
+                    ),
                   ),
                 ),
                 // Alto según el contenido: la card más alta define la fila.
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  clipBehavior: Clip.none,
-                  child: IntrinsicHeight(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        for (var i = 0; i < entry.value.length; i++) ...[
-                          if (i > 0) const SizedBox(width: 12),
-                          cardBuilder(entry.value[i]),
-                        ],
-                      ],
-                    ),
-                  ),
+                ListingHqCarousel(
+                  height: null,
+                  children: [for (final v in entry.value) cardBuilder(v)],
                 ),
                 const SizedBox(height: 8.0),
               ],
@@ -816,16 +752,7 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
   Widget _buildOpportunityCard(_ShowingVisit v) {
     return Container(
       width: 320.0,
-      decoration: BoxDecoration(
-        color: FlutterFlowTheme.of(context).secondaryBackground,
-        borderRadius: BorderRadius.circular(12.0),
-        boxShadow: const [
-          BoxShadow(
-              blurRadius: 4.0,
-              color: Color(0x33000000),
-              offset: Offset(0.0, 2.0))
-        ],
-      ),
+      decoration: ListingHqUi.cardDecoration(context),
       child: Padding(
         padding: const EdgeInsetsDirectional.fromSTEB(10.0, 10.0, 10.0, 10.0),
         child: Column(
@@ -847,9 +774,9 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
-                              font: GoogleFonts.inter(
-                                  fontWeight: FontWeight.w600, fontSize: 16.0),
-                              color: const Color(0xFF0F3E48),
+                              font: GoogleFonts.publicSans(
+                                  fontWeight: FontWeight.w600, fontSize: 15.0),
+                              color: ListingHqUi.textDark,
                             ),
                       ),
                       const SizedBox(height: 4.0),
@@ -858,7 +785,7 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                           'Monto: ${v.amount}',
                           style:
                               FlutterFlowTheme.of(context).bodyMedium.override(
-                                    font: GoogleFonts.inter(fontSize: 12.0),
+                                    font: GoogleFonts.publicSans(fontSize: 12.0),
                                     color: _primary,
                                   ),
                         ),
@@ -869,7 +796,7 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                           overflow: TextOverflow.ellipsis,
                           style:
                               FlutterFlowTheme.of(context).bodyMedium.override(
-                                    font: GoogleFonts.inter(fontSize: 12.0),
+                                    font: GoogleFonts.publicSans(fontSize: 12.0),
                                     color: _primary,
                                   ),
                         ),
@@ -878,7 +805,7 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                           'Fecha: ${_formatDate(v.date)}',
                           style:
                               FlutterFlowTheme.of(context).bodyMedium.override(
-                                    font: GoogleFonts.inter(fontSize: 12.0),
+                                    font: GoogleFonts.publicSans(fontSize: 12.0),
                                     color: _primary,
                                   ),
                         ),
@@ -887,7 +814,7 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                           'Hora: ${v.time}',
                           style:
                               FlutterFlowTheme.of(context).bodyMedium.override(
-                                    font: GoogleFonts.inter(fontSize: 12.0),
+                                    font: GoogleFonts.publicSans(fontSize: 12.0),
                                     color: _primary,
                                   ),
                         ),
@@ -898,7 +825,7 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                           overflow: TextOverflow.ellipsis,
                           style:
                               FlutterFlowTheme.of(context).bodyMedium.override(
-                                    font: GoogleFonts.inter(fontSize: 12.0),
+                                    font: GoogleFonts.publicSans(fontSize: 12.0),
                                     color: _primary,
                                   ),
                         ),
@@ -915,10 +842,12 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
               options: FFButtonOptions(
                 width: double.infinity,
                 height: 36.0,
-                color: Colors.transparent,
-                textStyle: FlutterFlowTheme.of(context).titleSmall.override(
-                      font: GoogleFonts.inter(color: _primary, fontSize: 14.0),
-                    ),
+                color: Colors.white,
+                textStyle: GoogleFonts.publicSans(
+                  color: _primary,
+                  fontSize: 14.0,
+                  fontWeight: FontWeight.w600,
+                ),
                 elevation: 0.0,
                 borderSide: const BorderSide(color: _primary, width: 1.0),
                 borderRadius: BorderRadius.circular(24.0),
@@ -940,16 +869,7 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
   }) {
     return Container(
       width: 320.0,
-      decoration: BoxDecoration(
-        color: FlutterFlowTheme.of(context).secondaryBackground,
-        borderRadius: BorderRadius.circular(12.0),
-        boxShadow: const [
-          BoxShadow(
-              blurRadius: 4.0,
-              color: Color(0x33000000),
-              offset: Offset(0.0, 2.0))
-        ],
-      ),
+      decoration: ListingHqUi.cardDecoration(context),
       child: Padding(
         padding: const EdgeInsetsDirectional.fromSTEB(10.0, 10.0, 10.0, 10.0),
         child: Column(
@@ -971,9 +891,9 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
-                              font: GoogleFonts.inter(
-                                  fontWeight: FontWeight.w600, fontSize: 16.0),
-                              color: const Color(0xFF0F3E48),
+                              font: GoogleFonts.publicSans(
+                                  fontWeight: FontWeight.w600, fontSize: 15.0),
+                              color: ListingHqUi.textDark,
                             ),
                       ),
                       const SizedBox(height: 4.0),
@@ -982,7 +902,7 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                           'Monto: ${visit.amount}',
                           style:
                               FlutterFlowTheme.of(context).bodyMedium.override(
-                                    font: GoogleFonts.inter(fontSize: 12.0),
+                                    font: GoogleFonts.publicSans(fontSize: 12.0),
                                     color: _primary,
                                   ),
                         ),
@@ -993,7 +913,7 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                           overflow: TextOverflow.ellipsis,
                           style:
                               FlutterFlowTheme.of(context).bodyMedium.override(
-                                    font: GoogleFonts.inter(fontSize: 12.0),
+                                    font: GoogleFonts.publicSans(fontSize: 12.0),
                                     color: _primary,
                                   ),
                         ),
@@ -1002,7 +922,7 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                           'Fecha: ${_formatDate(visit.date)}',
                           style:
                               FlutterFlowTheme.of(context).bodyMedium.override(
-                                    font: GoogleFonts.inter(fontSize: 12.0),
+                                    font: GoogleFonts.publicSans(fontSize: 12.0),
                                     color: _primary,
                                   ),
                         ),
@@ -1011,7 +931,7 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                           'Hora: ${visit.time}',
                           style:
                               FlutterFlowTheme.of(context).bodyMedium.override(
-                                    font: GoogleFonts.inter(fontSize: 12.0),
+                                    font: GoogleFonts.publicSans(fontSize: 12.0),
                                     color: _primary,
                                   ),
                         ),
@@ -1022,7 +942,7 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                           overflow: TextOverflow.ellipsis,
                           style:
                               FlutterFlowTheme.of(context).bodyMedium.override(
-                                    font: GoogleFonts.inter(fontSize: 12.0),
+                                    font: GoogleFonts.publicSans(fontSize: 12.0),
                                     color: _primary,
                                   ),
                         ),
@@ -1036,7 +956,7 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                               style: FlutterFlowTheme.of(context)
                                   .bodyMedium
                                   .override(
-                                    font: GoogleFonts.inter(fontSize: 12.0),
+                                    font: GoogleFonts.publicSans(fontSize: 12.0),
                                     color: _primary,
                                   ),
                             ),
@@ -1059,7 +979,7 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                 width: double.infinity,
                 height: 36.0,
                 color: buttonColor ?? _primary,
-                textStyle: GoogleFonts.inter(
+                textStyle: GoogleFonts.publicSans(
                   color: Colors.white,
                   fontSize: 14.0,
                   fontWeight: FontWeight.w600,
@@ -1094,39 +1014,24 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
   }
 
   Widget _buildStatusPill(String status) {
-    Color bgColor;
-    Color textColor;
-    switch (status) {
-      case 'Pendiente':
-        bgColor = const Color(0xFFFFD78D);
-        textColor = Colors.orange;
-        break;
-      case 'En proceso':
-        bgColor = const Color(0xFFD6E4FF);
-        textColor = const Color(0xFF1890FF);
-        break;
-      case 'Cancelada':
-        bgColor = const Color(0xFFFFF1F0);
-        textColor = const Color(0xFFF5222D);
-        break;
-      default:
-        bgColor = const Color(0xFFF5F5F5);
-        textColor = const Color(0xFF8C8C8C);
-    }
+    final color = switch (status) {
+      'Pendiente' => ListingHqUi.pending,
+      'En proceso' => _primary,
+      'Cancelada' => ListingHqUi.alert,
+      _ => const Color(0xFF8C8C8C),
+    };
     return Container(
+      padding: const EdgeInsetsDirectional.fromSTEB(12.0, 2.0, 12.0, 2.0),
       decoration: BoxDecoration(
-        color: bgColor,
+        color: color,
         borderRadius: BorderRadius.circular(24.0),
       ),
-      child: Padding(
-        padding: const EdgeInsetsDirectional.fromSTEB(12.0, 2.0, 12.0, 2.0),
-        child: Text(
-          status,
-          style: FlutterFlowTheme.of(context).bodyMedium.override(
-                font: GoogleFonts.inter(
-                    fontWeight: FontWeight.w600, fontSize: 12.0),
-                color: textColor,
-              ),
+      child: Text(
+        status,
+        style: GoogleFonts.publicSans(
+          color: Colors.white,
+          fontWeight: FontWeight.w600,
+          fontSize: 12.0,
         ),
       ),
     );

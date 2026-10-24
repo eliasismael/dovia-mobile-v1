@@ -8,6 +8,7 @@ import '/showing/s_h_o_w_i_n_g_header/s_h_o_w_i_n_g_header_widget.dart';
 import '/showing/s_h_o_w_i_n_g_to_navegation_app/s_h_o_w_i_n_g_to_navegation_app_widget.dart';
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_visits.dart';
+import '/listing_hq/listing_hq_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -456,10 +457,7 @@ class _SHOWINGPropiedadesAMostrarWidgetState
     const _primary = Color(0xFF007376);
     return Container(
       width: MediaQuery.sizeOf(context).width * 1.0,
-      decoration: BoxDecoration(
-        color: FlutterFlowTheme.of(context).secondaryBackground,
-        borderRadius: BorderRadius.circular(12.0),
-      ),
+      decoration: ListingHqUi.cardDecoration(context),
       child: Padding(
         padding: const EdgeInsetsDirectional.fromSTEB(10.0, 10.0, 10.0, 10.0),
         child: Row(
@@ -491,15 +489,16 @@ class _SHOWINGPropiedadesAMostrarWidgetState
                             style: FlutterFlowTheme.of(context)
                                 .bodyMedium
                                 .override(
-                                  font: GoogleFonts.inter(
-                                    fontWeight: FontWeight.w500,
+                                  font: GoogleFonts.publicSans(
+                                    fontWeight: FontWeight.w600,
                                     fontStyle: FlutterFlowTheme.of(context)
                                         .bodyMedium
                                         .fontStyle,
                                   ),
-                                  fontSize: 16.0,
+                                  color: ListingHqUi.textDark,
+                                  fontSize: 15.0,
                                   letterSpacing: 0.0,
-                                  fontWeight: FontWeight.w500,
+                                  fontWeight: FontWeight.w600,
                                   fontStyle: FlutterFlowTheme.of(context)
                                       .bodyMedium
                                       .fontStyle,
@@ -511,7 +510,7 @@ class _SHOWINGPropiedadesAMostrarWidgetState
                             style: FlutterFlowTheme.of(context)
                                 .bodyMedium
                                 .override(
-                                  font: GoogleFonts.inter(
+                                  font: GoogleFonts.publicSans(
                                     fontWeight: FontWeight.normal,
                                     fontStyle: FlutterFlowTheme.of(context)
                                         .bodyMedium
@@ -530,7 +529,7 @@ class _SHOWINGPropiedadesAMostrarWidgetState
                             style: FlutterFlowTheme.of(context)
                                 .bodyMedium
                                 .override(
-                                  font: GoogleFonts.inter(
+                                  font: GoogleFonts.publicSans(
                                     fontWeight: FontWeight.normal,
                                     fontStyle: FlutterFlowTheme.of(context)
                                         .bodyMedium
@@ -550,7 +549,7 @@ class _SHOWINGPropiedadesAMostrarWidgetState
                             style: FlutterFlowTheme.of(context)
                                 .bodyMedium
                                 .override(
-                                  font: GoogleFonts.inter(
+                                  font: GoogleFonts.publicSans(
                                     fontWeight: FontWeight.normal,
                                     fontStyle: FlutterFlowTheme.of(context)
                                         .bodyMedium
@@ -570,7 +569,7 @@ class _SHOWINGPropiedadesAMostrarWidgetState
                             style: FlutterFlowTheme.of(context)
                                 .bodyMedium
                                 .override(
-                                  font: GoogleFonts.inter(
+                                  font: GoogleFonts.publicSans(
                                     fontWeight: FlutterFlowTheme.of(context)
                                         .bodyMedium
                                         .fontWeight,
@@ -624,21 +623,20 @@ class _SHOWINGPropiedadesAMostrarWidgetState
                                 12.0, 0.0, 12.0, 0.0),
                             iconPadding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 0.0, 0.0, 0.0),
-                            color: const Color(0x00007376),
+                            color: Colors.white,
                             textStyle: FlutterFlowTheme.of(context)
                                 .titleSmall
                                 .override(
                                   font: GoogleFonts.publicSans(
-                                    fontWeight: FontWeight.normal,
+                                    fontWeight: FontWeight.w600,
                                     fontStyle: FlutterFlowTheme.of(context)
                                         .titleSmall
                                         .fontStyle,
                                   ),
-                                  color:
-                                      FlutterFlowTheme.of(context).primaryText,
+                                  color: FlutterFlowTheme.of(context).primary,
                                   fontSize: 14.0,
                                   letterSpacing: 0.0,
-                                  fontWeight: FontWeight.normal,
+                                  fontWeight: FontWeight.w600,
                                   fontStyle: FlutterFlowTheme.of(context)
                                       .titleSmall
                                       .fontStyle,
@@ -668,7 +666,7 @@ class _SHOWINGPropiedadesAMostrarWidgetState
                                   .titleSmall
                                   .override(
                                     font: GoogleFonts.publicSans(
-                                      fontWeight: FontWeight.normal,
+                                      fontWeight: FontWeight.w600,
                                     ),
                                     color: Colors.white,
                                     fontSize: 14.0,
@@ -694,7 +692,7 @@ class _SHOWINGPropiedadesAMostrarWidgetState
                                 .titleSmall
                                 .override(
                                   font: GoogleFonts.publicSans(
-                                    fontWeight: FontWeight.normal,
+                                    fontWeight: FontWeight.w600,
                                   ),
                                   color: Colors.white,
                                   fontSize: 14.0,
@@ -727,7 +725,7 @@ class _SHOWINGPropiedadesAMostrarWidgetState
                                 .titleSmall
                                 .override(
                                   font: GoogleFonts.publicSans(
-                                    fontWeight: FontWeight.normal,
+                                    fontWeight: FontWeight.w600,
                                     fontStyle: FlutterFlowTheme.of(context)
                                         .titleSmall
                                         .fontStyle,
@@ -735,7 +733,7 @@ class _SHOWINGPropiedadesAMostrarWidgetState
                                   color: Colors.white,
                                   fontSize: 14.0,
                                   letterSpacing: 0.0,
-                                  fontWeight: FontWeight.normal,
+                                  fontWeight: FontWeight.w600,
                                   fontStyle: FlutterFlowTheme.of(context)
                                       .titleSmall
                                       .fontStyle,
@@ -789,61 +787,17 @@ class _SHOWINGPropiedadesAMostrarWidgetState
                       model: _model.sHOWINGHeaderModel,
                       updateCallback: () => safeSetState(() {}),
                       child: const SHOWINGHeaderWidget(
-                        title: 'Propiedades a \nmostrar',
+                        title: 'Propiedades a mostrar',
                       ),
                     ),
                     Padding(
                       padding: const EdgeInsetsDirectional.fromSTEB(
-                          20.0, 0.0, 20.0, 100.0),
+                          20.0, 0.0, 20.0, 120.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         children: [
-                          Padding(
-                            padding: const EdgeInsetsDirectional.fromSTEB(
-                                0.0, 20.0, 0.0, 0.0),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.max,
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Align(
-                                  alignment:
-                                      const AlignmentDirectional(-1.0, 0.0),
-                                  child: Text(
-                                    'Propiedades asignadas',
-                                    style: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .override(
-                                          font: GoogleFonts.inter(
-                                            fontWeight: FontWeight.w600,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .bodyMedium
-                                                    .fontStyle,
-                                          ),
-                                          fontSize: 16.0,
-                                          letterSpacing: 0.0,
-                                          fontWeight: FontWeight.w600,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodyMedium
-                                                  .fontStyle,
-                                        ),
-                                  ),
-                                ),
-                                // Link de texto, con el estilo de los
-                                // "Ver más" del resto de la app.
-                                Text(
-                                  'Ver todo',
-                                  style: GoogleFonts.publicSans(
-                                    color: const Color(0xFF007376),
-                                    fontSize: 14.0,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                          const ListingHqSectionHeader(
+                              title: 'Propiedades asignadas'),
                           FutureBuilder<List<_ShowingVisit>>(
                             future: _visitsFuture,
                             builder: (context, snapshot) {
@@ -871,21 +825,10 @@ class _SHOWINGPropiedadesAMostrarWidgetState
                               }
                               final visits = snapshot.data!;
                               if (visits.isEmpty) {
-                                return Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 40.0),
-                                  child: Center(
-                                    child: Text(
-                                      'No tienes visitas programadas.',
-                                      style: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .override(
-                                            font: GoogleFonts.inter(),
-                                            color: FlutterFlowTheme.of(context)
-                                                .secondaryText,
-                                          ),
-                                    ),
-                                  ),
+                                return SizedBox(
+                                  width: double.infinity,
+                                  child: ListingHqUi.emptyText(
+                                      context, 'No tienes visitas programadas.'),
                                 );
                               }
 
@@ -911,15 +854,11 @@ class _SHOWINGPropiedadesAMostrarWidgetState
                                               .fromSTEB(0.0, 20.0, 0.0, 10.0),
                                           child: Text(
                                             _formatDate(dateStr),
-                                            style: FlutterFlowTheme.of(context)
-                                                .bodyMedium
-                                                .override(
-                                                  font: GoogleFonts.inter(
-                                                    fontWeight: FontWeight.w600,
-                                                  ),
-                                                  fontSize: 16.0,
-                                                  fontWeight: FontWeight.w600,
-                                                ),
+                                            style: GoogleFonts.publicSans(
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 14.0,
+                                              color: ListingHqUi.aqua,
+                                            ),
                                           ),
                                         ),
                                       ),

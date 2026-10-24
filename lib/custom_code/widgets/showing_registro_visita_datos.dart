@@ -1,6 +1,7 @@
 // Automatic FlutterFlow imports
 // Imports other custom widgets
 // Imports custom functions
+import '/listing_hq/listing_hq_ui.dart';
 import 'package:flutter/material.dart';
 import '/flutter_flow/upload_data.dart';
 import '/flutter_flow/uploaded_file.dart';
@@ -55,7 +56,6 @@ class _ShowingRegistroVisitaDatosState
   static const Color inputBackground = Color(0xFFFAFAFA);
   static const Color inputBorderColor = Color(0x1A000000);
   static const Color greyTextColor = Color(0xFF99A1AF);
-  static const Color confirmBg = Color(0x3370ACAD);
 
   // ==================== OPTION SETS (label → API enum) ====================
   static const List<_Opt> _kindOpts = [
@@ -265,24 +265,8 @@ class _ShowingRegistroVisitaDatosState
     return Container(
       width: widget.width ?? double.infinity,
       height: widget.height,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x1A000000),
-            blurRadius: 15,
-            offset: Offset(0, 10),
-            spreadRadius: -3,
-          ),
-          BoxShadow(
-            color: Color(0x1A000000),
-            blurRadius: 6,
-            offset: Offset(0, 4),
-            spreadRadius: -4,
-          ),
-        ],
-      ),
+      // La tarjeta de las pantallas del cliente.
+      decoration: ListingHqUi.cardDecoration(context),
       // Sin alto fijo el formulario crece y scrollea la pantalla; con alto,
       // scrollea por dentro.
       child: widget.height == null
@@ -915,16 +899,12 @@ class _ShowingRegistroVisitaDatosState
       children: [
         _buildSectionHeading('Confirmación'),
         const SizedBox(height: 16),
+        // Un check común: sin recuadro ni fondo alrededor.
         GestureDetector(
+          behavior: HitTestBehavior.opaque,
           onTap: () => setState(() => _confirmed = !_confirmed),
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: confirmBg,
-              border: Border.all(color: primaryColor, width: 2),
-              borderRadius: BorderRadius.circular(10),
-            ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -934,7 +914,7 @@ class _ShowingRegistroVisitaDatosState
                   decoration: BoxDecoration(
                     border: Border.all(
                       color:
-                          _confirmed ? primaryColor : const Color(0xFFD1D5DB),
+                          _confirmed ? primaryColor : const Color(0xFF8A8A8A),
                       width: 1.5,
                     ),
                     borderRadius: BorderRadius.circular(4),

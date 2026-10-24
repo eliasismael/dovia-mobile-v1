@@ -1,6 +1,4 @@
-import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 's_h_o_w_i_n_g_report_popup_model.dart';
@@ -9,8 +7,8 @@ export 's_h_o_w_i_n_g_report_popup_model.dart';
 class SHOWINGReportPopupWidget extends StatefulWidget {
   const SHOWINGReportPopupWidget({
     super.key,
-    this.title = '¿Que problema tuviste en la visita?',
-    this.subtitle = 'Por favor, puedes explicar levemente cual fue el problema',
+    this.title = '¿Qué problema tuviste en la visita?',
+    this.subtitle = 'Cuéntanos brevemente qué pasó.',
   });
 
   final String title;
@@ -25,6 +23,9 @@ class _SHOWINGReportPopupWidgetState extends State<SHOWINGReportPopupWidget> {
   late SHOWINGReportPopupModel _model;
 
   static const Color reportRed = Color(0xFFC90A0A);
+  static const Color _textDark = Color(0xFF00444B);
+  static const Color _grey = Color(0xFF717182);
+  static const Color _aqua = Color(0xFF007376);
 
   // Error mostrado cuando se intenta enviar el reporte sin escribir una nota.
   String? _errorText;
@@ -52,211 +53,176 @@ class _SHOWINGReportPopupWidgetState extends State<SHOWINGReportPopupWidget> {
     super.dispose();
   }
 
+  /// Botón de pie del modal. Los colores van en el TextStyle: dentro de
+  /// `font:` el override sólo toma la tipografía, y así "Enviar reporte"
+  /// salía con el texto oscuro sobre el rojo.
+  Widget _button({
+    required String text,
+    required VoidCallback onPressed,
+    required bool filled,
+  }) {
+    final color = filled ? reportRed : _aqua;
+    return SizedBox(
+      height: 46.0,
+      child: TextButton(
+        onPressed: onPressed,
+        style: TextButton.styleFrom(
+          backgroundColor: filled ? color : Colors.white,
+          foregroundColor: filled ? Colors.white : color,
+          side: filled ? null : BorderSide(color: color),
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(25.0),
+          ),
+        ),
+        child: Text(
+          text,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: GoogleFonts.publicSans(
+            color: filled ? Colors.white : color,
+            fontSize: 15.0,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Mismo diseño que los demás modales de DOVIA: blanco, título verde
+  /// oscuro, texto gris y botones redondeados.
   @override
   Widget build(BuildContext context) {
+    final hasError = _errorText != null;
     return Align(
       alignment: const AlignmentDirectional(0.0, 0.0),
       child: Padding(
         padding: const EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
         child: Container(
           width: double.infinity,
-          constraints: const BoxConstraints(
-            maxWidth: 400.0,
-          ),
+          constraints: const BoxConstraints(maxWidth: 400.0),
           decoration: BoxDecoration(
-            color: FlutterFlowTheme.of(context).secondaryBackground,
-            boxShadow: const [
-              BoxShadow(
-                blurRadius: 4.0,
-                color: Color(0x33000000),
-                offset: Offset(0.0, 2.0),
-              )
-            ],
-            borderRadius: BorderRadius.circular(16.0),
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20.0),
           ),
           child: Padding(
             padding:
-                const EdgeInsetsDirectional.fromSTEB(24.0, 24.0, 24.0, 24.0),
+                const EdgeInsetsDirectional.fromSTEB(24.0, 28.0, 24.0, 24.0),
+            // Sin X: se cierra con "Cancelar".
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Align(
-                  alignment: const AlignmentDirectional(1.0, 0.0),
-                  child: InkWell(
-                    splashColor: Colors.transparent,
-                    focusColor: Colors.transparent,
-                    hoverColor: Colors.transparent,
-                    highlightColor: Colors.transparent,
-                    onTap: () async {
-                      Navigator.pop(context);
-                    },
-                    child: Icon(
-                      Icons.close,
-                      color: FlutterFlowTheme.of(context).secondaryText,
-                      size: 22.0,
-                    ),
-                  ),
-                ),
-                Align(
-                  alignment: const AlignmentDirectional(0.0, 0.0),
-                  child: Text(
-                    widget.title,
-                    textAlign: TextAlign.center,
-                    style: FlutterFlowTheme.of(context).headlineSmall.override(
-                          font: GoogleFonts.inter(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 20.0,
-                          ),
-                        ),
-                  ),
-                ),
                 Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(
-                      0.0, 16.0, 0.0, 16.0),
-                  child: Text(
-                    widget.subtitle,
-                    style: FlutterFlowTheme.of(context).bodyMedium.override(
-                          font: GoogleFonts.inter(
-                            fontWeight: FontWeight.w600,
-                            color: FlutterFlowTheme.of(context).primaryText,
+                  padding: EdgeInsets.zero,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        widget.title,
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.publicSans(
+                          color: _textDark,
+                          fontSize: 20.0,
+                          fontWeight: FontWeight.w600,
+                          height: 1.3,
+                        ),
+                      ),
+                      const SizedBox(height: 8.0),
+                      Text(
+                        widget.subtitle,
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.publicSans(
+                          color: _grey,
+                          fontSize: 14.0,
+                          height: 1.4,
+                        ),
+                      ),
+                      const SizedBox(height: 20.0),
+                      TextFormField(
+                        controller: _model.textController,
+                        focusNode: _model.textFieldFocusNode,
+                        maxLines: 5,
+                        minLines: 4,
+                        textCapitalization: TextCapitalization.sentences,
+                        onChanged: (value) {
+                          if (_errorText != null && value.trim().isNotEmpty) {
+                            safeSetState(() => _errorText = null);
+                          }
+                        },
+                        style: GoogleFonts.publicSans(
+                          color: _textDark,
+                          fontSize: 14.0,
+                        ),
+                        decoration: InputDecoration(
+                          hintText: 'Describe por qué no se realizó la visita…',
+                          hintStyle: GoogleFonts.publicSans(
+                            color: _grey,
                             fontSize: 14.0,
                           ),
-                        ),
-                  ),
-                ),
-                Container(
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF3F4F6),
-                    borderRadius: BorderRadius.circular(12.0),
-                    border: Border.all(
-                      color:
-                          _errorText != null ? reportRed : Colors.transparent,
-                      width: 1.0,
-                    ),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsetsDirectional.fromSTEB(
-                        8.0, 8.0, 8.0, 8.0),
-                    child: TextFormField(
-                      controller: _model.textController,
-                      focusNode: _model.textFieldFocusNode,
-                      maxLines: 5,
-                      minLines: 5,
-                      onChanged: (value) {
-                        if (_errorText != null && value.trim().isNotEmpty) {
-                          safeSetState(() => _errorText = null);
-                        }
-                      },
-                      decoration: InputDecoration(
-                        hintText: 'Describe por qué no se realizó la visita…',
-                        hintStyle: FlutterFlowTheme.of(context)
-                            .bodyMedium
-                            .override(
-                              font: GoogleFonts.inter(
-                                color:
-                                    FlutterFlowTheme.of(context).secondaryText,
-                                fontSize: 14.0,
-                              ),
-                            ),
-                        enabledBorder: InputBorder.none,
-                        focusedBorder: InputBorder.none,
-                        errorBorder: InputBorder.none,
-                        focusedErrorBorder: InputBorder.none,
-                      ),
-                      style: FlutterFlowTheme.of(context).bodyMedium.override(
-                            font: GoogleFonts.inter(
-                              color: FlutterFlowTheme.of(context).primaryText,
-                              fontSize: 14.0,
-                            ),
-                          ),
-                      validator:
-                          _model.textControllerValidator?.asValidator(context),
-                    ),
-                  ),
-                ),
-                if (_errorText != null)
-                  Padding(
-                    padding: const EdgeInsetsDirectional.fromSTEB(
-                        4.0, 8.0, 0.0, 0.0),
-                    child: Text(
-                      _errorText!,
-                      style: FlutterFlowTheme.of(context).bodyMedium.override(
-                            font: GoogleFonts.inter(fontSize: 13.0),
-                            color: reportRed,
-                          ),
-                    ),
-                  ),
-                Padding(
-                  padding:
-                      const EdgeInsetsDirectional.fromSTEB(0.0, 24.0, 0.0, 0.0),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.max,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: FFButtonWidget(
-                          onPressed: () async {
-                            Navigator.pop(context);
-                          },
-                          text: 'Cancelar',
-                          options: FFButtonOptions(
-                            height: 44.0,
-                            padding: const EdgeInsetsDirectional.fromSTEB(
-                                0.0, 0.0, 0.0, 0.0),
-                            iconPadding: const EdgeInsetsDirectional.fromSTEB(
-                                0.0, 0.0, 0.0, 0.0),
-                            color: FlutterFlowTheme.of(context)
-                                .secondaryBackground,
-                            textStyle: FlutterFlowTheme.of(context)
-                                .titleSmall
-                                .override(
-                                  font: GoogleFonts.inter(
-                                    color: FlutterFlowTheme.of(context)
-                                        .primaryText,
-                                  ),
-                                ),
-                            elevation: 0.0,
+                          filled: true,
+                          fillColor: Colors.white,
+                          contentPadding: const EdgeInsets.all(14.0),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
                             borderSide: BorderSide(
-                              color: FlutterFlowTheme.of(context).primary,
-                              width: 1.0,
+                              color: hasError
+                                  ? reportRed
+                                  : const Color(0xFFE0E0E0),
                             ),
-                            borderRadius: BorderRadius.circular(24.0),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                            borderSide: BorderSide(
+                              color: hasError ? reportRed : _aqua,
+                              width: 1.5,
+                            ),
                           ),
                         ),
+                        validator: _model.textControllerValidator
+                            ?.asValidator(context),
                       ),
-                      const SizedBox(width: 16.0),
-                      Expanded(
-                        child: FFButtonWidget(
-                          onPressed: () async {
-                            final text =
-                                _model.textController?.text.trim() ?? '';
-                            if (text.isEmpty) {
-                              safeSetState(() => _errorText =
-                                  'Por favor, ingresa una nota para enviar el reporte.');
-                              return;
-                            }
-                            Navigator.pop(context, text);
-                          },
-                          text: 'Enviar reporte',
-                          options: FFButtonOptions(
-                            height: 44.0,
-                            padding: const EdgeInsetsDirectional.fromSTEB(
-                                0.0, 0.0, 0.0, 0.0),
-                            iconPadding: const EdgeInsetsDirectional.fromSTEB(
-                                0.0, 0.0, 0.0, 0.0),
-                            color: reportRed,
-                            textStyle: FlutterFlowTheme.of(context)
-                                .titleSmall
-                                .override(
-                                  font: GoogleFonts.inter(
-                                    color: Colors.white,
-                                  ),
-                                ),
-                            elevation: 0.0,
-                            borderRadius: BorderRadius.circular(24.0),
+                      if (hasError)
+                        Padding(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
+                              4.0, 8.0, 0.0, 0.0),
+                          child: Text(
+                            _errorText!,
+                            style: GoogleFonts.publicSans(
+                              color: reportRed,
+                              fontSize: 13.0,
+                            ),
                           ),
                         ),
+                      const SizedBox(height: 24.0),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _button(
+                              text: 'Cancelar',
+                              filled: false,
+                              onPressed: () => Navigator.pop(context),
+                            ),
+                          ),
+                          const SizedBox(width: 12.0),
+                          Expanded(
+                            child: _button(
+                              text: 'Enviar reporte',
+                              filled: true,
+                              onPressed: () {
+                                final text =
+                                    _model.textController?.text.trim() ?? '';
+                                if (text.isEmpty) {
+                                  safeSetState(() => _errorText =
+                                      'Escribe qué pasó para enviar el reporte.');
+                                  return;
+                                }
+                                Navigator.pop(context, text);
+                              },
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),

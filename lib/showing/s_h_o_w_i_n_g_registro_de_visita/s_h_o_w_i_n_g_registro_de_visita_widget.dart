@@ -9,6 +9,7 @@ import '/showing/s_h_o_w_i_n_g_header/s_h_o_w_i_n_g_header_widget.dart';
 import '/showing/s_h_o_w_i_n_g_navbar/s_h_o_w_i_n_g_navbar_widget.dart';
 import '/showing/s_h_o_w_i_n_g_registro_de_visita_2/s_h_o_w_i_n_g_registro_de_visita2_widget.dart';
 import '/showing/s_h_o_w_i_n_g_report_popup/s_h_o_w_i_n_g_report_popup_widget.dart';
+import '/listing_hq/listing_hq_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 's_h_o_w_i_n_g_registro_de_visita_model.dart';
@@ -99,6 +100,7 @@ class _SHOWINGRegistroDeVisitaWidgetState
 
   @override
   void dispose() {
+    _searchController.dispose();
     _model.dispose();
     super.dispose();
   }
@@ -286,7 +288,7 @@ class _SHOWINGRegistroDeVisitaWidgetState
                     ),
                     Padding(
                       padding: const EdgeInsetsDirectional.fromSTEB(
-                          20.0, 20.0, 20.0, 100.0),
+                          20.0, 20.0, 20.0, 120.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -353,6 +355,7 @@ class _SHOWINGRegistroDeVisitaWidgetState
 
     for (final v in visits) {
       if (v.substatus == 'CANCELLED') continue;
+      if (!_matches(v)) continue;
 
       DateTime visitDt;
       try {
@@ -411,7 +414,9 @@ class _SHOWINGRegistroDeVisitaWidgetState
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 20),
         child: Text(
-          'No tienes visitas pendientes de registro.',
+          _query.trim().isNotEmpty
+              ? 'Sin resultados para "${_query.trim()}".'
+              : 'No tienes visitas pendientes de registro.',
           style: FlutterFlowTheme.of(context).bodyMedium.override(
                 font: GoogleFonts.publicSans(),
                 color: FlutterFlowTheme.of(context).secondaryText,
@@ -426,59 +431,33 @@ class _SHOWINGRegistroDeVisitaWidgetState
     );
   }
 
-  // ==================== AI SEARCH BAR (visual) ====================
+  // ==================== BUSCADOR ====================
+  final _searchController = TextEditingController();
+  String _query = '';
+
+  /// Coincide con el nombre, la dirección o el propietario de la visita.
+  bool _matches(_ScheduleVisit v) {
+    final q = _query.trim().toLowerCase();
+    if (q.isEmpty) return true;
+    final haystack = '${v.title} ${v.address} ${v.ownerName}'.toLowerCase();
+    return q.split(RegExp(r'\s+')).every(haystack.contains);
+  }
+
   Widget _buildSearchBar() {
-    return Container(
-      width: double.infinity,
-      height: 56.0,
-      decoration: BoxDecoration(
-        color: FlutterFlowTheme.of(context).secondaryBackground,
-        borderRadius: BorderRadius.circular(100.0),
-      ),
-      child: Padding(
-        padding: const EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
-        child: Row(
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            Icon(
-              Icons.search_rounded,
-              color: FlutterFlowTheme.of(context).secondaryText,
-              size: 22.0,
-            ),
-            const SizedBox(width: 16.0),
-            Expanded(
-              child: Text(
-                'Búsqueda con IA',
-                style: FlutterFlowTheme.of(context).bodyMedium.override(
-                      font: GoogleFonts.publicSans(
-                        fontWeight: FontWeight.normal,
-                      ),
-                      color: const Color(0x80888888),
-                      fontSize: 15.0,
-                      letterSpacing: 0.3,
-                    ),
-              ),
-            ),
-          ],
-        ),
-      ),
+    return ListingHqSearchField(
+      controller: _searchController,
+      hintText: 'Propiedad, dirección o propietario',
+      onChanged: (v) => safeSetState(() => _query = v),
+      onClear: () {
+        _searchController.clear();
+        safeSetState(() => _query = '');
+      },
     );
   }
 
   // ==================== SECTION TITLE ====================
   Widget _buildSectionTitle(String title) {
-    return Text(
-      title,
-      style: FlutterFlowTheme.of(context).bodyMedium.override(
-            font: GoogleFonts.publicSans(
-              fontWeight: FontWeight.w600,
-            ),
-            color: const Color(0xFF00444B),
-            fontSize: 17.0,
-            letterSpacing: 0.34,
-            fontWeight: FontWeight.w600,
-          ),
-    );
+    return Text(title, style: ListingHqUi.sectionTitle(context));
   }
 
   // ==================== VISIT CARD ====================
@@ -499,10 +478,7 @@ class _SHOWINGRegistroDeVisitaWidgetState
       },
       child: Container(
         width: double.infinity,
-        decoration: BoxDecoration(
-          color: FlutterFlowTheme.of(context).secondaryBackground,
-          borderRadius: BorderRadius.circular(10.0),
-        ),
+        decoration: ListingHqUi.cardDecoration(context),
         child: Padding(
           padding: const EdgeInsetsDirectional.fromSTEB(10.0, 10.0, 10.0, 10.0),
           child: Row(
@@ -545,11 +521,11 @@ class _SHOWINGRegistroDeVisitaWidgetState
                       overflow: TextOverflow.ellipsis,
                       style: FlutterFlowTheme.of(context).bodyMedium.override(
                             font: GoogleFonts.publicSans(
-                              fontWeight: FontWeight.w500,
+                              fontWeight: FontWeight.w600,
                             ),
                             color: const Color(0xFF00444B),
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w500,
+                            fontSize: 15.0,
+                            fontWeight: FontWeight.w600,
                           ),
                     ),
                     const SizedBox(height: 8.0),
@@ -584,10 +560,10 @@ class _SHOWINGRegistroDeVisitaWidgetState
                           textStyle:
                               FlutterFlowTheme.of(context).titleSmall.override(
                                     font: GoogleFonts.publicSans(
-                                      fontWeight: FontWeight.normal,
+                                      fontWeight: FontWeight.w600,
                                     ),
                                     color: Colors.white,
-                                    fontSize: 12.0,
+                                    fontSize: 14.0,
                                   ),
                           elevation: 0.0,
                           borderRadius: BorderRadius.circular(25.0),

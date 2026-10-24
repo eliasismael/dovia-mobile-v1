@@ -242,7 +242,10 @@ class ListingHqCarousel extends StatefulWidget {
   });
 
   final List<Widget> children;
-  final double height;
+
+  /// Alto fijo del carrusel. Con `null` lo define la tarjeta más alta (para
+  /// tarjetas cuyo contenido cambia de alto).
+  final double? height;
   final double spacing;
 
   @override
@@ -312,26 +315,46 @@ class _ListingHqCarouselState extends State<ListingHqCarousel> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final fullWidth = constraints.maxWidth + 2 * ListingHqUi.gutter;
-        return SizedBox(
-          height: widget.height,
-          child: OverflowBox(
+        final list = widget.height != null
+            ? ListView.separated(
+                controller: _controller,
+                scrollDirection: Axis.horizontal,
+                clipBehavior: Clip.none,
+                padding: const EdgeInsets.symmetric(
+                    horizontal: ListingHqUi.gutter, vertical: 6.0),
+                itemCount: widget.children.length,
+                separatorBuilder: (_, __) => SizedBox(width: widget.spacing),
+                itemBuilder: (_, i) => widget.children[i],
+              )
+            : SingleChildScrollView(
+                controller: _controller,
+                scrollDirection: Axis.horizontal,
+                clipBehavior: Clip.none,
+                padding: const EdgeInsets.symmetric(
+                    horizontal: ListingHqUi.gutter, vertical: 6.0),
+                child: IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      for (var i = 0; i < widget.children.length; i++) ...[
+                        if (i > 0) SizedBox(width: widget.spacing),
+                        widget.children[i],
+                      ],
+                    ],
+                  ),
+                ),
+              );
+        Widget sized(Widget child) => widget.height != null
+            ? SizedBox(height: widget.height, child: child)
+            // Sin alto fijo, el carrusel toma el de la tarjeta más alta.
+            : IntrinsicHeight(child: child);
+        return sized(
+          OverflowBox(
             minWidth: fullWidth,
             maxWidth: fullWidth,
             child: Stack(
               children: [
-                HorizontalFadeEdges(
-                  child: ListView.separated(
-                    controller: _controller,
-                    scrollDirection: Axis.horizontal,
-                    clipBehavior: Clip.none,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: ListingHqUi.gutter, vertical: 6.0),
-                    itemCount: widget.children.length,
-                    separatorBuilder: (_, __) =>
-                        SizedBox(width: widget.spacing),
-                    itemBuilder: (_, i) => widget.children[i],
-                  ),
-                ),
+                HorizontalFadeEdges(child: list),
                 AnimatedBuilder(
                   animation: _controller,
                   builder: (context, _) {

@@ -14,6 +14,7 @@ import '/showing/s_h_o_w_i_n_g_navbar/s_h_o_w_i_n_g_navbar_widget.dart';
 import '/showing/s_h_o_w_i_n_g_visit_registered_popup/s_h_o_w_i_n_g_visit_registered_popup_widget.dart';
 import '/showing/s_h_o_w_i_n_g_report_popup/s_h_o_w_i_n_g_report_popup_widget.dart';
 import '/custom_code/widgets/index.dart' as custom_widgets;
+import '/listing_hq/listing_hq_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 's_h_o_w_i_n_g_registro_de_visita2_model.dart';
@@ -317,7 +318,7 @@ class _SHOWINGRegistroDeVisita2WidgetState
                     ),
                     Padding(
                       padding: const EdgeInsetsDirectional.fromSTEB(
-                          20.0, 40.0, 20.0, 100.0),
+                          20.0, 0.0, 20.0, 120.0),
                       child: FutureBuilder<ApiCallResponse>(
                         future: _overviewFuture,
                         builder: (context, snapshot) {
@@ -419,11 +420,8 @@ class _SHOWINGRegistroDeVisita2WidgetState
                                     0.0, 20.0, 0.0, 0.0),
                                 child: Container(
                                   width: MediaQuery.sizeOf(context).width * 1.0,
-                                  decoration: BoxDecoration(
-                                    color: FlutterFlowTheme.of(context)
-                                        .secondaryBackground,
-                                    borderRadius: BorderRadius.circular(12.0),
-                                  ),
+                                  decoration:
+                                      ListingHqUi.cardDecoration(context),
                                   child: Padding(
                                     padding:
                                         const EdgeInsetsDirectional.fromSTEB(
@@ -504,16 +502,18 @@ class _SHOWINGRegistroDeVisita2WidgetState
                                                                 .override(
                                                                   font:
                                                                       GoogleFonts
-                                                                          .inter(
+                                                                          .publicSans(
                                                                     fontWeight:
                                                                         FontWeight
-                                                                            .w500,
+                                                                            .w600,
                                                                   ),
+                                                                  color: ListingHqUi
+                                                                      .textDark,
                                                                   fontSize:
                                                                       16.0,
                                                                   fontWeight:
                                                                       FontWeight
-                                                                          .w500,
+                                                                          .w600,
                                                                 ),
                                                           ),
                                                           TextSpan(
@@ -525,7 +525,7 @@ class _SHOWINGRegistroDeVisita2WidgetState
                                                                 .override(
                                                                   font:
                                                                       GoogleFonts
-                                                                          .inter(
+                                                                          .publicSans(
                                                                     fontWeight:
                                                                         FontWeight
                                                                             .normal,
@@ -593,9 +593,7 @@ class _SHOWINGRegistroDeVisita2WidgetState
                                         width: double.infinity,
                                         height: 36,
                                         decoration: BoxDecoration(
-                                          border: Border.all(
-                                              color: Colors.red
-                                                  .withValues(alpha: 0.5)),
+                                          color: const Color(0xFFC90A0A),
                                           borderRadius:
                                               BorderRadius.circular(99),
                                         ),
@@ -605,8 +603,8 @@ class _SHOWINGRegistroDeVisita2WidgetState
                                             style: TextStyle(
                                               fontFamily: 'Public Sans',
                                               fontSize: 14,
-                                              fontWeight: FontWeight.w500,
-                                              color: Colors.red,
+                                              fontWeight: FontWeight.w600,
+                                              color: Colors.white,
                                             ),
                                           ),
                                         ),

@@ -9,6 +9,7 @@ import '/showing/s_h_o_w_i_n_g_header/s_h_o_w_i_n_g_header_widget.dart';
 import '/showing/s_h_o_w_i_n_g_report_popup/s_h_o_w_i_n_g_report_popup_widget.dart';
 import '/showing/s_h_o_w_i_n_g_to_navegation_app/s_h_o_w_i_n_g_to_navegation_app_widget.dart';
 import '/custom_code/widgets/index.dart' as custom_widgets;
+import '/listing_hq/listing_hq_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 's_h_o_w_i_n_g_propiedad_a_mostrar_model.dart';
@@ -635,12 +636,12 @@ class _SHOWINGPropiedadAMostrarWidgetState
                       model: _model.sHOWINGHeaderModel,
                       updateCallback: () => safeSetState(() {}),
                       child: const SHOWINGHeaderWidget(
-                        title: 'Propiedad a\nmostrar',
+                        title: 'Propiedad a mostrar',
                       ),
                     ),
                     Padding(
                       padding: const EdgeInsetsDirectional.fromSTEB(
-                          20.0, 0.0, 20.0, 100.0),
+                          20.0, 0.0, 20.0, 120.0),
                       child: _loading
                           ? const Padding(
                               padding: EdgeInsets.symmetric(vertical: 80.0),
@@ -659,7 +660,7 @@ class _SHOWINGPropiedadAMostrarWidgetState
                                       style: FlutterFlowTheme.of(context)
                                           .bodyMedium
                                           .override(
-                                            font: GoogleFonts.inter(),
+                                            font: GoogleFonts.publicSans(),
                                             color: Colors.red,
                                           ),
                                     ),
@@ -685,29 +686,8 @@ class _SHOWINGPropiedadAMostrarWidgetState
                                                     -1.0, 0.0),
                                             child: Text(
                                               'Propiedad',
-                                              style:
-                                                  FlutterFlowTheme.of(context)
-                                                      .bodyMedium
-                                                      .override(
-                                                        font: GoogleFonts.inter(
-                                                          fontWeight:
-                                                              FontWeight.w600,
-                                                          fontStyle:
-                                                              FlutterFlowTheme.of(
-                                                                      context)
-                                                                  .bodyMedium
-                                                                  .fontStyle,
-                                                        ),
-                                                        fontSize: 16.0,
-                                                        letterSpacing: 0.0,
-                                                        fontWeight:
-                                                            FontWeight.w600,
-                                                        fontStyle:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .bodyMedium
-                                                                .fontStyle,
-                                                      ),
+                                              style: ListingHqUi.sectionTitle(
+                                                  context),
                                             ),
                                           ),
                                           FFButtonWidget(
@@ -733,7 +713,7 @@ class _SHOWINGPropiedadAMostrarWidgetState
                                               Icons.remove_red_eye_outlined,
                                               color:
                                                   FlutterFlowTheme.of(context)
-                                                      .primaryText,
+                                                      .primary,
                                               size: 15.0,
                                             ),
                                             text: 'Ver más',
@@ -747,9 +727,7 @@ class _SHOWINGPropiedadAMostrarWidgetState
                                                   const EdgeInsetsDirectional
                                                       .fromSTEB(
                                                       0.0, 0.0, 0.0, 0.0),
-                                              color:
-                                                  FlutterFlowTheme.of(context)
-                                                      .accent1,
+                                              color: Colors.white,
                                               textStyle: FlutterFlowTheme.of(
                                                       context)
                                                   .titleSmall
@@ -757,7 +735,7 @@ class _SHOWINGPropiedadAMostrarWidgetState
                                                     font:
                                                         GoogleFonts.publicSans(
                                                       fontWeight:
-                                                          FontWeight.normal,
+                                                          FontWeight.w600,
                                                       fontStyle:
                                                           FlutterFlowTheme.of(
                                                                   context)
@@ -766,11 +744,11 @@ class _SHOWINGPropiedadAMostrarWidgetState
                                                     ),
                                                     color: FlutterFlowTheme.of(
                                                             context)
-                                                        .primaryText,
+                                                        .primary,
                                                     fontSize: 14.0,
                                                     letterSpacing: 0.0,
                                                     fontWeight:
-                                                        FontWeight.normal,
+                                                        FontWeight.w600,
                                                     fontStyle:
                                                         FlutterFlowTheme.of(
                                                                 context)
@@ -778,6 +756,11 @@ class _SHOWINGPropiedadAMostrarWidgetState
                                                             .fontStyle,
                                                   ),
                                               elevation: 0.0,
+                                              borderSide: BorderSide(
+                                                color:
+                                                    FlutterFlowTheme.of(context)
+                                                        .primary,
+                                              ),
                                               borderRadius:
                                                   BorderRadius.circular(24.0),
                                             ),
@@ -793,12 +776,8 @@ class _SHOWINGPropiedadAMostrarWidgetState
                                         width:
                                             MediaQuery.sizeOf(context).width *
                                                 1.0,
-                                        decoration: BoxDecoration(
-                                          color: FlutterFlowTheme.of(context)
-                                              .secondaryBackground,
-                                          borderRadius:
-                                              BorderRadius.circular(12.0),
-                                        ),
+                                        decoration:
+                                            ListingHqUi.cardDecoration(context),
                                         child: Padding(
                                           padding: const EdgeInsetsDirectional
                                               .fromSTEB(10.0, 10.0, 10.0, 10.0),
@@ -891,19 +870,21 @@ class _SHOWINGPropiedadAMostrarWidgetState
                                                                       .bodyMedium
                                                                       .override(
                                                                         font: GoogleFonts
-                                                                            .inter(
+                                                                            .publicSans(
                                                                           fontWeight:
-                                                                              FontWeight.w500,
+                                                                              FontWeight.w600,
                                                                           fontStyle: FlutterFlowTheme.of(context)
                                                                               .bodyMedium
                                                                               .fontStyle,
                                                                         ),
+                                                                        color: ListingHqUi
+                                                                            .textDark,
                                                                         fontSize:
                                                                             16.0,
                                                                         letterSpacing:
                                                                             0.0,
                                                                         fontWeight:
-                                                                            FontWeight.w500,
+                                                                            FontWeight.w600,
                                                                         fontStyle: FlutterFlowTheme.of(context)
                                                                             .bodyMedium
                                                                             .fontStyle,
@@ -917,7 +898,7 @@ class _SHOWINGPropiedadAMostrarWidgetState
                                                                       .bodyMedium
                                                                       .override(
                                                                         font: GoogleFonts
-                                                                            .inter(
+                                                                            .publicSans(
                                                                           fontWeight:
                                                                               FontWeight.normal,
                                                                           fontStyle: FlutterFlowTheme.of(context)
@@ -1002,7 +983,7 @@ class _SHOWINGPropiedadAMostrarWidgetState
                                         style: FlutterFlowTheme.of(context)
                                             .bodyMedium
                                             .override(
-                                              font: GoogleFonts.inter(
+                                              font: GoogleFonts.publicSans(
                                                 fontWeight:
                                                     FlutterFlowTheme.of(context)
                                                         .bodyMedium
@@ -1040,7 +1021,7 @@ class _SHOWINGPropiedadAMostrarWidgetState
                                           style: FlutterFlowTheme.of(context)
                                               .bodyMedium
                                               .override(
-                                                font: GoogleFonts.inter(
+                                                font: GoogleFonts.publicSans(
                                                   fontWeight:
                                                       FlutterFlowTheme.of(
                                                               context)
@@ -1077,16 +1058,9 @@ class _SHOWINGPropiedadAMostrarWidgetState
                                               MediaQuery.sizeOf(context).width *
                                                   1.0,
                                           decoration: BoxDecoration(
-                                            color: const Color(
-                                                0xFFE8F5F5), // Light green background
+                                            color: const Color(0xFFE8F5F5),
                                             borderRadius:
-                                                BorderRadius.circular(8.0),
-                                            border: Border.all(
-                                              color:
-                                                  FlutterFlowTheme.of(context)
-                                                      .primary,
-                                              width: 1.0,
-                                            ),
+                                                BorderRadius.circular(12.0),
                                           ),
                                           child: Padding(
                                             padding: const EdgeInsetsDirectional
@@ -1099,7 +1073,7 @@ class _SHOWINGPropiedadAMostrarWidgetState
                                                   FlutterFlowTheme.of(context)
                                                       .bodyMedium
                                                       .override(
-                                                        font: GoogleFonts.inter(
+                                                        font: GoogleFonts.publicSans(
                                                           fontWeight:
                                                               FontWeight.w500,
                                                         ),
@@ -1212,19 +1186,8 @@ class _SHOWINGPropiedadAMostrarWidgetState
                                                     MediaQuery.sizeOf(context)
                                                             .width *
                                                         0.42,
-                                                decoration: BoxDecoration(
-                                                  color: FlutterFlowTheme.of(
-                                                          context)
-                                                      .secondaryBackground,
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          10.0),
-                                                  border: Border.all(
-                                                    color: FlutterFlowTheme.of(
-                                                            context)
-                                                        .primary,
-                                                  ),
-                                                ),
+                                                decoration: ListingHqUi
+                                                    .cardDecoration(context),
                                                 child: Padding(
                                                   padding:
                                                       const EdgeInsetsDirectional
@@ -1355,7 +1318,7 @@ class _SHOWINGPropiedadAMostrarWidgetState
                                                               .override(
                                                                 font:
                                                                     GoogleFonts
-                                                                        .inter(
+                                                                        .publicSans(
                                                                   fontWeight:
                                                                       FontWeight
                                                                           .w600,
@@ -1462,7 +1425,7 @@ class _SHOWINGPropiedadAMostrarWidgetState
                                                                   .bodyMedium
                                                                   .override(
                                                                     font: GoogleFonts
-                                                                        .inter(),
+                                                                        .publicSans(),
                                                                     color: _ownerPhone.isNotEmpty
                                                                         ? FlutterFlowTheme.of(context)
                                                                             .primary
@@ -1482,19 +1445,8 @@ class _SHOWINGPropiedadAMostrarWidgetState
                                                     MediaQuery.sizeOf(context)
                                                             .width *
                                                         0.42,
-                                                decoration: BoxDecoration(
-                                                  color: FlutterFlowTheme.of(
-                                                          context)
-                                                      .secondaryBackground,
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          10.0),
-                                                  border: Border.all(
-                                                    color: FlutterFlowTheme.of(
-                                                            context)
-                                                        .primary,
-                                                  ),
-                                                ),
+                                                decoration: ListingHqUi
+                                                    .cardDecoration(context),
                                                 child: Padding(
                                                   padding:
                                                       const EdgeInsetsDirectional
@@ -1625,7 +1577,7 @@ class _SHOWINGPropiedadAMostrarWidgetState
                                                               .override(
                                                                 font:
                                                                     GoogleFonts
-                                                                        .inter(
+                                                                        .publicSans(
                                                                   fontWeight:
                                                                       FontWeight
                                                                           .w600,
@@ -1732,7 +1684,7 @@ class _SHOWINGPropiedadAMostrarWidgetState
                                                                   .bodyMedium
                                                                   .override(
                                                                     font: GoogleFonts
-                                                                        .inter(),
+                                                                        .publicSans(),
                                                                     color: _clientPhone.isNotEmpty
                                                                         ? FlutterFlowTheme.of(context)
                                                                             .primary
@@ -1786,23 +1738,19 @@ class _SHOWINGPropiedadAMostrarWidgetState
                                           iconPadding:
                                               const EdgeInsetsDirectional
                                                   .fromSTEB(0.0, 0.0, 0.0, 0.0),
-                                          color: Colors.transparent,
+                                          color: const Color(0xFFC90A0A),
                                           textStyle: FlutterFlowTheme.of(
                                                   context)
                                               .titleSmall
                                               .override(
                                                 font: GoogleFonts.publicSans(
-                                                  fontWeight: FontWeight.normal,
+                                                  fontWeight: FontWeight.w600,
                                                 ),
-                                                color: const Color(0xFFC90A0A),
+                                                color: Colors.white,
                                                 fontSize: 16.0,
                                                 letterSpacing: 0.0,
                                               ),
                                           elevation: 0.0,
-                                          borderSide: const BorderSide(
-                                            color: Color(0xFFC90A0A),
-                                            width: 1.0,
-                                          ),
                                           borderRadius:
                                               BorderRadius.circular(24.0),
                                         ),
