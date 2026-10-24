@@ -18,6 +18,10 @@ export 'l_i_s_t_i_n_g_h_q_propiedades_model.dart';
 class _HqCardData {
   final String id;
   final String address;
+
+  /// Nombre de la propiedad: no se muestra (la tarjeta lleva la dirección),
+  /// pero se busca por él, como en Documentos.
+  final String name;
   final String statusText;
   final Color statusBgColor;
   final Color statusTextColor;
@@ -34,6 +38,7 @@ class _HqCardData {
     required this.statusBgColor,
     required this.statusTextColor,
     required this.tagText,
+    this.name = '',
     this.substatus = '',
   });
 }
@@ -67,6 +72,10 @@ class _LISTINGHQPropiedadesWidgetState extends State<LISTINGHQPropiedadesWidget>
   static const String _kAssignSubstatus =
       'READY_TO_ASSIGN_OPERATIVE_LISTING,RESCHEDULE_REQUIRED';
   static const String _kPublishSubstatus = 'READY_TO_PUBLISH';
+
+  /// Cuántas propiedades se traen por sección (igual que Documentos). La
+  /// búsqueda es local: lo que no se trae no se puede encontrar.
+  static const String _kPageLimit = '50';
 
   // Paleta de las píldoras de estado, tomada del diseño.
   static const Color _kPendingBg = Color(0xFFFFDBBC);
@@ -202,7 +211,7 @@ class _LISTINGHQPropiedadesWidgetState extends State<LISTINGHQPropiedadesWidget>
       authToken: token,
       substatus: substatus,
       page: '1',
-      limit: '10',
+      limit: _kPageLimit,
     );
     if (!res.succeeded) return [];
     final raw = getJsonField(res.jsonBody, r'$.data');
@@ -212,11 +221,16 @@ class _LISTINGHQPropiedadesWidgetState extends State<LISTINGHQPropiedadesWidget>
       final id = v is Map ? v['id']?.toString() ?? '' : '';
       final visitSubstatus = v is Map ? v['substatus']?.toString() ?? '' : '';
       String address = '';
+      String name = '';
       if (v is Map) {
+        name = v['propertyName']?.toString() ?? '';
         // `/visits/lister-hq` expone la propiedad resumida como
         // `propertyInfo`; se conserva `property` por compatibilidad.
         final prop = v['propertyInfo'] ?? v['property'];
         if (prop is Map) {
+          if (name.isEmpty) {
+            name = prop['name']?.toString() ?? prop['title']?.toString() ?? '';
+          }
           final locAddr = _deepMap(prop, ['location', 'address']);
           address = locAddr?['fullAddress']?.toString() ??
               locAddr?['street']?.toString() ??
@@ -231,6 +245,7 @@ class _LISTINGHQPropiedadesWidgetState extends State<LISTINGHQPropiedadesWidget>
       return _HqCardData(
         id: id,
         address: address,
+        name: name,
         statusText: labels.status,
         statusBgColor: labels.bg,
         statusTextColor: labels.fg,
@@ -250,7 +265,7 @@ class _LISTINGHQPropiedadesWidgetState extends State<LISTINGHQPropiedadesWidget>
       authToken: token,
       status: status,
       page: '1',
-      limit: '10',
+      limit: _kPageLimit,
     );
     if (!res.succeeded) return [];
     final raw = getJsonField(res.jsonBody, r'$.data');
@@ -259,10 +274,12 @@ class _LISTINGHQPropiedadesWidgetState extends State<LISTINGHQPropiedadesWidget>
     return processes.map((p) {
       final id = p is Map ? p['id']?.toString() ?? '' : '';
       String address = '';
+      String name = '';
       if (p is Map) {
         final prop = p['property'] ??
             (p['visit'] is Map ? p['visit']['property'] : null);
         if (prop is Map) {
+          name = prop['name']?.toString() ?? prop['title']?.toString() ?? '';
           final locAddr = _deepMap(prop, ['location', 'address']);
           address = locAddr?['fullAddress']?.toString() ??
               locAddr?['street']?.toString() ??
@@ -272,6 +289,7 @@ class _LISTINGHQPropiedadesWidgetState extends State<LISTINGHQPropiedadesWidget>
       return _HqCardData(
         id: id,
         address: address,
+        name: name,
         statusText: 'Pausada',
         statusBgColor: _kUrgentBg,
         statusTextColor: _kUrgentFg,
@@ -349,11 +367,12 @@ class _LISTINGHQPropiedadesWidgetState extends State<LISTINGHQPropiedadesWidget>
     return b.toString().toLowerCase();
   }
 
-  /// Coincide con la dirección, la etiqueta o el estado de la tarjeta.
+  /// Coincide con el nombre, la dirección, la etiqueta o el estado.
   bool _matches(_HqCardData e) {
     final q = _fold(_query.trim());
     if (q.isEmpty) return true;
-    final haystack = _fold('${e.address} ${e.tagText} ${e.statusText}');
+    final haystack =
+        _fold('${e.name} ${e.address} ${e.tagText} ${e.statusText}');
     return q.split(RegExp(r'\s+')).every(haystack.contains);
   }
 
