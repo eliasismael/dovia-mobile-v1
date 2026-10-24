@@ -68,12 +68,12 @@ class _LISTINGHQProfileWidgetState extends State<LISTINGHQProfileWidget> {
                       model: _model.lISTINGHQHeaderModel,
                       updateCallback: () => safeSetState(() {}),
                       child: const LISTINGHQHeaderWidget(
-                        titleText: 'Profile',
+                        titleText: 'Ajustes',
                       ),
                     ),
                     Padding(
                       padding: const EdgeInsetsDirectional.fromSTEB(
-                          20.0, 20.0, 20.0, 100.0),
+                          20.0, 8.0, 20.0, 120.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         children: [

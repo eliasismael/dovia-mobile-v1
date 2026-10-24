@@ -16,6 +16,7 @@ class DOVIASHAREDHeaderWidget extends StatefulWidget {
     super.key,
     String? title,
     this.hideActions = false,
+    this.showBack = true,
     this.showCurrency = true,
     this.showMap = true,
     this.mapActive = false,
@@ -30,6 +31,9 @@ class DOVIASHAREDHeaderWidget extends StatefulWidget {
 
   final String title;
   final bool hideActions;
+
+  /// En los inicios no hay a dónde volver: se oculta la flecha.
+  final bool showBack;
   final bool showCurrency;
   final bool showMap;
 
@@ -103,8 +107,24 @@ class _DOVIASHAREDHeaderWidgetState extends State<DOVIASHAREDHeaderWidget> {
 
   bool get _showChat => widget.onChatTap != null || widget.showSupport;
 
-  double get _leadingWidth =>
-      _backSize + (widget.showLogo ? _gap + _logoWidth : 0.0);
+  double get _leadingWidth {
+    final back = widget.showBack ? _backSize : 0.0;
+    final logo = widget.showLogo ? _logoWidth : 0.0;
+    final gap = widget.showBack && widget.showLogo ? _gap : 0.0;
+    return back + gap + logo;
+  }
+
+  bool get _isListerHq => FFAppState().UserRole == 'LISTER_HQ';
+
+  /// Avisos y ajustes llevan a las pantallas del rol: Lister HQ tiene las
+  /// suyas; el resto usa las del cliente.
+  String get _notificationsRoute => _isListerHq
+      ? LISTINGHQNotificationsWidget.routeName
+      : DOVIACLIENTNotificacionesWidget.routeName;
+
+  String get _settingsRoute => _isListerHq
+      ? LISTINGHQProfileWidget.routeName
+      : DOVIACLIENTAjustesWidget.routeName;
 
   double get _actionsWidth {
     if (widget.hideActions) return 0.0;
@@ -146,45 +166,43 @@ class _DOVIASHAREDHeaderWidgetState extends State<DOVIASHAREDHeaderWidget> {
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                InkWell(
-                  splashColor: Colors.transparent,
-                  focusColor: Colors.transparent,
-                  hoverColor: Colors.transparent,
-                  highlightColor: Colors.transparent,
-                  onTap: () async {
-                    context.safePop();
-                  },
-                  child: Container(
-                    width: 35.0,
-                    height: 35.0,
-                    decoration: BoxDecoration(
-                      color: FlutterFlowTheme.of(context).alternate,
-                      shape: BoxShape.circle,
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8.0),
-                      child: SvgPicture.asset(
-                        'assets/images/IconoVolverAtras.svg',
-                        width: 200.0,
-                        height: 200.0,
-                        fit: BoxFit.none,
-                      ),
-                    ),
-                  ),
-                ),
-                if (widget.showLogo)
+                if (widget.showBack)
                   InkWell(
                     splashColor: Colors.transparent,
                     focusColor: Colors.transparent,
                     hoverColor: Colors.transparent,
                     highlightColor: Colors.transparent,
                     onTap: () async {
-                      final role = FFAppState().UserRole;
-                      if (role == 'OPERATIVE_LISTER') {
-                        context.pushNamed(OPERATIVELISTINGHomeWidget.routeName);
-                      } else {
-                        context.pushNamed(DOVIACLIENTHomePageWidget.routeName);
-                      }
+                      context.safePop();
+                    },
+                    child: Container(
+                      width: 35.0,
+                      height: 35.0,
+                      decoration: BoxDecoration(
+                        color: FlutterFlowTheme.of(context).alternate,
+                        shape: BoxShape.circle,
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8.0),
+                        child: SvgPicture.asset(
+                          'assets/images/IconoVolverAtras.svg',
+                          width: 200.0,
+                          height: 200.0,
+                          fit: BoxFit.none,
+                        ),
+                      ),
+                    ),
+                  ),
+                if (widget.showLogo)
+                  InkWell(
+                    splashColor: Colors.transparent,
+                    focusColor: Colors.transparent,
+                    hoverColor: Colors.transparent,
+                    highlightColor: Colors.transparent,
+                    // Al inicio del rol con el que se entró.
+                    onTap: () async {
+                      context.pushNamed(
+                          homeRouteNameForRole(FFAppState().UserRole));
                     },
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(0.0),
@@ -259,27 +277,39 @@ class _DOVIASHAREDHeaderWidgetState extends State<DOVIASHAREDHeaderWidget> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           if (widget.showMap)
-                            Container(
-                              width: 40.0,
-                              height: 40.0,
-                              decoration: BoxDecoration(
-                                color: widget.mapActive
-                                    ? const Color(0xFF00444B)
-                                    : FlutterFlowTheme.of(context)
-                                        .secondaryBackground,
-                                shape: BoxShape.circle,
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(0.0),
-                                child: SvgPicture.asset(
-                                  'assets/images/IconoDoviaHomeClienteMapa.svg',
-                                  width: 8.0,
-                                  height: 8.0,
-                                  fit: BoxFit.none,
-                                  colorFilter: widget.mapActive
-                                      ? const ColorFilter.mode(
-                                          Colors.white, BlendMode.srcIn)
-                                      : null,
+                            // Abre el mapa de propiedades, el mismo del
+                            // inicio. Antes el ícono no tenía acción.
+                            InkWell(
+                              splashColor: Colors.transparent,
+                              focusColor: Colors.transparent,
+                              hoverColor: Colors.transparent,
+                              highlightColor: Colors.transparent,
+                              onTap: widget.mapActive
+                                  ? null
+                                  : () => context.pushNamed(
+                                      MapWidgetPageTestWidget.routeName),
+                              child: Container(
+                                width: 40.0,
+                                height: 40.0,
+                                decoration: BoxDecoration(
+                                  color: widget.mapActive
+                                      ? const Color(0xFF00444B)
+                                      : FlutterFlowTheme.of(context)
+                                          .secondaryBackground,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(0.0),
+                                  child: SvgPicture.asset(
+                                    'assets/images/IconoDoviaHomeClienteMapa.svg',
+                                    width: 8.0,
+                                    height: 8.0,
+                                    fit: BoxFit.none,
+                                    colorFilter: widget.mapActive
+                                        ? const ColorFilter.mode(
+                                            Colors.white, BlendMode.srcIn)
+                                        : null,
+                                  ),
                                 ),
                               ),
                             ),
@@ -351,8 +381,7 @@ class _DOVIASHAREDHeaderWidgetState extends State<DOVIASHAREDHeaderWidget> {
                               hoverColor: Colors.transparent,
                               highlightColor: Colors.transparent,
                               onTap: () async {
-                                context.pushNamed(
-                                    DOVIACLIENTNotificacionesWidget.routeName);
+                                context.pushNamed(_notificationsRoute);
                               },
                               // El contador va sobre el borde del círculo, no
                               // sobre la campana.
@@ -384,8 +413,7 @@ class _DOVIASHAREDHeaderWidgetState extends State<DOVIASHAREDHeaderWidget> {
                               hoverColor: Colors.transparent,
                               highlightColor: Colors.transparent,
                               onTap: () async {
-                                context.pushNamed(
-                                    DOVIACLIENTAjustesWidget.routeName);
+                                context.pushNamed(_settingsRoute);
                               },
                               child: Container(
                                 width: 40.0,

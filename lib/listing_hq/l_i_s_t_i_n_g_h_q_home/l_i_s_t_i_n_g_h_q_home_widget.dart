@@ -2,8 +2,8 @@ import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_visits.dart';
 import '/backend/api_requests/api_legal_process.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
+import '/listing_hq/listing_hq_ui.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_header/l_i_s_t_i_n_g_h_q_header_widget.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_navbar/l_i_s_t_i_n_g_h_q_navbar_widget.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
@@ -13,7 +13,6 @@ import '/listing_hq/l_i_s_t_i_n_g_h_q_propiedad_rechazada/l_i_s_t_i_n_g_h_q_prop
 import '/listing_hq/l_i_s_t_i_n_g_h_q_propiedad_archivos_pendientes/l_i_s_t_i_n_g_h_q_propiedad_archivos_pendientes_widget.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_propiedad_asignada/l_i_s_t_i_n_g_h_q_propiedad_asignada_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'l_i_s_t_i_n_g_h_q_home_model.dart';
 import '/shared_components/dovia_spinner.dart';
@@ -94,8 +93,6 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget>
   static const Color _kPendingFg = Color(0xFFF57E00);
   static const Color _kUrgentBg = Color(0xFFFFBCBC);
   static const Color _kUrgentFg = Color(0xFFF52100);
-  static const Color _kAlertBg = Color(0xFFF8D5D5);
-  static const Color _kAlertFg = Color(0xFFBC0000);
 
   Future<List<_HqCardData>>? _docsFuture;
   Future<List<_HqCardData>>? _assignFuture;
@@ -159,7 +156,7 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget>
         );
       case 'RESCHEDULE_REQUIRED':
         return (
-          tag: 'Re-programar',
+          tag: 'Reprogramar',
           status: 'Urgente',
           bg: _kUrgentBg,
           fg: _kUrgentFg
@@ -364,48 +361,15 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget>
 
   Widget _buildSectionHeader(String title, String routeToPush,
       {bool isExpanded = false, VoidCallback? onToggle}) {
-    return Padding(
-      padding: const EdgeInsetsDirectional.fromSTEB(0.0, 32.0, 0.0, 12.0),
-      child: Row(
-        mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Expanded(
-            child: Text(
-              title,
-              style: FlutterFlowTheme.of(context).bodyMedium.override(
-                    font: GoogleFonts.inter(
-                      fontWeight: FontWeight.w600,
-                    ),
-                    fontSize: 16.0,
-                  ),
-            ),
-          ),
-          // Link de texto, con el estilo de los "Ver más" del resto de la app.
-          const SizedBox(width: 12.0),
-          InkWell(
-            splashColor: Colors.transparent,
-            highlightColor: Colors.transparent,
-            onTap: onToggle ??
-                () {
-                  if (routeToPush.isNotEmpty) {
-                    context.pushNamed(routeToPush);
-                  }
-                },
-            child: Text(
-              onToggle != null
-                  ? (isExpanded ? 'Ver menos' : 'Ver todo')
-                  : 'Ver todo',
-              style: GoogleFonts.publicSans(
-                color: const Color(0xFF007376),
-                fontSize: 14.0,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ],
-      ),
+    return ListingHqSectionHeader(
+      title: title,
+      linkText: onToggle != null && isExpanded ? 'Ver menos' : 'Ver todo',
+      onLinkTap: onToggle ??
+          () {
+            if (routeToPush.isNotEmpty) {
+              context.pushNamed(routeToPush);
+            }
+          },
     );
   }
 
@@ -413,137 +377,30 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget>
     required String address,
     required String tagText,
     required String statusText,
-    required Color statusBgColor,
-    required Color statusTextColor,
+    required Color statusColor,
     required String buttonText,
     VoidCallback? onPressed,
   }) {
-    return Container(
-      width: 250.0,
-      margin: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 15.0, 0.0),
-      decoration: BoxDecoration(
-        color: FlutterFlowTheme.of(context).secondaryBackground,
-        boxShadow: const [
-          BoxShadow(
-            blurRadius: 4.0,
-            color: Color(0x1A000000),
-            offset: Offset(0.0, 2.0),
-          ),
-        ],
-        borderRadius: BorderRadius.circular(12.0),
-      ),
-      child: Padding(
-        padding: const EdgeInsetsDirectional.fromSTEB(15.0, 10.0, 15.0, 10.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              address.isNotEmpty ? 'Dirección: $address' : 'Dirección: N/A',
-              style: FlutterFlowTheme.of(context).bodyMedium.override(
-                    font: GoogleFonts.inter(),
-                  ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            Container(
-              height: 22.0,
-              decoration: BoxDecoration(
-                color: FlutterFlowTheme.of(context).accent1,
-                borderRadius: BorderRadius.circular(24.0),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                child: Center(
-                  child: Text(
-                    tagText,
-                    style: FlutterFlowTheme.of(context).titleSmall.override(
-                          font: GoogleFonts.publicSans(),
-                          color: FlutterFlowTheme.of(context).primary,
-                          fontSize: 12.0,
-                        ),
-                  ),
-                ),
-              ),
-            ),
-            Row(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Estatus',
-                  style: FlutterFlowTheme.of(context).bodyMedium.override(
-                        font: GoogleFonts.inter(),
-                        fontSize: 12.0,
-                      ),
-                ),
-                Container(
-                  decoration: BoxDecoration(
-                    color: statusBgColor,
-                    borderRadius: BorderRadius.circular(24.0),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsetsDirectional.fromSTEB(
-                        10.0, 2.0, 10.0, 2.0),
-                    child: Text(
-                      statusText,
-                      style: FlutterFlowTheme.of(context).bodyMedium.override(
-                            font: GoogleFonts.inter(),
-                            color: statusTextColor,
-                            fontSize: 12.0,
-                          ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            FFButtonWidget(
-              onPressed: onPressed ??
-                  () {
-                    print('Button pressed ...');
-                  },
-              text: buttonText,
-              options: FFButtonOptions(
-                width: double.infinity,
-                height: 30.0,
-                color: FlutterFlowTheme.of(context).primary,
-                textStyle: FlutterFlowTheme.of(context).titleSmall.override(
-                      font: GoogleFonts.publicSans(
-                        fontWeight: FontWeight.w300,
-                      ),
-                      color: Colors.white,
-                      fontSize: 13.0,
-                    ),
-                elevation: 0.0,
-                borderRadius: BorderRadius.circular(24.0),
-              ),
-            ),
-          ].divide(const SizedBox(height: 8.0)),
-        ),
-      ),
+    return ListingHqPropertyCard(
+      address: address,
+      tagText: tagText,
+      statusText: statusText,
+      statusColor: statusColor,
+      buttonText: buttonText,
+      onPressed: onPressed,
     );
   }
 
   Widget _buildHorizontalList(List<Widget> cards) {
-    if (cards.isEmpty) {
-      return Padding(
-        padding: const EdgeInsets.only(bottom: 16.0),
-        child: Text(
-          'No hay propiedades en esta sección',
-          style: FlutterFlowTheme.of(context).bodyMedium,
-        ),
-      );
-    }
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
-      child: SizedBox(
-        height: 160.0,
-        child: ListView(
-          scrollDirection: Axis.horizontal,
-          children: cards,
-        ),
-      ),
+      child: cards.isEmpty
+          ? Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: ListingHqUi.emptyText(
+                  context, 'No hay propiedades en esta sección.'),
+            )
+          : ListingHqCarousel(children: cards),
     );
   }
 
@@ -554,124 +411,65 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget>
     VoidCallback? onPressed,
     String buttonText = 'Ver más',
   }) {
+    const secondary = TextStyle(
+      fontFamily: 'Public Sans',
+      fontSize: 12.0,
+      color: Color(0xFF888888),
+    );
     return Padding(
-      padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 15.0),
+      padding: const EdgeInsetsDirectional.only(bottom: 15.0),
       child: Container(
-        width: MediaQuery.sizeOf(context).width * 1.0,
-        decoration: BoxDecoration(
-          color: FlutterFlowTheme.of(context).secondaryBackground,
-          boxShadow: const [
-            BoxShadow(
-              blurRadius: 4.0,
-              color: Color(0x1A000000),
-              offset: Offset(0.0, 2.0),
-            ),
-          ],
-          borderRadius: BorderRadius.circular(12.0),
-        ),
-        child: Padding(
-          padding: const EdgeInsetsDirectional.fromSTEB(10.0, 10.0, 10.0, 10.0),
-          child: Row(
-            mainAxisSize: MainAxisSize.max,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(10.0),
+        decoration: ListingHqUi.cardDecoration(context),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10.0),
+              child: Image.asset(
+                'assets/images/casa_card_sobreMiVisita.png',
                 width: 100.0,
                 height: 100.0,
-                decoration: BoxDecoration(
-                  color: FlutterFlowTheme.of(context).secondaryBackground,
-                  borderRadius: BorderRadius.circular(12.0),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12.0),
-                  child: Image.asset(
-                    'assets/images/casa_card_sobreMiVisita.png',
-                    width: 100.0,
-                    height: 100.0,
-                    fit: BoxFit.cover,
+                fit: BoxFit.cover,
+              ),
+            ),
+            const SizedBox(width: 10.0),
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title.isNotEmpty ? title : 'Propiedad',
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.publicSans(
+                      color: ListingHqUi.textDark,
+                      fontSize: 15.0,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-              ),
-              const SizedBox(width: 10.0),
-              Expanded(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title.isNotEmpty ? title : 'Propiedad',
-                      style: FlutterFlowTheme.of(context).bodyMedium.override(
-                            font: GoogleFonts.inter(
-                              fontWeight: FontWeight.w600,
-                            ),
-                            fontSize: 16.0,
-                          ),
-                    ),
+                  if (address.isNotEmpty) ...[
                     const SizedBox(height: 4.0),
-                    Text(
-                      address.isNotEmpty
-                          ? 'Dirección: $address'
-                          : 'Dirección: N/A',
-                      style: FlutterFlowTheme.of(context).bodyMedium.override(
-                            font: GoogleFonts.inter(),
-                            fontSize: 12.0,
-                          ),
-                    ),
-                    if (ownerName.isNotEmpty) ...[
-                      const SizedBox(height: 4.0),
-                      Text(
-                        ownerName,
-                        style: FlutterFlowTheme.of(context).bodyMedium.override(
-                              font: GoogleFonts.inter(),
-                              fontSize: 12.0,
-                            ),
-                      ),
-                    ],
-                    const SizedBox(height: 8.0),
-                    Container(
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: _kAlertBg,
-                        borderRadius: BorderRadius.circular(100.0),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsetsDirectional.fromSTEB(
-                            10.0, 4.0, 10.0, 4.0),
-                        child: Text(
-                          'Falta información',
-                          textAlign: TextAlign.center,
-                          style:
-                              FlutterFlowTheme.of(context).bodyMedium.override(
-                                    font: GoogleFonts.inter(),
-                                    color: _kAlertFg,
-                                    fontSize: 12.0,
-                                  ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 8.0),
-                    FFButtonWidget(
-                      onPressed: onPressed ?? () {},
-                      text: buttonText,
-                      options: FFButtonOptions(
-                        width: double.infinity,
-                        height: 30.0,
-                        color: FlutterFlowTheme.of(context).primary,
-                        textStyle:
-                            FlutterFlowTheme.of(context).titleSmall.override(
-                                  font: GoogleFonts.publicSans(),
-                                  color: Colors.white,
-                                  fontSize: 13.0,
-                                ),
-                        elevation: 0.0,
-                        borderRadius: BorderRadius.circular(24.0),
-                      ),
-                    ),
+                    Text(address,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: secondary),
                   ],
-                ),
+                  if (ownerName.isNotEmpty) ...[
+                    const SizedBox(height: 4.0),
+                    Text(ownerName, style: secondary),
+                  ],
+                  const SizedBox(height: 8.0),
+                  ListingHqUi.statusPill(
+                      'Falta información', ListingHqUi.alert),
+                  const SizedBox(height: 8.0),
+                  ListingHqUi.cardButton(buttonText, onPressed),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -716,70 +514,29 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget>
                         model: _model.lISTINGHQHeaderModel,
                         updateCallback: () => safeSetState(() {}),
                         child: const LISTINGHQHeaderWidget(
-                          titleText: 'Home',
+                          titleText: 'Inicio',
                           showBack: false,
                         ),
                       ),
+                      // Lleva a Propiedades, que tiene el buscador y los
+                      // filtros reales, con el cursor ya en el buscador.
                       Padding(
                         padding: const EdgeInsetsDirectional.fromSTEB(
                             20.0, 20.0, 20.0, 0.0),
-                        child: InkWell(
-                          splashColor: Colors.transparent,
-                          focusColor: Colors.transparent,
-                          hoverColor: Colors.transparent,
-                          highlightColor: Colors.transparent,
-                          onTap: () async {
-                            context.pushNamed('LISTING_HQ_BusquedaPropiedad');
-                          },
-                          child: Container(
-                            width: double.infinity,
-                            height: 64.0,
-                            decoration: BoxDecoration(
-                              color: FlutterFlowTheme.of(context)
-                                  .secondaryBackground,
-                              borderRadius: BorderRadius.circular(100.0),
-                            ),
-                            child: Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 15.0),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.max,
-                                children: [
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(0.0),
-                                    child: SvgPicture.asset(
-                                      'assets/images/search.svg',
-                                      width: 24.0,
-                                      height: 24.0,
-                                      fit: BoxFit.none,
-                                      colorFilter: ColorFilter.mode(
-                                        FlutterFlowTheme.of(context)
-                                            .primaryText,
-                                        BlendMode.srcIn,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 20.0),
-                                  Text(
-                                    'Búsqueda con IA',
-                                    style: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .override(
-                                          font: GoogleFonts.publicSans(),
-                                          color: const Color(0xFF888888),
-                                          fontSize: 15.0,
-                                          fontWeight: FontWeight.normal,
-                                        ),
-                                  ),
-                                ],
-                              ),
-                            ),
+                        child: ListingHqSearchField(
+                          hintText: 'Buscar propiedades',
+                          onTap: () => context.pushNamed(
+                            LISTINGHQPropiedadesWidget.routeName,
+                            queryParameters: {
+                              'focusSearch':
+                                  serializeParam(true, ParamType.bool),
+                            }.withoutNulls,
                           ),
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsetsDirectional.fromSTEB(
-                            20.0, 0.0, 20.0, 80.0), // Padding bottom for navbar
+                        padding: const EdgeInsetsDirectional.fromSTEB(20.0, 0.0,
+                            20.0, 110.0), // Espacio para la barra flotante
                         child: Column(
                           mainAxisSize: MainAxisSize.max,
                           children: [
@@ -801,8 +558,7 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget>
                                             address: e.address,
                                             tagText: e.tagText,
                                             statusText: e.statusText,
-                                            statusBgColor: e.statusBgColor,
-                                            statusTextColor: e.statusTextColor,
+                                            statusColor: e.statusTextColor,
                                             buttonText: 'Revisar ahora',
                                             onPressed: () => Navigator.push(
                                               context,
@@ -835,8 +591,7 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget>
                                             address: e.address,
                                             tagText: e.tagText,
                                             statusText: e.statusText,
-                                            statusBgColor: e.statusBgColor,
-                                            statusTextColor: e.statusTextColor,
+                                            statusColor: e.statusTextColor,
                                             buttonText: e.substatus ==
                                                     'RESCHEDULE_REQUIRED'
                                                 ? 'Asignar de nuevo'
@@ -870,8 +625,7 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget>
                                             address: e.address,
                                             tagText: e.tagText,
                                             statusText: e.statusText,
-                                            statusBgColor: e.statusBgColor,
-                                            statusTextColor: e.statusTextColor,
+                                            statusColor: e.statusTextColor,
                                             buttonText: 'Revisar checklist',
                                             onPressed: () => context.pushNamed(
                                               'LISTING_HQ_Propiedad',
@@ -888,7 +642,7 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget>
 
                             // Fila 4: Propiedades Rechazadas por Dovia Legal
                             _buildSectionHeader(
-                              'Propiedades Rechazadas por Dovia Legal',
+                              'Propiedades rechazadas por Dovia Legal',
                               '',
                               isExpanded: _model.isRechazadasExpanded,
                               onToggle: () {
@@ -906,10 +660,11 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget>
                                   return Padding(
                                     padding:
                                         const EdgeInsets.only(bottom: 16.0),
-                                    child: Text(
-                                      'No hay propiedades en esta sección',
-                                      style: FlutterFlowTheme.of(context)
-                                          .bodyMedium,
+                                    child: Align(
+                                      alignment:
+                                          AlignmentDirectional.centerStart,
+                                      child: ListingHqUi.emptyText(context,
+                                          'No hay propiedades en esta sección.'),
                                     ),
                                   );
                                 }
@@ -922,7 +677,7 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget>
                                       first.ownerName,
                                       first.address,
                                       buttonText:
-                                          'Actualizar Documentacion Legal',
+                                          'Actualizar documentación legal',
                                       onPressed: () => Navigator.push(
                                         context,
                                         MaterialPageRoute(
@@ -945,7 +700,7 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget>
                                                         e.ownerName,
                                                         e.address,
                                                         buttonText:
-                                                            'Actualizar Documentacion Legal',
+                                                            'Actualizar documentación legal',
                                                         onPressed: () =>
                                                             Navigator.push(
                                                           context,
@@ -986,10 +741,11 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget>
                                   return Padding(
                                     padding:
                                         const EdgeInsets.only(bottom: 16.0),
-                                    child: Text(
-                                      'No hay propiedades en esta sección',
-                                      style: FlutterFlowTheme.of(context)
-                                          .bodyMedium,
+                                    child: Align(
+                                      alignment:
+                                          AlignmentDirectional.centerStart,
+                                      child: ListingHqUi.emptyText(context,
+                                          'No hay propiedades en esta sección.'),
                                     ),
                                   );
                                 }
@@ -1001,7 +757,7 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget>
                                       first.title,
                                       first.ownerName,
                                       first.address,
-                                      buttonText: 'Contactar con Propietario',
+                                      buttonText: 'Contactar al propietario',
                                       onPressed: () => Navigator.push(
                                         context,
                                         MaterialPageRoute(
@@ -1025,7 +781,7 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget>
                                                         e.ownerName,
                                                         e.address,
                                                         buttonText:
-                                                            'Contactar con Propietario',
+                                                            'Contactar al propietario',
                                                         onPressed: () =>
                                                             Navigator.push(
                                                           context,

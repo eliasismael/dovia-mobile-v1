@@ -4,13 +4,13 @@ import '/backend/api_requests/api_visits.dart';
 import '/backend/api_requests/api_properties.dart';
 import '/domain/offer_json.dart' show firstPropertyPhotoUrl;
 import '/flutter_flow/flutter_flow_theme.dart';
+import '/listing_hq/listing_hq_ui.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_header/l_i_s_t_i_n_g_h_q_header_widget.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_navbar/l_i_s_t_i_n_g_h_q_navbar_widget.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_propiedad_archivos_pendientes/l_i_s_t_i_n_g_h_q_propiedad_archivos_pendientes_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'l_i_s_t_i_n_g_h_q_documentos_model.dart';
 import '/shared_components/dovia_spinner.dart';
@@ -62,10 +62,11 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
 
   /// Map of tab label → API status filter value.
   /// Empty string means "no filter" (all documents).
+  // En el orden en que se muestran los filtros.
   static const Map<String, String> _tabStatusMap = {
-    'Pendiente': 'pending',
-    'Revision legal': 'in_legal_review', // TODO: backend will define this
     'Todos los documentos': '',
+    'Pendiente': 'pending',
+    'Revisión legal': 'in_legal_review', // TODO: backend will define this
   };
 
   Future<List<_DocCardData>>? _docsFuture;
@@ -116,11 +117,7 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
   /// Resolves display status information from the raw API item.
   ({String text, Color bg, Color fg}) _resolveStatus(dynamic item) {
     if (item is! Map) {
-      return (
-        text: 'Pendiente',
-        bg: const Color(0xFFFFDCCB),
-        fg: Colors.orange,
-      );
+      return (text: 'Pendiente', bg: ListingHqUi.pending, fg: Colors.white);
     }
 
     // Try to read status from item or nested checklist / document fields
@@ -131,39 +128,40 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
     if (status.contains('approved') ||
         status.contains('accepted') ||
         status.contains('aceptada')) {
-      return (
-        text: 'Aceptada',
-        bg: const Color(0x3370ACAD),
-        fg: const Color(0xFF007376),
-      );
+      return (text: 'Aceptada', bg: _approved, fg: Colors.white);
     }
     if (status.contains('legal') || status.contains('review')) {
       return (
         text: 'Revisión legal',
-        bg: const Color(0xFFE0E7FF),
-        fg: const Color(0xFF4F46E5),
+        bg: ListingHqUi.textDark,
+        fg: Colors.white,
       );
     }
     if (status.contains('rejected') || status.contains('rechazada')) {
-      return (
-        text: 'Rechazada',
-        bg: const Color(0xFFFFE4E4),
-        fg: const Color(0xFFDC2626),
-      );
+      return (text: 'Rechazada', bg: ListingHqUi.alert, fg: Colors.white);
     }
     if (status.contains('published') || status.contains('publicada')) {
-      return (
-        text: 'Publicada',
-        bg: const Color(0xFFD1FAE5),
-        fg: const Color(0xFF059669),
-      );
+      return (text: 'Publicada', bg: ListingHqUi.aqua, fg: Colors.white);
     }
     // Default: pending
-    return (
-      text: 'Pendiente',
-      bg: const Color(0xFFFFDCCB),
-      fg: Colors.orange,
-    );
+    return (text: 'Pendiente', bg: ListingHqUi.pending, fg: Colors.white);
+  }
+
+  static const Color _approved = Color(0xFF249689);
+  static const Color _missing = Color(0xFF888888);
+
+  /// Búsqueda local por propiedad, dirección o nombre de documento.
+  String _query = '';
+
+  bool _matches(_DocCardData card) {
+    final q = _query.trim().toLowerCase();
+    if (q.isEmpty) return true;
+    final haystack = [
+      card.propertyName,
+      card.address,
+      ...card.documents.map((d) => d.label),
+    ].join(' ').toLowerCase();
+    return q.split(RegExp(r'\s+')).every(haystack.contains);
   }
 
   /// Fetches documents from the API for the current active tab.
@@ -308,340 +306,60 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                       ),
                       Padding(
                         padding: const EdgeInsetsDirectional.fromSTEB(
-                            20.0, 20.0, 20.0, 80.0),
+                            20.0, 20.0, 20.0, 110.0),
                         child: Column(
                           mainAxisSize: MainAxisSize.max,
                           children: [
-                            // Search bar
-                            Padding(
-                              padding: const EdgeInsetsDirectional.fromSTEB(
-                                  0.0, 0.0, 0.0, 20.0),
+                            ListingHqSearchField(
+                              hintText: 'Buscar por propiedad o documento',
+                              controller: _model.textController,
+                              onChanged: (v) => setState(() => _query = v),
+                              onClear: () {
+                                _model.textController?.clear();
+                                setState(() => _query = '');
+                              },
+                            ),
+                            const SizedBox(height: 12.0),
+                            // Mismos filtros que en Propiedades.
+                            SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
                               child: Row(
-                                mainAxisSize: MainAxisSize.max,
                                 children: [
-                                  InkWell(
-                                    splashColor: Colors.transparent,
-                                    focusColor: Colors.transparent,
-                                    hoverColor: Colors.transparent,
-                                    highlightColor: Colors.transparent,
-                                    onTap: () async {
-                                      // Search action
-                                    },
-                                    child: Container(
-                                      height: 40.0,
-                                      decoration: BoxDecoration(
-                                        color: FlutterFlowTheme.of(context)
-                                            .secondaryBackground,
-                                        borderRadius: const BorderRadius.only(
-                                          bottomLeft: Radius.circular(25.0),
-                                          bottomRight: Radius.circular(0.0),
-                                          topLeft: Radius.circular(25.0),
-                                          topRight: Radius.circular(0.0),
+                                  for (final tab in _tabStatusMap.keys)
+                                    Padding(
+                                      padding: const EdgeInsets.only(right: 8),
+                                      child: ChoiceChip(
+                                        label: Text(tab),
+                                        selected: _model.activeTab == tab,
+                                        showCheckmark: false,
+                                        onSelected: (_) => _onTabChanged(tab),
+                                        selectedColor: Colors.white,
+                                        backgroundColor:
+                                            const Color(0xFFEFF3F4),
+                                        side: BorderSide.none,
+                                        labelStyle: GoogleFonts.publicSans(
+                                          color: _model.activeTab == tab
+                                              ? ListingHqUi.textDark
+                                              : const Color(0xFF8A8A8A),
+                                          fontWeight: _model.activeTab == tab
+                                              ? FontWeight.w600
+                                              : FontWeight.w400,
                                         ),
-                                      ),
-                                      child: Padding(
-                                        padding: const EdgeInsetsDirectional
-                                            .fromSTEB(10.0, 10.0, 10.0, 10.0),
-                                        child: ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(8.0),
-                                          child: SvgPicture.asset(
-                                            'assets/images/lupa.svg',
-                                            width: 24.0,
-                                            height: 24.0,
-                                            fit: BoxFit.none,
-                                          ),
-                                        ),
+                                        shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(20)),
+                                        elevation:
+                                            _model.activeTab == tab ? 1 : 0,
+                                        pressElevation: 0,
+                                        shadowColor: ListingHqUi.aqua
+                                            .withValues(alpha: 0.3),
                                       ),
                                     ),
-                                  ),
-                                  Expanded(
-                                    child: SizedBox(
-                                      width: 200.0,
-                                      child: TextFormField(
-                                        controller: _model.textController,
-                                        focusNode: _model.textFieldFocusNode,
-                                        autofocus: false,
-                                        enabled: true,
-                                        obscureText: false,
-                                        decoration: InputDecoration(
-                                          isDense: true,
-                                          labelStyle: FlutterFlowTheme.of(
-                                                  context)
-                                              .labelMedium
-                                              .override(
-                                                font: GoogleFonts.inter(
-                                                  fontWeight:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .labelMedium
-                                                          .fontWeight,
-                                                  fontStyle:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .labelMedium
-                                                          .fontStyle,
-                                                ),
-                                                letterSpacing: 0.0,
-                                                fontWeight:
-                                                    FlutterFlowTheme.of(context)
-                                                        .labelMedium
-                                                        .fontWeight,
-                                                fontStyle:
-                                                    FlutterFlowTheme.of(context)
-                                                        .labelMedium
-                                                        .fontStyle,
-                                              ),
-                                          hintText: 'Buscar documentos...',
-                                          hintStyle: FlutterFlowTheme.of(
-                                                  context)
-                                              .labelMedium
-                                              .override(
-                                                font: GoogleFonts.inter(
-                                                  fontWeight:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .labelMedium
-                                                          .fontWeight,
-                                                  fontStyle:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .labelMedium
-                                                          .fontStyle,
-                                                ),
-                                                letterSpacing: 0.0,
-                                                fontWeight:
-                                                    FlutterFlowTheme.of(context)
-                                                        .labelMedium
-                                                        .fontWeight,
-                                                fontStyle:
-                                                    FlutterFlowTheme.of(context)
-                                                        .labelMedium
-                                                        .fontStyle,
-                                              ),
-                                          enabledBorder:
-                                              const OutlineInputBorder(
-                                            borderSide: BorderSide(
-                                              color: Color(0x00000000),
-                                              width: 1.0,
-                                            ),
-                                            borderRadius: BorderRadius.only(
-                                              bottomLeft: Radius.circular(0.0),
-                                              bottomRight:
-                                                  Radius.circular(25.0),
-                                              topLeft: Radius.circular(0.0),
-                                              topRight: Radius.circular(25.0),
-                                            ),
-                                          ),
-                                          focusedBorder:
-                                              const OutlineInputBorder(
-                                            borderSide: BorderSide(
-                                              color: Color(0x00000000),
-                                              width: 1.0,
-                                            ),
-                                            borderRadius: BorderRadius.only(
-                                              bottomLeft: Radius.circular(0.0),
-                                              bottomRight:
-                                                  Radius.circular(25.0),
-                                              topLeft: Radius.circular(0.0),
-                                              topRight: Radius.circular(25.0),
-                                            ),
-                                          ),
-                                          errorBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
-                                              color:
-                                                  FlutterFlowTheme.of(context)
-                                                      .error,
-                                              width: 1.0,
-                                            ),
-                                            borderRadius:
-                                                const BorderRadius.only(
-                                              bottomLeft: Radius.circular(0.0),
-                                              bottomRight:
-                                                  Radius.circular(25.0),
-                                              topLeft: Radius.circular(0.0),
-                                              topRight: Radius.circular(25.0),
-                                            ),
-                                          ),
-                                          focusedErrorBorder:
-                                              OutlineInputBorder(
-                                            borderSide: BorderSide(
-                                              color:
-                                                  FlutterFlowTheme.of(context)
-                                                      .error,
-                                              width: 1.0,
-                                            ),
-                                            borderRadius:
-                                                const BorderRadius.only(
-                                              bottomLeft: Radius.circular(0.0),
-                                              bottomRight:
-                                                  Radius.circular(25.0),
-                                              topLeft: Radius.circular(0.0),
-                                              topRight: Radius.circular(25.0),
-                                            ),
-                                          ),
-                                          filled: true,
-                                          fillColor:
-                                              FlutterFlowTheme.of(context)
-                                                  .secondaryBackground,
-                                        ),
-                                        style: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .override(
-                                              font: GoogleFonts.inter(
-                                                fontWeight:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .fontWeight,
-                                                fontStyle:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .fontStyle,
-                                              ),
-                                              letterSpacing: 0.0,
-                                              fontWeight:
-                                                  FlutterFlowTheme.of(context)
-                                                      .bodyMedium
-                                                      .fontWeight,
-                                              fontStyle:
-                                                  FlutterFlowTheme.of(context)
-                                                      .bodyMedium
-                                                      .fontStyle,
-                                            ),
-                                        maxLines: null,
-                                        cursorColor:
-                                            FlutterFlowTheme.of(context)
-                                                .primaryText,
-                                        enableInteractiveSelection: true,
-                                        validator: _model
-                                            .textControllerValidator
-                                            .asValidator(context),
-                                      ),
-                                    ),
-                                  ),
                                 ],
                               ),
                             ),
-                            // Tabs
-                            Padding(
-                              padding: const EdgeInsetsDirectional.fromSTEB(
-                                  0.0, 0.0, 0.0, 20.0),
-                              child: Container(
-                                width: double.infinity,
-                                decoration: BoxDecoration(
-                                  color: FlutterFlowTheme.of(context)
-                                      .primaryBackground,
-                                  borderRadius: BorderRadius.circular(12.0),
-                                  border: Border.all(
-                                    color:
-                                        FlutterFlowTheme.of(context).alternate,
-                                    width: 1.0,
-                                  ),
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsetsDirectional.fromSTEB(
-                                      4.0, 4.0, 4.0, 4.0),
-                                  child: SingleChildScrollView(
-                                    scrollDirection: Axis.horizontal,
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.max,
-                                      children: [
-                                        'Todos los documentos',
-                                        'Pendiente',
-                                        'Revision legal',
-                                      ].map((tab) {
-                                        final isActive =
-                                            _model.activeTab == tab;
-                                        return Padding(
-                                          padding: const EdgeInsetsDirectional
-                                              .fromSTEB(0.0, 0.0, 4.0, 0.0),
-                                          child: InkWell(
-                                            splashColor: Colors.transparent,
-                                            focusColor: Colors.transparent,
-                                            hoverColor: Colors.transparent,
-                                            highlightColor: Colors.transparent,
-                                            onTap: () async {
-                                              _onTabChanged(tab);
-                                            },
-                                            child: Container(
-                                              padding:
-                                                  const EdgeInsetsDirectional
-                                                      .fromSTEB(
-                                                      16.0, 10.0, 16.0, 10.0),
-                                              decoration: BoxDecoration(
-                                                color: isActive
-                                                    ? FlutterFlowTheme.of(
-                                                            context)
-                                                        .secondaryBackground
-                                                    : Colors.transparent,
-                                                borderRadius:
-                                                    BorderRadius.circular(10.0),
-                                                boxShadow: isActive
-                                                    ? const [
-                                                        BoxShadow(
-                                                          blurRadius: 4.0,
-                                                          color:
-                                                              Color(0x0D000000),
-                                                          offset:
-                                                              Offset(0.0, 2.0),
-                                                        )
-                                                      ]
-                                                    : [],
-                                              ),
-                                              child: Center(
-                                                child: Text(
-                                                  tab,
-                                                  style: FlutterFlowTheme.of(
-                                                          context)
-                                                      .bodyMedium
-                                                      .override(
-                                                        font:
-                                                            GoogleFonts.inter(),
-                                                        color: isActive
-                                                            ? FlutterFlowTheme
-                                                                    .of(context)
-                                                                .primaryText
-                                                            : FlutterFlowTheme
-                                                                    .of(context)
-                                                                .secondaryText,
-                                                        fontWeight: isActive
-                                                            ? FontWeight.w600
-                                                            : FontWeight.normal,
-                                                      ),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        );
-                                      }).toList(),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            // Section title
-                            Align(
-                              alignment: const AlignmentDirectional(-1.0, 0.0),
-                              child: Text(
-                                'Documentos de propiedades',
-                                style: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .override(
-                                      font: GoogleFonts.inter(
-                                        fontWeight: FontWeight.w600,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontStyle,
-                                      ),
-                                      fontSize: 16.0,
-                                      letterSpacing: 0.0,
-                                      fontWeight: FontWeight.w600,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontStyle,
-                                    ),
-                              ),
-                            ),
+                            const ListingHqSectionHeader(
+                                title: 'Documentos de propiedades'),
                             // Dynamic document cards
                             FutureBuilder<List<_DocCardData>>(
                               future: _docsFuture,
@@ -662,32 +380,26 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                                     padding: const EdgeInsets.symmetric(
                                         vertical: 40.0),
                                     child: Center(
-                                      child: Text(
-                                        'Error al cargar documentos',
-                                        style: FlutterFlowTheme.of(context)
-                                            .bodyMedium,
-                                      ),
+                                      child: ListingHqUi.emptyText(context,
+                                          'No pudimos cargar los documentos.'),
                                     ),
                                   );
                                 }
 
-                                final cards = snapshot.data ?? [];
+                                final cards = (snapshot.data ?? [])
+                                    .where(_matches)
+                                    .toList();
 
                                 if (cards.isEmpty) {
                                   return Padding(
                                     padding: const EdgeInsets.symmetric(
                                         vertical: 40.0),
                                     child: Center(
-                                      child: Text(
-                                        'No hay documentos en esta categoría',
-                                        style: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .override(
-                                              font: GoogleFonts.inter(),
-                                              color:
-                                                  FlutterFlowTheme.of(context)
-                                                      .secondaryText,
-                                            ),
+                                      child: ListingHqUi.emptyText(
+                                        context,
+                                        _query.trim().isEmpty
+                                            ? 'No hay documentos en esta categoría.'
+                                            : 'Ningún documento coincide con la búsqueda.',
                                       ),
                                     ),
                                   );
@@ -731,26 +443,18 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
 
   static ({String text, Color bg, Color fg}) _docStatus(String status) =>
       switch (status) {
-        'approved' => (
-            text: 'Aprobado',
-            bg: const Color(0x3370ACAD),
-            fg: const Color(0xFF007376)
-          ),
+        'approved' => (text: 'Aprobado', bg: _approved, fg: Colors.white),
         'submitted' => (
             text: 'Por revisar',
-            bg: const Color(0xFFFFEAD6),
-            fg: const Color(0xFFE08A00)
+            bg: ListingHqUi.pending,
+            fg: Colors.white
           ),
         'rejected' => (
             text: 'Rechazado',
-            bg: const Color(0xFFFFE4E4),
-            fg: const Color(0xFFDC2626)
+            bg: ListingHqUi.alert,
+            fg: Colors.white
           ),
-        _ => (
-            text: 'Falta cargar',
-            bg: const Color(0xFFF0F0F0),
-            fg: const Color(0xFF6A6A6A)
-          ),
+        _ => (text: 'Falta cargar', bg: _missing, fg: Colors.white),
       };
 
   Widget _chip(String text, Color bg, Color fg) => Container(
@@ -822,16 +526,7 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
         child: Container(
           width: double.infinity,
           padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: FlutterFlowTheme.of(context).secondaryBackground,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: const [
-              BoxShadow(
-                  color: Color(0x14000000),
-                  blurRadius: 12,
-                  offset: Offset(0, 4)),
-            ],
-          ),
+          decoration: ListingHqUi.cardDecoration(context),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -887,7 +582,7 @@ class _LISTINGHQDocumentosWidgetState extends State<LISTINGHQDocumentosWidget> {
                           ? '1 por revisar'
                           : '$pendingReview por revisar',
                       style: GoogleFonts.publicSans(
-                          color: const Color(0xFFE08A00),
+                          color: ListingHqUi.pending,
                           fontSize: 12,
                           fontWeight: FontWeight.w600),
                     ),

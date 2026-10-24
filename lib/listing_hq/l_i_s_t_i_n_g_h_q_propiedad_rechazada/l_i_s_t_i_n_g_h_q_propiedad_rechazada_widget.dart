@@ -7,8 +7,10 @@ import '/flutter_flow/upload_data.dart';
 import '/backend/api_requests/api_legal_process.dart';
 import '/auth/custom_auth/auth_util.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:percent_indicator/percent_indicator.dart';
+import '/listing_hq/listing_hq_ui.dart';
+import '/listing_hq/l_i_s_t_i_n_g_h_q_header/l_i_s_t_i_n_g_h_q_header_widget.dart';
 import 'l_i_s_t_i_n_g_h_q_propiedad_rechazada_model.dart';
 import '/shared_components/dovia_spinner.dart';
 export 'l_i_s_t_i_n_g_h_q_propiedad_rechazada_model.dart';
@@ -77,9 +79,7 @@ class _LISTINGHQPropiedadRechazadaWidgetState
         final property = body['property'];
         if (mounted) {
           setState(() {
-            _rejectionNote = notes.isNotEmpty
-                ? notes.join('\n\n')
-                : 'Dovia Legal no dejó una nota para este rechazo.';
+            _rejectionNote = notes.join('\n\n');
             _remoteDocuments = docs;
             _ownerData = body['ownerProfile'] is Map
                 ? Map<String, dynamic>.from(body['ownerProfile'])
@@ -149,7 +149,7 @@ class _LISTINGHQPropiedadRechazadaWidgetState
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
               content: Text(response.statusCode == 403
-                  ? 'Por ahora solo Dovia Legal puede agregar documentos nuevos. Usá "Resubir" en el documento rechazado.'
+                  ? 'Por ahora solo Dovia Legal puede agregar documentos nuevos. Usa "Resubir" en el documento rechazado.'
                   : 'Error al cargar documento.')),
         );
       }
@@ -247,7 +247,7 @@ class _LISTINGHQPropiedadRechazadaWidgetState
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(response.statusCode == 400
-              ? 'Todavía hay documentos rechazados o faltantes: reemplazalos antes de reenviar.'
+              ? 'Todavía hay documentos rechazados o faltantes: reemplázalos antes de reenviar.'
               : (msg ?? 'Error al enviar el caso.')),
           backgroundColor: FlutterFlowTheme.of(context).error,
         ),
@@ -267,8 +267,10 @@ class _LISTINGHQPropiedadRechazadaWidgetState
         doc['hqReviewDecision'] == 'rejected' || doc['status'] == 'rejected';
     final missing = doc['status'] == 'missing';
     final statusColor = rejected || missing
-        ? FlutterFlowTheme.of(context).error
-        : FlutterFlowTheme.of(context).primary;
+        ? ListingHqUi.alert
+        : doc['status'] == 'approved'
+            ? const Color(0xFF249689)
+            : ListingHqUi.pending;
     final statusText = rejected
         ? 'Rechazado, resubir'
         : missing
@@ -277,108 +279,41 @@ class _LISTINGHQPropiedadRechazadaWidgetState
                 ? 'Aprobado'
                 : 'Enviado';
     return Container(
-      width: 220.0,
-      margin: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 15.0, 0.0),
-      decoration: BoxDecoration(
-        color: FlutterFlowTheme.of(context).secondaryBackground,
-        borderRadius: BorderRadius.circular(12.0),
-        boxShadow: const [
-          BoxShadow(
-            blurRadius: 4.0,
-            color: Color(0x1A000000),
-            offset: Offset(0.0, 2.0),
-          )
-        ],
-      ),
-      child: Stack(
+      width: 200.0,
+      padding: const EdgeInsets.all(14.0),
+      decoration: ListingHqUi.cardDecoration(context),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Padding(
-            padding: const EdgeInsets.all(15.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Container(
-                  width: 60.0,
-                  height: 60.0,
-                  decoration: BoxDecoration(
-                    color: FlutterFlowTheme.of(context).primaryText,
-                    borderRadius: BorderRadius.circular(12.0),
-                  ),
-                  child: Center(
-                    child: Text(
-                      'PDF',
-                      style: FlutterFlowTheme.of(context).bodyMedium.override(
-                            font:
-                                GoogleFonts.inter(fontWeight: FontWeight.bold),
-                            color: FlutterFlowTheme.of(context)
-                                .secondaryBackground,
-                          ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12.0),
-                Text(
-                  docName,
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: FlutterFlowTheme.of(context).bodyMedium.override(
-                        font: GoogleFonts.inter(fontWeight: FontWeight.w500),
-                      ),
-                ),
-                const SizedBox(height: 12.0),
-                LinearPercentIndicator(
-                  percent: missing ? 0.0 : 1.0,
-                  lineHeight: 8.0,
-                  animation: true,
-                  progressColor: statusColor,
-                  backgroundColor: FlutterFlowTheme.of(context).accent1,
-                  barRadius: const Radius.circular(50.0),
-                  padding: EdgeInsets.zero,
-                ),
-                const SizedBox(height: 6.0),
-                Text(
-                  statusText,
-                  style: FlutterFlowTheme.of(context).bodySmall.override(
-                        font: GoogleFonts.inter(fontWeight: FontWeight.w600),
-                        color: statusColor,
-                      ),
-                ),
-              ],
+          Container(
+            width: 56.0,
+            height: 56.0,
+            decoration: BoxDecoration(
+              color: FlutterFlowTheme.of(context).accent1,
+              borderRadius: BorderRadius.circular(12.0),
+            ),
+            alignment: Alignment.center,
+            child: Text(
+              'PDF',
+              style: GoogleFonts.publicSans(
+                color: FlutterFlowTheme.of(context).primary,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
-          Positioned(
-            top: 5,
-            right: 5,
-            child: PopupMenuButton<String>(
-              icon: const Icon(Icons.more_vert, size: 20),
-              onSelected: (value) {
-                if (value == 'eliminar') {
-                  // DELETE /legal-processes/{id}/documents/{docId} es solo
-                  // para LEGAL_ASSOCIATE: el backend no deja borrar a HQ.
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text(
-                            'Por ahora solo Dovia Legal puede eliminar documentos. Usá "Resubir" para reemplazarlo.')),
-                  );
-                } else if (value == 'resubir') {
-                  _handleReuploadDoc(index);
-                }
-              },
-              itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                const PopupMenuItem<String>(
-                  value: 'eliminar',
-                  child: Text('Eliminar'),
-                ),
-                const PopupMenuItem<String>(
-                  value: 'resubir',
-                  child: Text('Resubir'),
-                ),
-              ],
+          Text(
+            docName,
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.publicSans(
+              color: ListingHqUi.textDark,
+              fontSize: 14.0,
+              fontWeight: FontWeight.w500,
             ),
           ),
+          ListingHqUi.statusPill(statusText, statusColor),
+          ListingHqUi.cardButton('Resubir', () => _handleReuploadDoc(index)),
         ],
       ),
     );
@@ -391,55 +326,55 @@ class _LISTINGHQPropiedadRechazadaWidgetState
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: 12.0),
-      decoration: BoxDecoration(
-        color: FlutterFlowTheme.of(context).secondaryBackground,
-        borderRadius: BorderRadius.circular(12.0),
-        boxShadow: const [
-          BoxShadow(
-            blurRadius: 4.0,
-            color: Color(0x1A000000),
-            offset: Offset(0.0, 2.0),
-          )
-        ],
-      ),
+      decoration: ListingHqUi.cardDecoration(context),
       child: Padding(
         padding: const EdgeInsets.all(15.0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  role,
-                  style: FlutterFlowTheme.of(context).bodySmall.override(
-                        font: GoogleFonts.inter(fontWeight: FontWeight.w600),
-                        color: FlutterFlowTheme.of(context).primary,
-                      ),
-                ),
-                const SizedBox(height: 4.0),
-                Text(
-                  name,
-                  style: FlutterFlowTheme.of(context).bodyMedium.override(
-                        font: GoogleFonts.inter(
-                            fontWeight: FontWeight.w600, fontSize: 16.0),
-                      ),
-                ),
-              ],
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    role,
+                    style: FlutterFlowTheme.of(context).bodySmall.override(
+                          font: GoogleFonts.publicSans(
+                              fontWeight: FontWeight.w600),
+                          color: FlutterFlowTheme.of(context).primary,
+                        ),
+                  ),
+                  const SizedBox(height: 4.0),
+                  Text(
+                    name,
+                    style: FlutterFlowTheme.of(context).bodyMedium.override(
+                          font: GoogleFonts.publicSans(
+                              fontWeight: FontWeight.w600, fontSize: 16.0),
+                        ),
+                  ),
+                ],
+              ),
             ),
+            const SizedBox(width: 12.0),
             InkWell(
               onTap: () => _contact(profile),
+              customBorder: const CircleBorder(),
+              // Mismo ícono de mensajes que el header, en blanco sobre verde.
               child: Container(
-                width: 45.0,
-                height: 45.0,
-                decoration: BoxDecoration(
-                  color: FlutterFlowTheme.of(context).accent1,
+                width: 44.0,
+                height: 44.0,
+                decoration: const BoxDecoration(
+                  color: ListingHqUi.aqua,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(
-                  Icons.chat_bubble_outline_rounded,
-                  color: FlutterFlowTheme.of(context).primaryText,
-                  size: 24.0,
+                alignment: Alignment.center,
+                child: SvgPicture.asset(
+                  'assets/images/IconoDoviaHomeClienteMensajes.svg',
+                  width: 20.0,
+                  height: 20.0,
+                  fit: BoxFit.contain,
+                  colorFilter:
+                      const ColorFilter.mode(Colors.white, BlendMode.srcIn),
                 ),
               ),
             ),
@@ -468,57 +403,8 @@ class _LISTINGHQPropiedadRechazadaWidgetState
               Column(
                 mainAxisSize: MainAxisSize.max,
                 children: [
-                  // Header
-                  Padding(
-                    padding: const EdgeInsetsDirectional.fromSTEB(
-                        20.0, 30.0, 20.0, 20.0),
-                    child: Row(
-                      children: [
-                        InkWell(
-                          onTap: () => context.pop(),
-                          child: Container(
-                            width: 40.0,
-                            height: 40.0,
-                            decoration: BoxDecoration(
-                              color: FlutterFlowTheme.of(context)
-                                  .secondaryBackground,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(Icons.chevron_left, size: 24.0),
-                          ),
-                        ),
-                        const SizedBox(width: 15.0),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                _propertyAddress ?? widget.propertyName,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: FlutterFlowTheme.of(context)
-                                    .bodyLarge
-                                    .override(
-                                      font: GoogleFonts.inter(
-                                          fontWeight: FontWeight.w700,
-                                          fontSize: 18.0),
-                                    ),
-                              ),
-                              Text(
-                                'Rechazada por Legal',
-                                style: FlutterFlowTheme.of(context)
-                                    .bodySmall
-                                    .override(
-                                      font: GoogleFonts.inter(
-                                          color: FlutterFlowTheme.of(context)
-                                              .error),
-                                    ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
+                  const LISTINGHQHeaderWidget(
+                    titleText: 'Propiedad rechazada',
                   ),
 
                   // Scrollable Body
@@ -531,36 +417,48 @@ class _LISTINGHQPropiedadRechazadaWidgetState
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+                                // Arriba del cuerpo (se va con el scroll): el
+                                // nombre de la casa completo y su estado.
+                                const SizedBox(height: 10.0),
+                                Text(
+                                  _propertyAddress ?? widget.propertyName,
+                                  style: GoogleFonts.publicSans(
+                                    color: ListingHqUi.textDark,
+                                    fontSize: 18.0,
+                                    fontWeight: FontWeight.w600,
+                                    height: 1.3,
+                                  ),
+                                ),
+                                const SizedBox(height: 12.0),
+                                ListingHqUi.statusPill(
+                                    'Rechazada por Dovia Legal',
+                                    ListingHqUi.alert),
+                                const SizedBox(height: 28.0),
                                 // Documentos subidos
                                 Text(
                                   'Documentos cargados',
-                                  style: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .override(
-                                        font: GoogleFonts.inter(
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 16.0),
-                                      ),
+                                  style: ListingHqUi.sectionTitle(context),
                                 ),
                                 const SizedBox(height: 15.0),
-                                SizedBox(
-                                  height: 190.0,
-                                  child: ListView.builder(
-                                    scrollDirection: Axis.horizontal,
-                                    itemCount: _remoteDocuments.length,
-                                    itemBuilder: (context, index) {
-                                      return _buildDocCard(
-                                          _remoteDocuments[index], index);
-                                    },
+                                if (_remoteDocuments.isEmpty)
+                                  ListingHqUi.emptyText(context,
+                                      'Todavía no hay documentos cargados.')
+                                else
+                                  ListingHqCarousel(
+                                    height: 200.0,
+                                    children: [
+                                      for (var i = 0;
+                                          i < _remoteDocuments.length;
+                                          i++)
+                                        _buildDocCard(_remoteDocuments[i], i),
+                                    ],
                                   ),
-                                ),
                                 const SizedBox(height: 20.0),
 
                                 // Subir nuevo
                                 FFButtonWidget(
                                   onPressed: _handleUploadNewDoc,
-                                  text:
-                                      'Subir nuevo documentacion de la propiedad',
+                                  text: 'Subir otro documento de la propiedad',
                                   icon: const Icon(Icons.upload_file, size: 15),
                                   options: FFButtonOptions(
                                     width: double.infinity,
@@ -590,49 +488,37 @@ class _LISTINGHQPropiedadRechazadaWidgetState
                                 // Feedback Legal
                                 Text(
                                   'Nota de Dovia Legal',
-                                  style: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .override(
-                                        font: GoogleFonts.inter(
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 16.0),
-                                      ),
+                                  style: ListingHqUi.sectionTitle(context),
                                 ),
                                 const SizedBox(height: 10.0),
-                                Container(
-                                  width: double.infinity,
-                                  padding: const EdgeInsets.all(15.0),
-                                  decoration: BoxDecoration(
-                                    color: FlutterFlowTheme.of(context)
-                                        .error
-                                        .withValues(alpha: 0.1),
-                                    borderRadius: BorderRadius.circular(12.0),
-                                    border: Border.all(
-                                        color: FlutterFlowTheme.of(context)
-                                            .error
-                                            .withValues(alpha: 0.5)),
+                                // Sin nota, el aviso en gris de sección vacía,
+                                // sin fondo.
+                                if (_rejectionNote.isEmpty)
+                                  ListingHqUi.emptyText(context,
+                                      'Dovia Legal no dejó una nota para este rechazo.')
+                                else
+                                  Container(
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.all(15.0),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFF8D5D5),
+                                      borderRadius: BorderRadius.circular(12.0),
+                                    ),
+                                    child: Text(
+                                      _rejectionNote,
+                                      style: GoogleFonts.publicSans(
+                                        color: ListingHqUi.textDark,
+                                        fontSize: 14.0,
+                                        height: 1.4,
+                                      ),
+                                    ),
                                   ),
-                                  child: Text(
-                                    _rejectionNote,
-                                    style: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .override(
-                                          font: GoogleFonts.inter(),
-                                        ),
-                                  ),
-                                ),
                                 const SizedBox(height: 30.0),
 
                                 // Contactos
                                 Text(
                                   'Involucrados',
-                                  style: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .override(
-                                        font: GoogleFonts.inter(
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 16.0),
-                                      ),
+                                  style: ListingHqUi.sectionTitle(context),
                                 ),
                                 const SizedBox(height: 10.0),
                                 _buildContactCard(
@@ -646,9 +532,8 @@ class _LISTINGHQPropiedadRechazadaWidgetState
                                   name: _profileName(_ownerData, 'Sin datos'),
                                   profile: _ownerData,
                                 ),
-                                const SizedBox(
-                                    height:
-                                        100.0), // Padding for navbar and bottom button
+                                // Espacio para el botón de abajo y la barra.
+                                const SizedBox(height: 170.0),
                               ],
                             ),
                           ),
@@ -668,7 +553,7 @@ class _LISTINGHQPropiedadRechazadaWidgetState
                         onPressed: _submitting ? null : _resubmit,
                         text: _submitting
                             ? 'Enviando...'
-                            : 'Enviar a Revision Legal HQ',
+                            : 'Enviar a revisión de Legal HQ',
                         options: FFButtonOptions(
                           width: double.infinity,
                           height: 50.0,
@@ -679,7 +564,7 @@ class _LISTINGHQPropiedadRechazadaWidgetState
                                         fontWeight: FontWeight.w600),
                                     color: Colors.white,
                                   ),
-                          elevation: 2.0,
+                          elevation: 0.0,
                           borderRadius: BorderRadius.circular(24.0),
                         ),
                       ),

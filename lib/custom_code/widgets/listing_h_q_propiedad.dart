@@ -2144,7 +2144,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
             child: Text(
               label,
               style: const TextStyle(
-                fontFamily: 'Avenir',
+                fontFamily: 'Public Sans',
                 fontSize: 16,
                 fontWeight: FontWeight.w400,
                 color: textColor,

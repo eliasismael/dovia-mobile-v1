@@ -496,18 +496,21 @@ class _ListingHQMatchmakingSelectorWidgetState
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: _selectedOperative == null ? null : _handleAccept,
+                  // Mismo botón principal que el resto de la app.
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: colorScheme.primary,
+                    backgroundColor: const Color(0xFF007376),
                     disabledBackgroundColor:
-                        colorScheme.primary.withValues(alpha: 0.4),
+                        const Color(0xFF007376).withValues(alpha: 0.4),
+                    elevation: 0,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(25),
                     ),
                   ),
                   child: const Text(
-                    'Aceptar y Continuar',
+                    'Aceptar y continuar',
                     style: TextStyle(
+                      fontFamily: 'Public Sans',
                       color: Colors.white,
                       fontWeight: FontWeight.w600,
                       fontSize: 16,
@@ -696,7 +699,7 @@ class _ListingHQMatchmakingSelectorWidgetState
           border: Border.all(color: const Color(0xFFBC0000)),
         ),
         child: Text(
-          'Ese día no tiene horarios disponibles. Elegí otra fecha.',
+          'Ese día no tiene horarios disponibles. Elige otra fecha.',
           style: colorScheme.bodyMedium.override(
             fontFamily: 'Public Sans',
             color: const Color(0xFFBC0000),

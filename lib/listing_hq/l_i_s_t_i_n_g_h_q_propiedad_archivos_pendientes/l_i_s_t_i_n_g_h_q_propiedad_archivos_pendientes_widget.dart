@@ -2,18 +2,16 @@ import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_visits.dart';
 import '/backend/api_requests/api_manager.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
+import '/listing_hq/listing_hq_ui.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/uploaded_file.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_navbar/l_i_s_t_i_n_g_h_q_navbar_widget.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
-import '/index.dart';
+import '/listing_hq/l_i_s_t_i_n_g_h_q_header/l_i_s_t_i_n_g_h_q_header_widget.dart';
 import 'package:flutter/material.dart';
 import '/shared_components/popup_subir_documento/popup_subir_documento_widget.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_visor_pdf/l_i_s_t_i_n_g_h_q_visor_pdf_widget.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:percent_indicator/percent_indicator.dart';
 import 'l_i_s_t_i_n_g_h_q_propiedad_archivos_pendientes_model.dart';
 import '/shared_components/dovia_spinner.dart';
 export 'l_i_s_t_i_n_g_h_q_propiedad_archivos_pendientes_model.dart';
@@ -63,7 +61,7 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
   // Paleta del semáforo del checklist.
   static const Color _kMissingBorder = Color(0xFFBC0000);
   static const Color _kMissingFill = Color(0xFFF8D5D5);
-  static const Color _kPendingBorder = Color(0xFFE8A200);
+  static const Color _kPendingBorder = ListingHqUi.pending;
   static const Color _kPendingFill = Color(0xFFFFF1CC);
   static const Color _kApprovedBorder = Color(0xFF249689);
   static const Color _kApprovedFill = Color(0xFFDFF1ED);
@@ -151,50 +149,35 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
     final ready = tally.missing == 0 && tally.pending == 0;
 
     final Color border;
-    final Color fill;
-    final IconData icon;
     final String title;
     final String detail;
 
     if (ready) {
       border = _kApprovedBorder;
-      fill = _kApprovedFill;
-      icon = Icons.check_circle;
       title = 'Documentación aprobada';
       detail = 'Todos los documentos requeridos están aprobados.';
     } else if (tally.missing > 0) {
       border = _kMissingBorder;
-      fill = _kMissingFill;
-      icon = Icons.upload_file;
       title = tally.missing == 1
           ? 'Falta subir 1 documento requerido'
           : 'Faltan subir ${tally.missing} documentos requeridos';
       detail = tally.pending == 0
-          ? 'Subilos para poder aprobarlos.'
+          ? 'Súbelos para poder aprobarlos.'
           : 'Además hay ${tally.pending} esperando aprobación.';
     } else {
       border = _kPendingBorder;
-      fill = _kPendingFill;
-      icon = Icons.hourglass_top;
       title = tally.pending == 1
           ? 'Falta aprobar 1 documento'
           : 'Faltan aprobar ${tally.pending} documentos';
-      detail = 'Abrí cada uno y aprobalo.';
+      detail = 'Abre cada uno y apruébalo.';
     }
 
-    return Container(
+    // Solo texto, sin fondo: el título en el color del estado.
+    return SizedBox(
       width: double.infinity,
-      padding: const EdgeInsets.all(14.0),
-      decoration: BoxDecoration(
-        color: fill,
-        borderRadius: BorderRadius.circular(12.0),
-        border: Border.all(color: border, width: 1.5),
-      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: border, size: 22.0),
-          const SizedBox(width: 10.0),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -203,7 +186,8 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
                 Text(
                   title,
                   style: FlutterFlowTheme.of(context).bodyMedium.override(
-                        font: GoogleFonts.inter(fontWeight: FontWeight.w600),
+                        font:
+                            GoogleFonts.publicSans(fontWeight: FontWeight.w600),
                         color: border,
                         fontSize: 14.0,
                       ),
@@ -212,9 +196,9 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
                 Text(
                   detail,
                   style: FlutterFlowTheme.of(context).bodyMedium.override(
-                        font: GoogleFonts.inter(),
-                        color: FlutterFlowTheme.of(context).primaryText,
-                        fontSize: 12.0,
+                        font: GoogleFonts.publicSans(),
+                        color: FlutterFlowTheme.of(context).secondaryText,
+                        fontSize: 13.0,
                       ),
                 ),
               ],
@@ -243,11 +227,7 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
           alignment: AlignmentDirectional.centerStart,
           child: Text(
             text,
-            style: FlutterFlowTheme.of(context).bodyMedium.override(
-                  font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
-                  fontSize: 16.0,
-                  letterSpacing: 0.0,
-                ),
+            style: ListingHqUi.sectionTitle(context),
           ),
         ),
       );
@@ -255,10 +235,7 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
   Widget _card(List<Widget> children) => Container(
         width: double.infinity,
         padding: const EdgeInsets.all(16.0),
-        decoration: BoxDecoration(
-          color: FlutterFlowTheme.of(context).secondaryBackground,
-          borderRadius: BorderRadius.circular(16.0),
-        ),
+        decoration: ListingHqUi.cardDecoration(context),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
@@ -278,7 +255,7 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
             child: Text(
               label,
               style: FlutterFlowTheme.of(context).bodyMedium.override(
-                    font: GoogleFonts.inter(),
+                    font: GoogleFonts.publicSans(),
                     color: FlutterFlowTheme.of(context).secondaryText,
                     fontSize: 13.0,
                     letterSpacing: 0.0,
@@ -289,7 +266,7 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
             child: Text(
               value,
               style: FlutterFlowTheme.of(context).bodyMedium.override(
-                    font: GoogleFonts.inter(fontWeight: FontWeight.w500),
+                    font: GoogleFonts.publicSans(fontWeight: FontWeight.w500),
                     fontSize: 13.0,
                     letterSpacing: 0.0,
                   ),
@@ -309,7 +286,7 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
               Text(
                 label,
                 style: FlutterFlowTheme.of(context).bodyMedium.override(
-                      font: GoogleFonts.inter(),
+                      font: GoogleFonts.publicSans(),
                       color: FlutterFlowTheme.of(context).secondaryText,
                       fontSize: 12.0,
                       letterSpacing: 0.0,
@@ -319,7 +296,7 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
               SelectableText(
                 value.isEmpty ? '—' : value,
                 style: FlutterFlowTheme.of(context).bodyMedium.override(
-                      font: GoogleFonts.inter(fontWeight: FontWeight.w600),
+                      font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
                       fontSize: 16.0,
                       letterSpacing: 0.0,
                     ),
@@ -327,22 +304,21 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
             ],
           ),
         );
+    // Sin fondo de color: una línea fina lo separa de los datos de arriba.
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(top: 8.0),
-      padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
-      decoration: BoxDecoration(
-        color: _kApprovedFill,
-        borderRadius: BorderRadius.circular(12.0),
-        border: Border.all(color: _kApprovedBorder),
+      padding: const EdgeInsets.only(top: 14.0),
+      decoration: const BoxDecoration(
+        border: Border(top: BorderSide(color: Color(0xFFE9EFF2))),
       ),
       child: Column(
         children: [
           Text(
             'Datos registrales',
             style: FlutterFlowTheme.of(context).bodyMedium.override(
-                  font: GoogleFonts.inter(fontWeight: FontWeight.w600),
-                  color: _kApprovedBorder,
+                  font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
+                  color: ListingHqUi.textDark,
                   fontSize: 13.0,
                   letterSpacing: 0.0,
                 ),
@@ -393,7 +369,7 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
               child: Text(
                 name,
                 style: FlutterFlowTheme.of(context).bodyMedium.override(
-                      font: GoogleFonts.inter(),
+                      font: GoogleFonts.publicSans(),
                       fontSize: 14.0,
                       letterSpacing: 0.0,
                     ),
@@ -402,7 +378,7 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
             Text(
               has ? 'Ver' : 'No lo subió',
               style: FlutterFlowTheme.of(context).bodyMedium.override(
-                    font: GoogleFonts.inter(
+                    font: GoogleFonts.publicSans(
                         fontWeight: has ? FontWeight.w600 : FontWeight.w400),
                     color: has
                         ? FlutterFlowTheme.of(context).primary
@@ -604,175 +580,26 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   children: [
+                    const LISTINGHQHeaderWidget(
+                      titleText: 'Revisar documentación',
+                    ),
+                    // El nombre de la casa va completo, sin cortar.
                     Padding(
                       padding: const EdgeInsetsDirectional.fromSTEB(
-                          20.0, 42.0, 20.0, 0.0),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.max,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Container(
-                            decoration: const BoxDecoration(),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.max,
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                Container(
-                                  width: 35.0,
-                                  height: 35.0,
-                                  decoration: BoxDecoration(
-                                    color:
-                                        FlutterFlowTheme.of(context).alternate,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: InkWell(
-                                    onTap: () {
-                                      Navigator.pop(context);
-                                    },
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(8.0),
-                                      child: SvgPicture.asset(
-                                        'assets/images/IconoVolverAtras.svg',
-                                        width: 200.0,
-                                        height: 200.0,
-                                        fit: BoxFit.none,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(0.0),
-                                  child: SvgPicture.asset(
-                                    'assets/images/D-verde.svg',
-                                    width: 28.0,
-                                    height: 36.0,
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              ].divide(const SizedBox(width: 8.0)),
-                            ),
+                          20.0, 20.0, 20.0, 0.0),
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: Text(
+                          (widget.title ?? '').isNotEmpty
+                              ? widget.title!
+                              : 'Propiedad',
+                          style: GoogleFonts.publicSans(
+                            color: ListingHqUi.textDark,
+                            fontSize: 18.0,
+                            fontWeight: FontWeight.w600,
+                            height: 1.3,
                           ),
-                          Expanded(
-                            child: Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 8.0),
-                              child: RichText(
-                                textScaler: MediaQuery.of(context).textScaler,
-                                text: TextSpan(
-                                  children: [
-                                    TextSpan(
-                                      text: widget.title!,
-                                      style: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .override(
-                                            font: GoogleFonts.publicSans(
-                                              fontWeight: FontWeight.w600,
-                                              fontStyle:
-                                                  FlutterFlowTheme.of(context)
-                                                      .bodyMedium
-                                                      .fontStyle,
-                                            ),
-                                            fontSize: 18.0,
-                                            letterSpacing: 0.0,
-                                            fontWeight: FontWeight.w600,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .bodyMedium
-                                                    .fontStyle,
-                                            lineHeight: 1.4,
-                                          ),
-                                    )
-                                  ],
-                                  style: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .override(
-                                        font: GoogleFonts.inter(
-                                          fontWeight: FontWeight.w600,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodyMedium
-                                                  .fontStyle,
-                                        ),
-                                        fontSize: 18.0,
-                                        letterSpacing: 0.0,
-                                        fontWeight: FontWeight.w600,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontStyle,
-                                        lineHeight: 1.4,
-                                      ),
-                                ),
-                                textAlign: TextAlign.center,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ),
-                          Row(
-                            mainAxisSize: MainAxisSize.max,
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              Container(
-                                width: 40.0,
-                                height: 40.0,
-                                decoration: BoxDecoration(
-                                  color: FlutterFlowTheme.of(context)
-                                      .secondaryBackground,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: InkWell(
-                                  splashColor: Colors.transparent,
-                                  focusColor: Colors.transparent,
-                                  hoverColor: Colors.transparent,
-                                  highlightColor: Colors.transparent,
-                                  onTap: () async {
-                                    context.pushNamed(
-                                        LISTINGHQBusquedaPropiedadWidget
-                                            .routeName);
-                                  },
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(8.0),
-                                    child: SvgPicture.asset(
-                                      'assets/images/search.svg',
-                                      width: 8.0,
-                                      height: 8.0,
-                                      fit: BoxFit.none,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              Container(
-                                width: 40.0,
-                                height: 40.0,
-                                decoration: BoxDecoration(
-                                  color: FlutterFlowTheme.of(context)
-                                      .secondaryBackground,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: InkWell(
-                                  splashColor: Colors.transparent,
-                                  focusColor: Colors.transparent,
-                                  hoverColor: Colors.transparent,
-                                  highlightColor: Colors.transparent,
-                                  onTap: () async {
-                                    context.pushNamed(
-                                        LISTINGHQDocumentosWidget.routeName);
-                                  },
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(8.0),
-                                    child: SvgPicture.asset(
-                                      'assets/images/folder-alert.svg',
-                                      width: 8.0,
-                                      height: 8.0,
-                                      fit: BoxFit.none,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ].divide(const SizedBox(width: 8.0)),
-                          ),
-                        ],
+                        ),
                       ),
                     ),
                     Padding(
@@ -803,11 +630,13 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
                                     _buildSectionTitle(
                                         'Checklist de documentos'),
                                     if (docs.isEmpty)
-                                      const Padding(
-                                        padding: EdgeInsets.symmetric(
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
                                             vertical: 24.0),
                                         child: Center(
-                                            child: Text('No hay documentos')),
+                                            child: ListingHqUi.emptyText(
+                                                context,
+                                                'Todavía no hay documentos en el checklist.')),
                                       )
                                     else ...[
                                       _buildChecklistSummary(docs),
@@ -960,18 +789,8 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
                                                 Container(
                                                   width: 150.0,
                                                   height: 150.0,
-                                                  decoration: BoxDecoration(
-                                                    color: FlutterFlowTheme.of(
-                                                            context)
-                                                        .primaryText,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            24.0),
-                                                    border: Border.all(
-                                                      color: style.border,
-                                                      width: 3.0,
-                                                    ),
-                                                  ),
+                                                  decoration: ListingHqUi
+                                                      .cardDecoration(context),
                                                   child: Stack(
                                                     children: [
                                                       Align(
@@ -984,48 +803,15 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
                                                                   .of(context)
                                                               .bodyMedium
                                                               .override(
-                                                                font:
-                                                                    GoogleFonts
-                                                                        .inter(
+                                                                font: GoogleFonts
+                                                                    .publicSans(
                                                                   fontWeight:
                                                                       FontWeight
                                                                           .bold,
                                                                 ),
-                                                                color: FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .tertiary,
+                                                                color: ListingHqUi
+                                                                    .textDark,
                                                               ),
-                                                        ),
-                                                      ),
-                                                      // Distintivo de estado, para
-                                                      // que el color del borde se
-                                                      // entienda sin depender solo
-                                                      // del color.
-                                                      Align(
-                                                        alignment:
-                                                            const AlignmentDirectional(
-                                                                1.0, -1.0),
-                                                        child: Padding(
-                                                          padding:
-                                                              const EdgeInsets
-                                                                  .all(8.0),
-                                                          child: Container(
-                                                            padding:
-                                                                const EdgeInsets
-                                                                    .all(4.0),
-                                                            decoration:
-                                                                BoxDecoration(
-                                                              color: style.fill,
-                                                              shape: BoxShape
-                                                                  .circle,
-                                                            ),
-                                                            child: Icon(
-                                                              style.icon,
-                                                              color:
-                                                                  style.border,
-                                                              size: 18.0,
-                                                            ),
-                                                          ),
                                                         ),
                                                       ),
                                                     ],
@@ -1036,36 +822,12 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
                                                       const EdgeInsetsDirectional
                                                           .fromSTEB(
                                                           0.0, 8.0, 0.0, 0.0),
-                                                  child: Container(
-                                                    padding: const EdgeInsets
-                                                        .symmetric(
-                                                        horizontal: 10.0,
-                                                        vertical: 3.0),
-                                                    decoration: BoxDecoration(
-                                                      color: style.fill,
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              100.0),
-                                                      border: Border.all(
-                                                          color: style.border,
-                                                          width: 1.0),
-                                                    ),
-                                                    child: Text(
-                                                      style.label,
-                                                      style: FlutterFlowTheme
-                                                              .of(context)
-                                                          .bodyMedium
-                                                          .override(
-                                                            font: GoogleFonts
-                                                                .inter(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w600,
-                                                            ),
-                                                            color: style.text,
-                                                            fontSize: 11.0,
-                                                          ),
-                                                    ),
+                                                  child: SizedBox(
+                                                    width: 150.0,
+                                                    child:
+                                                        ListingHqUi.statusPill(
+                                                            style.label,
+                                                            style.border),
                                                   ),
                                                 ),
                                                 Padding(
@@ -1084,9 +846,8 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
                                                                   context)
                                                               .bodyMedium
                                                               .override(
-                                                                font:
-                                                                    GoogleFonts
-                                                                        .inter(
+                                                                font: GoogleFonts
+                                                                    .publicSans(
                                                                   color: FlutterFlowTheme.of(
                                                                           context)
                                                                       .primaryText,
@@ -1112,7 +873,7 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
                     ),
                     Padding(
                       padding: const EdgeInsetsDirectional.fromSTEB(
-                          20.0, 40.0, 20.0, 100.0),
+                          20.0, 40.0, 20.0, 120.0),
                       child: FFButtonWidget(
                         onPressed: () async {
                           final result = await showDialog<FFUploadedFile>(
@@ -1155,7 +916,7 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
                             }
                           }
                         },
-                        text: 'Subir documentacion de la propiedad',
+                        text: 'Subir documentación de la propiedad',
                         options: FFButtonOptions(
                           width: double.infinity,
                           height: 48.0,
@@ -1166,10 +927,11 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
                           color: FlutterFlowTheme.of(context).primary,
                           textStyle:
                               FlutterFlowTheme.of(context).titleSmall.override(
-                                    font: GoogleFonts.inter(
+                                    font: GoogleFonts.publicSans(
                                       fontWeight: FontWeight.w600,
                                     ),
                                     color: Colors.white,
+                                    fontSize: 16.0,
                                   ),
                           elevation: 0.0,
                           borderRadius: BorderRadius.circular(24.0),

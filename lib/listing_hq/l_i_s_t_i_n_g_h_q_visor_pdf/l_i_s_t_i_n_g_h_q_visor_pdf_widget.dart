@@ -10,7 +10,6 @@ import '/shared_components/popup_rechazar_documento/popup_rechazar_documento_wid
 import '/shared_components/popup_exito/popup_exito_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '/flutter_flow/uploaded_file.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 import 'l_i_s_t_i_n_g_h_q_visor_pdf_model.dart';
 export 'l_i_s_t_i_n_g_h_q_visor_pdf_model.dart';
@@ -148,30 +147,20 @@ class _LISTINGHQVisorPdfWidgetState extends State<LISTINGHQVisorPdfWidget> {
                     wrapWithModel(
                       model: _model.lISTINGHQHeaderModel,
                       updateCallback: () => safeSetState(() {}),
-                      child: const LISTINGHQHeaderWidget(
-                        titleText: 'Propiedades A',
+                      child: LISTINGHQHeaderWidget(
+                        titleText: widget.documentName,
                       ),
                     ),
                     Padding(
                       padding: const EdgeInsetsDirectional.fromSTEB(
-                          20.0, 20.0, 20.0, 100.0),
+                          20.0, 20.0, 20.0, 120.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            widget.documentName,
-                            style: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .override(
-                                  font: GoogleFonts.inter(),
-                                  fontSize: 16.0,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                          ),
                           Padding(
                             padding: const EdgeInsetsDirectional.fromSTEB(
-                                0.0, 16.0, 0.0, 0.0),
+                                0.0, 0.0, 0.0, 0.0),
                             child: Container(
                               width: double.infinity,
                               height: 500.0,
@@ -257,24 +246,17 @@ class _LISTINGHQVisorPdfWidgetState extends State<LISTINGHQVisorPdfWidget> {
                                         height: 48.0,
                                         padding: const EdgeInsetsDirectional
                                             .fromSTEB(0.0, 0.0, 0.0, 0.0),
-                                        color: Colors.white,
+                                        color: const Color(0xFFE85D75),
                                         textStyle: FlutterFlowTheme.of(context)
                                             .titleSmall
                                             .override(
-                                              font: GoogleFonts.inter(
+                                              font: GoogleFonts.publicSans(
                                                 fontWeight: FontWeight.w600,
                                               ),
                                               fontSize: 14.0,
-                                              color:
-                                                  FlutterFlowTheme.of(context)
-                                                      .primary,
+                                              color: Colors.white,
                                             ),
                                         elevation: 0.0,
-                                        borderSide: BorderSide(
-                                          color: FlutterFlowTheme.of(context)
-                                              .primary,
-                                          width: 1.0,
-                                        ),
                                         borderRadius:
                                             BorderRadius.circular(24.0),
                                       ),
@@ -358,7 +340,7 @@ class _LISTINGHQVisorPdfWidgetState extends State<LISTINGHQVisorPdfWidget> {
                                         textStyle: FlutterFlowTheme.of(context)
                                             .titleSmall
                                             .override(
-                                              font: GoogleFonts.inter(
+                                              font: GoogleFonts.publicSans(
                                                 fontWeight: FontWeight.w600,
                                               ),
                                               color: Colors.white,

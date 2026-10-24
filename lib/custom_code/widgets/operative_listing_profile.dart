@@ -172,17 +172,19 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
               )
             else ...[
               _buildPerfilCard(repo),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
               _buildGananciasCard(repo),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
               _buildDocumentacionCard(repo),
-              const SizedBox(height: 16),
+              ..._sectionGap(),
               _buildCambioContrasenaCard(),
-              const SizedBox(height: 16),
+              ..._sectionGap(),
               _buildSoporteYLegalSection(),
-              const SizedBox(height: 16),
+              ..._sectionGap(),
+              _buildCerrarSesionButton(),
+              ..._sectionGap(),
               _buildAccionesCriticasSection(),
-              const SizedBox(height: 16),
+              const SizedBox(height: 24),
             ],
           ],
         ),
@@ -195,11 +197,7 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
   Widget _buildPerfilCard(UserRepository repo) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(16, 19, 16, 20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-      ),
+      padding: const EdgeInsets.only(top: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -212,8 +210,6 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
               color: aqua,
             ),
           ),
-          const SizedBox(height: 10),
-          Container(height: 1, color: borderColor),
           const SizedBox(height: 20),
           _buildAvatarSection(repo),
           const SizedBox(height: 20),
@@ -428,7 +424,7 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
           child: DropdownButton<String>(
             value: _editGender,
             isExpanded: true,
-            hint: const Text('Seleccioná'),
+            hint: const Text('Selecciona'),
             items: const [
               DropdownMenuItem(value: 'MALE', child: Text('Masculino')),
               DropdownMenuItem(value: 'FEMALE', child: Text('Femenino')),
@@ -659,11 +655,7 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-      ),
+      padding: EdgeInsets.zero,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -703,11 +695,7 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
   Widget _buildDocumentacionCard(UserRepository repo) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-      ),
+      padding: EdgeInsets.zero,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -812,11 +800,7 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
   Widget _buildCambioContrasenaCard() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-      ),
+      padding: EdgeInsets.zero,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -826,23 +810,22 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
               fontFamily: 'Public Sans',
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: aqua,
+              color: textPrimary,
             ),
           ),
-          const SizedBox(height: 10),
-          Container(height: 1, color: borderColor),
           const SizedBox(height: 16),
           const Text(
-            'Te enviaremos un código a tu correo para crear una contraseña nueva.',
+            'Te enviaremos un código a tu correo para que crees una '
+            'contraseña nueva.',
             style: TextStyle(
               fontFamily: 'Public Sans',
-              fontSize: 14,
-              color: Color(0xFF00444B),
+              fontSize: 13,
+              color: inputPlaceholder,
             ),
           ),
           const SizedBox(height: 16),
           _buildSolidButton(
-              label: 'Cambiar contraseña', onTap: _handleUpdatePassword),
+              label: 'Actualizar contraseña', onTap: _handleUpdatePassword),
         ],
       ),
     );
@@ -853,11 +836,7 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
   Widget _buildSoporteYLegalSection() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-      ),
+      padding: EdgeInsets.zero,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -867,26 +846,13 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
               fontFamily: 'Public Sans',
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: aqua,
+              color: textPrimary,
             ),
           ),
-          const SizedBox(height: 10),
-          Container(height: 1, color: borderColor),
           const SizedBox(height: 20),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Ver términos y condiciones',
-                style: TextStyle(
-                  fontFamily: 'Public Sans',
-                  fontSize: 16,
-                  fontWeight: FontWeight.normal,
-                  color: textPrimary,
-                  letterSpacing: 0.32,
-                ),
-              ),
-              const SizedBox(height: 12),
               _buildOutlinedButton(
                 label: 'Términos y condiciones',
                 onTap: () async {
@@ -895,17 +861,6 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
                   }
                   _openTermsModal();
                 },
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                'Ayuda o soporte',
-                style: TextStyle(
-                  fontFamily: 'Public Sans',
-                  fontSize: 16,
-                  fontWeight: FontWeight.normal,
-                  color: textPrimary,
-                  letterSpacing: 0.32,
-                ),
               ),
               const SizedBox(height: 12),
               _buildOutlinedButton(
@@ -929,11 +884,7 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
   Widget _buildAccionesCriticasSection() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-      ),
+      padding: EdgeInsets.zero,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -943,48 +894,42 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
               fontFamily: 'Public Sans',
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: aqua,
-            ),
-          ),
-          const SizedBox(height: 10),
-          Container(height: 1, color: borderColor),
-          const SizedBox(height: 20),
-          const Text(
-            'Deseo cerrar sesión',
-            style: TextStyle(
-              fontFamily: 'Public Sans',
-              fontSize: 16,
-              fontWeight: FontWeight.normal,
               color: textPrimary,
-              letterSpacing: 0.32,
             ),
-          ),
-          const SizedBox(height: 12),
-          _buildOutlinedButton(
-            label: 'Cerrar sesión',
-            onTap: () async {
-              if (widget.onLogout != null) {
-                await widget.onLogout!.call();
-              } else if (widget.onSignOut != null) {
-                await widget.onSignOut!.call();
-              }
-            },
           ),
           const SizedBox(height: 20),
           const Text(
             'Deseo eliminar mi cuenta',
             style: TextStyle(
               fontFamily: 'Public Sans',
-              fontSize: 16,
-              fontWeight: FontWeight.normal,
-              color: textPrimary,
-              letterSpacing: 0.32,
+              fontSize: 13,
+              color: inputPlaceholder,
             ),
           ),
           const SizedBox(height: 12),
           _buildDeleteButton(),
         ],
       ),
+    );
+  }
+
+  /// Separador verde entre secciones, como en Ajustes del cliente.
+  List<Widget> _sectionGap() => [
+        const SizedBox(height: 32),
+        Container(height: 1, color: aqua.withValues(alpha: 0.3)),
+        const SizedBox(height: 28),
+      ];
+
+  Widget _buildCerrarSesionButton() {
+    return _buildOutlinedButton(
+      label: 'Cerrar sesión',
+      onTap: () async {
+        if (widget.onLogout != null) {
+          await widget.onLogout!.call();
+        } else if (widget.onSignOut != null) {
+          await widget.onSignOut!.call();
+        }
+      },
     );
   }
 
@@ -1288,10 +1233,11 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
       onTap: onTap,
       child: Container(
         width: double.infinity,
-        height: 42,
+        height: 46,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(25),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
           border: Border.all(color: aqua, width: 1),
         ),
         child: Text(
@@ -1299,9 +1245,9 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
           textAlign: TextAlign.center,
           style: const TextStyle(
             fontFamily: 'Public Sans',
-            fontSize: 16,
+            fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: aqua,
+            color: textPrimary,
           ),
         ),
       ),
@@ -1316,17 +1262,17 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
       onTap: onTap,
       child: Container(
         width: double.infinity,
-        height: 42,
+        height: 46,
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: aqua,
-          borderRadius: BorderRadius.circular(25),
+          borderRadius: BorderRadius.circular(24),
         ),
         child: Text(
           label,
           style: const TextStyle(
             fontFamily: 'Public Sans',
-            fontSize: 16,
+            fontSize: 14,
             fontWeight: FontWeight.w600,
             color: Colors.white,
           ),
@@ -1340,17 +1286,17 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
       onTap: _showDeleteAccountFlow,
       child: Container(
         width: double.infinity,
-        height: 42,
+        height: 46,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: deleteRed,
-          borderRadius: BorderRadius.circular(25),
+          color: const Color(0xFFE57373),
+          borderRadius: BorderRadius.circular(24),
         ),
         child: const Text(
           'Eliminar cuenta',
           style: TextStyle(
             fontFamily: 'Public Sans',
-            fontSize: 16,
+            fontSize: 14,
             fontWeight: FontWeight.w600,
             color: Colors.white,
           ),

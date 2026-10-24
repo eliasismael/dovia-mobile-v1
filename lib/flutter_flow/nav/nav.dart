@@ -934,7 +934,10 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           name: LISTINGHQPropiedadesWidget.routeName,
           requireAuth: true,
           path: LISTINGHQPropiedadesWidget.routePath,
-          builder: (context, params) => const LISTINGHQPropiedadesWidget(),
+          builder: (context, params) => LISTINGHQPropiedadesWidget(
+            focusSearch:
+                params.getParam('focusSearch', ParamType.bool) ?? false,
+          ),
         ),
         FFRoute(
           name: LISTINGHQPropiedadAsignadaWidget.routeName,

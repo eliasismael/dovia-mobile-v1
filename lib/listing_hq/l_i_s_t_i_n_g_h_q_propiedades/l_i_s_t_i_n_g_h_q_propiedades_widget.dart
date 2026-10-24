@@ -2,8 +2,8 @@ import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_visits.dart';
 import '/backend/api_requests/api_legal_process.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
+import '/listing_hq/listing_hq_ui.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_header/l_i_s_t_i_n_g_h_q_header_widget.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_navbar/l_i_s_t_i_n_g_h_q_navbar_widget.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_propiedad_asignada/l_i_s_t_i_n_g_h_q_propiedad_asignada_widget.dart';
@@ -39,7 +39,10 @@ class _HqCardData {
 }
 
 class LISTINGHQPropiedadesWidget extends StatefulWidget {
-  const LISTINGHQPropiedadesWidget({super.key});
+  const LISTINGHQPropiedadesWidget({super.key, this.focusSearch = false});
+
+  /// Desde el buscador del inicio: se abre con el cursor en el buscador.
+  final bool focusSearch;
 
   static String routeName = 'LISTING_HQ_Propiedades';
   static String routePath = '/lISTINGHQPropiedades';
@@ -278,168 +281,45 @@ class _LISTINGHQPropiedadesWidgetState extends State<LISTINGHQPropiedadesWidget>
   }
 
   Widget _buildSectionHeader(String title) {
-    return Padding(
-      padding: const EdgeInsetsDirectional.fromSTEB(0.0, 32.0, 0.0, 12.0),
-      child: Row(
-        mainAxisSize: MainAxisSize.max,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Expanded(
-            child: Text(
-              title,
-              style: FlutterFlowTheme.of(context).bodyMedium.override(
-                    font: GoogleFonts.inter(
-                      fontWeight: FontWeight.w600,
-                    ),
-                    fontSize: 16.0,
-                  ),
-            ),
-          ),
-        ],
-      ),
-    );
+    return ListingHqSectionHeader(title: title);
   }
 
   Widget _buildCarouselCard({
     required String address,
     required String tagText,
     required String statusText,
-    required Color statusBgColor,
-    required Color statusTextColor,
+    required Color statusColor,
     required String buttonText,
     VoidCallback? onPressed,
     VoidCallback? onEyePressed,
   }) {
-    return Container(
-      width: 250.0,
-      margin: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 15.0, 0.0),
-      decoration: BoxDecoration(
-        color: FlutterFlowTheme.of(context).secondaryBackground,
-        boxShadow: const [
-          BoxShadow(
-            blurRadius: 4.0,
-            color: Color(0x1A000000),
-            offset: Offset(0.0, 2.0),
-          ),
-        ],
-        borderRadius: BorderRadius.circular(12.0),
-      ),
-      child: Padding(
-        padding: const EdgeInsetsDirectional.fromSTEB(15.0, 10.0, 15.0, 10.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              address.isNotEmpty ? 'Dirección: $address' : 'Dirección: N/A',
-              style: FlutterFlowTheme.of(context).bodyMedium.override(
-                    font: GoogleFonts.inter(),
-                  ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            Container(
-              height: 22.0,
-              decoration: BoxDecoration(
-                color: FlutterFlowTheme.of(context).accent1,
-                borderRadius: BorderRadius.circular(24.0),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                child: Center(
-                  child: Text(
-                    tagText,
-                    style: FlutterFlowTheme.of(context).titleSmall.override(
-                          font: GoogleFonts.publicSans(),
-                          color: FlutterFlowTheme.of(context).primary,
-                          fontSize: 12.0,
-                        ),
-                  ),
+    return ListingHqPropertyCard(
+      address: address,
+      tagText: tagText,
+      statusText: statusText,
+      statusColor: statusColor,
+      buttonText: buttonText,
+      onPressed: onPressed,
+      // Ver la propiedad sin asignarla todavía.
+      trailing: onEyePressed == null
+          ? null
+          : InkWell(
+              onTap: onEyePressed,
+              customBorder: const CircleBorder(),
+              child: Container(
+                width: 30.0,
+                height: 30.0,
+                decoration: BoxDecoration(
+                  color: FlutterFlowTheme.of(context).accent1,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.visibility_outlined,
+                  color: FlutterFlowTheme.of(context).primary,
+                  size: 16.0,
                 ),
               ),
             ),
-            Row(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Estatus',
-                  style: FlutterFlowTheme.of(context).bodyMedium.override(
-                        font: GoogleFonts.inter(),
-                        fontSize: 12.0,
-                      ),
-                ),
-                Container(
-                  decoration: BoxDecoration(
-                    color: statusBgColor,
-                    borderRadius: BorderRadius.circular(24.0),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsetsDirectional.fromSTEB(
-                        10.0, 2.0, 10.0, 2.0),
-                    child: Text(
-                      statusText,
-                      style: FlutterFlowTheme.of(context).bodyMedium.override(
-                            font: GoogleFonts.inter(),
-                            color: statusTextColor,
-                            fontSize: 12.0,
-                          ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            Row(
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                Expanded(
-                  child: FFButtonWidget(
-                    onPressed: onPressed ?? () {},
-                    text: buttonText,
-                    options: FFButtonOptions(
-                      height: 30.0,
-                      color: FlutterFlowTheme.of(context).primary,
-                      textStyle:
-                          FlutterFlowTheme.of(context).titleSmall.override(
-                                font: GoogleFonts.publicSans(
-                                  fontWeight: FontWeight.w300,
-                                ),
-                                color: Colors.white,
-                                fontSize: 13.0,
-                              ),
-                      elevation: 0.0,
-                      borderRadius: BorderRadius.circular(24.0),
-                    ),
-                  ),
-                ),
-                if (onEyePressed != null)
-                  Padding(
-                    padding: const EdgeInsetsDirectional.fromSTEB(
-                        8.0, 0.0, 0.0, 0.0),
-                    child: Container(
-                      width: 30.0,
-                      height: 30.0,
-                      decoration: BoxDecoration(
-                        color: FlutterFlowTheme.of(context).accent1,
-                        shape: BoxShape.circle,
-                      ),
-                      child: IconButton(
-                        padding: EdgeInsets.zero,
-                        icon: Icon(
-                          Icons.visibility_outlined,
-                          color: FlutterFlowTheme.of(context).primary,
-                          size: 16.0,
-                        ),
-                        onPressed: onEyePressed,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ].divide(const SizedBox(height: 8.0)),
-        ),
-      ),
     );
   }
 
@@ -480,33 +360,19 @@ class _LISTINGHQPropiedadesWidgetState extends State<LISTINGHQPropiedadesWidget>
   Widget _buildFilters() {
     const primary = Color(0xFF007376);
     return Padding(
-      padding: const EdgeInsets.only(top: 12, bottom: 4),
+      padding: const EdgeInsets.only(top: 20, bottom: 4),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          TextField(
+          ListingHqSearchField(
+            hintText: 'Buscar por dirección o estado',
             controller: _searchController,
+            autofocus: widget.focusSearch,
             onChanged: (v) => setState(() => _query = v),
-            decoration: InputDecoration(
-              hintText: 'Buscar por dirección o estado...',
-              prefixIcon: const Icon(Icons.search, color: Color(0xFF8A8A8A)),
-              suffixIcon: _query.isEmpty
-                  ? null
-                  : IconButton(
-                      icon: const Icon(Icons.close, size: 18),
-                      onPressed: () {
-                        _searchController.clear();
-                        setState(() => _query = '');
-                      },
-                    ),
-              filled: true,
-              fillColor: Colors.white,
-              contentPadding: const EdgeInsets.symmetric(vertical: 12),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(25),
-                borderSide: BorderSide.none,
-              ),
-            ),
+            onClear: () {
+              _searchController.clear();
+              setState(() => _query = '');
+            },
           ),
           const SizedBox(height: 12),
           SingleChildScrollView(
@@ -547,26 +413,19 @@ class _LISTINGHQPropiedadesWidgetState extends State<LISTINGHQPropiedadesWidget>
   }
 
   Widget _buildHorizontalList(List<Widget> cards) {
-    if (cards.isEmpty) {
-      return Padding(
-        padding: const EdgeInsets.only(bottom: 16.0),
-        child: Text(
-          _query.trim().isEmpty
-              ? 'No hay propiedades en esta sección'
-              : 'Ninguna propiedad coincide con la búsqueda',
-          style: FlutterFlowTheme.of(context).bodyMedium,
-        ),
-      );
-    }
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
-      child: SizedBox(
-        height: 160.0,
-        child: ListView(
-          scrollDirection: Axis.horizontal,
-          children: cards,
-        ),
-      ),
+      child: cards.isEmpty
+          ? Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: ListingHqUi.emptyText(
+                context,
+                _query.trim().isEmpty
+                    ? 'No hay propiedades en esta sección.'
+                    : 'Ninguna propiedad coincide con la búsqueda.',
+              ),
+            )
+          : ListingHqCarousel(children: cards),
     );
   }
 
@@ -614,7 +473,7 @@ class _LISTINGHQPropiedadesWidgetState extends State<LISTINGHQPropiedadesWidget>
                       ),
                       Padding(
                         padding: const EdgeInsetsDirectional.fromSTEB(
-                            20.0, 0.0, 20.0, 100.0),
+                            20.0, 0.0, 20.0, 110.0),
                         child: Column(
                           mainAxisSize: MainAxisSize.max,
                           children: [
@@ -635,9 +494,7 @@ class _LISTINGHQPropiedadesWidgetState extends State<LISTINGHQPropiedadesWidget>
                                               address: e.address,
                                               tagText: e.tagText,
                                               statusText: e.statusText,
-                                              statusBgColor: e.statusBgColor,
-                                              statusTextColor:
-                                                  e.statusTextColor,
+                                              statusColor: e.statusTextColor,
                                               buttonText: 'Revisar ahora',
                                               onPressed: () => Navigator.push(
                                                 context,
@@ -659,7 +516,7 @@ class _LISTINGHQPropiedadesWidgetState extends State<LISTINGHQPropiedadesWidget>
                             // Sección 2: Asignar Operative Listing
                             if (_showSection('assign')) ...[
                               _buildSectionHeader(
-                                'Propiedades que necesitan asignar un Operative Listing',
+                                'Propiedades para asignar un Operative Listing',
                               ),
                               FutureBuilder<List<_HqCardData>>(
                                 future: _assignFuture,
@@ -672,9 +529,7 @@ class _LISTINGHQPropiedadesWidgetState extends State<LISTINGHQPropiedadesWidget>
                                               address: e.address,
                                               tagText: e.tagText,
                                               statusText: e.statusText,
-                                              statusBgColor: e.statusBgColor,
-                                              statusTextColor:
-                                                  e.statusTextColor,
+                                              statusColor: e.statusTextColor,
                                               buttonText: e.substatus ==
                                                       'RESCHEDULE_REQUIRED'
                                                   ? 'Asignar de nuevo'
@@ -719,9 +574,7 @@ class _LISTINGHQPropiedadesWidgetState extends State<LISTINGHQPropiedadesWidget>
                                               address: e.address,
                                               tagText: e.tagText,
                                               statusText: e.statusText,
-                                              statusBgColor: e.statusBgColor,
-                                              statusTextColor:
-                                                  e.statusTextColor,
+                                              statusColor: e.statusTextColor,
                                               buttonText: 'Revisar checklist',
                                               onPressed: () =>
                                                   context.pushNamed(
@@ -754,9 +607,7 @@ class _LISTINGHQPropiedadesWidgetState extends State<LISTINGHQPropiedadesWidget>
                                               address: e.address,
                                               tagText: e.tagText,
                                               statusText: e.statusText,
-                                              statusBgColor: e.statusBgColor,
-                                              statusTextColor:
-                                                  e.statusTextColor,
+                                              statusColor: e.statusTextColor,
                                               buttonText: 'Revisar fotos',
                                               onPressed: () =>
                                                   context.pushNamed(
