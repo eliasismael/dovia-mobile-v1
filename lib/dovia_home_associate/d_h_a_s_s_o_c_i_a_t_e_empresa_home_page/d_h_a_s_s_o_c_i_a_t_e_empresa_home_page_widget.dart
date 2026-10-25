@@ -1,4 +1,4 @@
-import '/dovia_home_associate/associate_header_actions.dart';
+import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_header/d_h_a_s_s_o_c_i_a_t_e_header_widget.dart';
 import '/dovia_home_associate/associate_nav.dart';
 import '/backend/api_requests/dovia_home_paginated_loader.dart';
 import '/dovia_home_associate/associate_service_categories.dart';
@@ -198,43 +198,10 @@ class _DHASSOCIATEEmpresaHomePageWidgetState
   // Bloques de UI.
   // ---------------------------------------------------------------------------
 
-  /// Cabecera del panel: logo, título y los accesos a Servicios y Próximos
-  /// trabajos.
-  Widget _buildHeader() {
-    return Padding(
-      padding: const EdgeInsetsDirectional.fromSTEB(20.0, 42.0, 20.0, 0.0),
-      // Título centrado en la pantalla, no entre los íconos: la D y los
-      // accesos quedan encima, a cada lado.
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Text(
-            'Home',
-            textAlign: TextAlign.center,
-            style: FlutterFlowTheme.of(context).bodyMedium.override(
-                  font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
-                  color: FlutterFlowTheme.of(context).primaryText,
-                  fontSize: 18.0,
-                  letterSpacing: 0.0,
-                  lineHeight: 1.2,
-                ),
-          ),
-          Row(
-            children: [
-              SvgPicture.asset(
-                'assets/images/D-verde.svg',
-                width: 28.0,
-                height: 36.0,
-                fit: BoxFit.contain,
-              ),
-              const Spacer(),
-              const AssociateHeaderActions(),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
+  /// Cabecera del panel: la misma del resto de las pantallas del asociado,
+  /// sin volver porque es el inicio. Servicios y Cotizaciones están en la
+  /// barra de abajo.
+  Widget _buildHeader() => const DHASSOCIATEHeaderWidget(tittleText: 'Inicio');
 
   Widget _buildSearchBar() {
     return Padding(

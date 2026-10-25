@@ -185,6 +185,23 @@ String associateRequestTitle(
   return isQuote && trade != null ? trade : asrServiceName(request);
 }
 
+/// Título de las tarjetas del independiente: el servicio con su oficio al
+/// lado (Ej: "Instalación · Albañilería"). Sin el oficio, filtrar por
+/// Albañilería y ver "Instalación" parecía un error del filtro.
+String associateRequestCardTitle(
+  Map<String, dynamic> request,
+  List<AssociateServiceCategory> categories,
+) {
+  final title = associateRequestTitle(request, categories);
+  final trade = associateRequestTrade(request, categories);
+  if (trade == null ||
+      trade.trim().isEmpty ||
+      title.toLowerCase().contains(trade.trim().toLowerCase())) {
+    return title;
+  }
+  return '$title · ${trade.trim()}';
+}
+
 /// Ícono del oficio de la solicitud, con el del servicio como respaldo.
 String associateRequestIcon(
   Map<String, dynamic> request,

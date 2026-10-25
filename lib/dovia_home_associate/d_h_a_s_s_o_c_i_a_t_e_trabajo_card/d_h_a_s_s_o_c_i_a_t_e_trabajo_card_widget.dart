@@ -1,4 +1,5 @@
 import '/flutter_flow/flutter_flow_theme.dart';
+import '/listing_hq/listing_hq_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -53,13 +54,9 @@ class DHASSOCIATETrabajoCardWidget extends StatelessWidget {
   /// Ver detalle (ícono de "Ojo").
   final VoidCallback? onViewDetail;
 
-  // Píldoras del diseño: el color del oficio al 20% de fondo y pleno en el
-  // texto (`rgba(232,93,117,0.2)` / `rgba(246,166,35,0.2)`).
-  static const Color _urgentText = Color(0xFFE85D75);
-  static const Color _urgentBackground = Color(0x33E85D75);
-  static const Color _standardText = Color(0xFFF6A623);
-  static const Color _standardBackground = Color(0x33F6A623);
-  static const Color _eyeBackground = Color(0xFFCCE3E4);
+  // Píldoras como los estados del cliente: color sólido y texto en blanco.
+  static const Color _urgentBackground = ListingHqUi.urgent;
+  static const Color _standardBackground = Color(0xFFF5A700);
 
   @override
   Widget build(BuildContext context) {
@@ -71,17 +68,7 @@ class DHASSOCIATETrabajoCardWidget extends StatelessWidget {
       onTap: onViewDetail,
       child: Container(
         width: double.infinity,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16.0),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x14000000),
-              blurRadius: 12.0,
-              offset: Offset(0.0, 4.0),
-            ),
-          ],
-        ),
+        decoration: ListingHqUi.cardDecoration(context),
         child: Padding(
           padding: const EdgeInsetsDirectional.fromSTEB(16.0, 14.0, 14.0, 16.0),
           child: Column(
@@ -116,7 +103,7 @@ class DHASSOCIATETrabajoCardWidget extends StatelessWidget {
                       child: Text(
                         priorityLabel!,
                         style: GoogleFonts.publicSans(
-                          color: isUrgent ? _urgentText : _standardText,
+                          color: Colors.white,
                           fontWeight: FontWeight.w600,
                           fontSize: 11.0,
                         ),
@@ -187,9 +174,10 @@ class DHASSOCIATETrabajoCardWidget extends StatelessWidget {
                     child: Container(
                       width: 40.0,
                       height: 40.0,
-                      decoration: const BoxDecoration(
-                        color: _eyeBackground,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
                         shape: BoxShape.circle,
+                        border: Border.all(color: theme.primary),
                       ),
                       child: Icon(
                         Icons.visibility_outlined,

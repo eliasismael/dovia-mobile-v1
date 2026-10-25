@@ -11,6 +11,7 @@ import '/flutter_flow/flutter_flow_widgets.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
 import '/custom_code/widgets/index.dart' as custom_widgets;
+import '/listing_hq/listing_hq_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:geolocator/geolocator.dart';
@@ -527,12 +528,8 @@ class _DHASSOCIATETuTrabajoWidgetState
                                     child: Container(
                                       width: MediaQuery.sizeOf(context).width *
                                           1.0,
-                                      decoration: BoxDecoration(
-                                        color: FlutterFlowTheme.of(context)
-                                            .secondaryBackground,
-                                        borderRadius:
-                                            BorderRadius.circular(10.0),
-                                      ),
+                                      decoration:
+                                          ListingHqUi.cardDecoration(context),
                                       child: Padding(
                                         padding: const EdgeInsetsDirectional
                                             .fromSTEB(15.0, 12.0, 15.0, 0.0),

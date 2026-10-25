@@ -120,14 +120,17 @@ class _DOVIASHAREDHeaderWidgetState extends State<DOVIASHAREDHeaderWidget> {
   }
 
   /// Avisos y ajustes llevan a las pantallas del rol: Lister HQ, Operative
-  /// Lister, Legal Associate, Legal HQ y Showing tienen las suyas; el resto
-  /// usa las del cliente.
+  /// Lister, Legal Associate, Legal HQ, Showing y Home Associate tienen las
+  /// suyas; el resto usa las del cliente.
   String get _notificationsRoute => switch (FFAppState().UserRole) {
         'LISTER_HQ' => LISTINGHQNotificationsWidget.routeName,
         'OPERATIVE_LISTER' => OPERATIVELISTINGNotificationsWidget.routeName,
         'LEGAL_ASSOCIATE' => LEGALASSOCIATENotificationsWidget.routeName,
         'SHOWING_AGENT' => SHOWINGNotificationsWidget.routeName,
         'LEGAL_OFFICER' => LEGALHQNotificacionesWidget.routeName,
+        'HOME_ASSOCIATE' ||
+        'HOME_ASSOCIATE_COMPANY' =>
+          DHASSOCIATENotificacionesWidget.routeName,
         _ => DOVIACLIENTNotificacionesWidget.routeName,
       };
 
@@ -137,6 +140,9 @@ class _DOVIASHAREDHeaderWidgetState extends State<DOVIASHAREDHeaderWidget> {
         'LEGAL_ASSOCIATE' => LEGALASSOCIATEAjustesWidget.routeName,
         'SHOWING_AGENT' => SHOWINGProfileWidget.routeName,
         'LEGAL_OFFICER' => LEGALHQAjustesWidget.routeName,
+        'HOME_ASSOCIATE' ||
+        'HOME_ASSOCIATE_COMPANY' =>
+          DHASSOCIATEAjustesWidget.routeName,
         _ => DOVIACLIENTAjustesWidget.routeName,
       };
 

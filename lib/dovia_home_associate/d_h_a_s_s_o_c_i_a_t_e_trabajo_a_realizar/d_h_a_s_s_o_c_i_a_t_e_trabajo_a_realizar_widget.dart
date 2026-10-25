@@ -13,6 +13,7 @@ import '/flutter_flow/flutter_flow_widgets.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
 import '/custom_code/widgets/index.dart' as custom_widgets;
+import '/listing_hq/listing_hq_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -534,10 +535,7 @@ class _DHASSOCIATETrabajoARealizarWidgetState
               width: MediaQuery.sizeOf(context).width * 1.0,
               padding:
                   const EdgeInsetsDirectional.fromSTEB(13.0, 13.0, 13.0, 13.0),
-              decoration: BoxDecoration(
-                color: FlutterFlowTheme.of(context).secondaryBackground,
-                borderRadius: BorderRadius.circular(10.0),
-              ),
+              decoration: ListingHqUi.cardDecoration(context),
               child: Text(
                 value,
                 style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -787,11 +785,8 @@ class _DHASSOCIATETrabajoARealizarWidgetState
                                   child: Container(
                                     width:
                                         MediaQuery.sizeOf(context).width * 1.0,
-                                    decoration: BoxDecoration(
-                                      color: FlutterFlowTheme.of(context)
-                                          .secondaryBackground,
-                                      borderRadius: BorderRadius.circular(10.0),
-                                    ),
+                                    decoration:
+                                        ListingHqUi.cardDecoration(context),
                                     child: Padding(
                                       padding:
                                           const EdgeInsetsDirectional.fromSTEB(

@@ -1,9 +1,9 @@
 import '/dovia_home_associate/associate_current_job.dart';
-import '/dovia_home_associate/associate_header_actions.dart';
 import '/dovia_home_associate/associate_nav.dart';
 import '/dovia_home_associate/associate_service_categories.dart';
 import '/dovia_home_associate/associate_service_request_fields.dart';
 import '/dovia_home_associate/associate_specialties_loader.dart';
+import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_header/d_h_a_s_s_o_c_i_a_t_e_header_widget.dart';
 import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_navbar/d_h_a_s_s_o_c_i_a_t_e_navbar_widget.dart';
 import '/dovia_home_associate/d_h_a_s_s_o_c_i_a_t_e_trabajo_card/d_h_a_s_s_o_c_i_a_t_e_trabajo_card_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -11,6 +11,7 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
 import '/index.dart';
+import '/listing_hq/listing_hq_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -100,6 +101,27 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
       authToken: token,
       limit: 20,
     );
+    // El inicio ya trae los trabajos del asociado: si hay uno en ejecución,
+    // la navbar muestra "En curso" sin esperar su propio pedido.
+    final generation = authManager.sessionGeneration;
+    _myJobsFuture.then((response) {
+      if (!response.succeeded ||
+          authManager.sessionGeneration != generation) {
+        return;
+      }
+      Map<String, dynamic>? current;
+      for (final item in DOVIAAPIDoviaHomeContextGroup
+              .listAssociateServiceRequestsCall
+              .requestsList(response.jsonBody) ??
+          const []) {
+        if (item is Map && _isInProgress(Map<String, dynamic>.from(item))) {
+          current = Map<String, dynamic>.from(item);
+          break;
+        }
+      }
+      // Trae hasta 20: que no esté acá no prueba que no haya uno en curso.
+      if (current != null) AssociateCurrentJob.remember(current);
+    });
   }
 
   @override
@@ -191,53 +213,40 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
               .compareTo(asrFilterDate(a) ?? DateTime(0)));
 
         final cardWidth = MediaQuery.sizeOf(context).width * 0.8;
-        return Padding(
-          padding: const EdgeInsets.only(top: 32.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildSectionHeader(
-                'Trabajos terminados',
-                actionText: 'Ver más',
-                onAction: () => context.pushNamed(
-                    DHASSOCIATEProximosTrabajosWidget.routeName,
-                    queryParameters: {
-                      'seccion': 'terminados'
-                    }).then((_) => safeSetState(_loadFeeds)),
-              ),
-              const SizedBox(height: 14.0),
-              if (jobs.isEmpty)
-                Text(
-                  'Todavía no tienes trabajos finalizados.',
-                  style: GoogleFonts.publicSans(
-                    color: FlutterFlowTheme.of(context).secondaryText,
-                    fontSize: 12.0,
-                  ),
-                )
-              else
-                SizedBox(
-                  height: 190.0,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    clipBehavior: Clip.none,
-                    padding: const EdgeInsets.symmetric(vertical: 6.0),
-                    itemCount: jobs.length,
-                    separatorBuilder: (_, __) => const SizedBox(width: 12.0),
-                    itemBuilder: (context, index) => SizedBox(
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildSectionHeader(
+              'Trabajos terminados',
+              actionText: 'Ver más',
+              onAction: () => context.pushNamed(
+                  DHASSOCIATEProximosTrabajosWidget.routeName,
+                  queryParameters: {
+                    'seccion': 'terminados'
+                  }).then((_) => safeSetState(_loadFeeds)),
+            ),
+            if (jobs.isEmpty)
+              _buildEmptyState('Todavía no tienes trabajos finalizados.')
+            else
+              ListingHqCarousel(
+                height: null,
+                spacing: 12.0,
+                children: [
+                  for (final job in jobs)
+                    SizedBox(
                       width: cardWidth,
                       child: DHASSOCIATETrabajoCardWidget(
-                        title: asrServiceName(jobs[index]),
-                        addressLabel: asrZoneLabel(jobs[index]),
-                        dateLabel: asrFormattedDate(jobs[index]),
-                        timeLabel: asrTimeLabel(jobs[index]),
-                        payoutLabel: asrPayoutLabel(jobs[index]),
-                        onViewDetail: () => _openFinished(jobs[index]),
+                        title: associateRequestCardTitle(job, categories),
+                        addressLabel: asrZoneLabel(job),
+                        dateLabel: asrFormattedDate(job),
+                        timeLabel: asrTimeLabel(job),
+                        payoutLabel: asrPayoutLabel(job),
+                        onViewDetail: () => _openFinished(job),
                       ),
                     ),
-                  ),
-                ),
-            ],
-          ),
+                ],
+              ),
+          ],
         );
       },
     );
@@ -261,25 +270,12 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
             .where(_isInProgress)
             .toList();
         if (jobs.isEmpty) return const SizedBox.shrink();
-        return Padding(
-          padding: const EdgeInsets.only(top: 32.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'En curso',
-                style: FlutterFlowTheme.of(context).bodyMedium.override(
-                      font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
-                      color: FlutterFlowTheme.of(context).primaryText,
-                      fontSize: 17.0,
-                      letterSpacing: 0.0,
-                      lineHeight: 1.3,
-                    ),
-              ),
-              const SizedBox(height: 14.0),
-              for (final data in jobs) _jobCard(data, _openInProgress),
-            ],
-          ),
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildSectionHeader('En curso'),
+            for (final data in jobs) _jobCard(data, _openInProgress),
+          ],
         );
       },
     );
@@ -313,117 +309,24 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
   // Bloques de UI.
   // ---------------------------------------------------------------------------
 
-  /// Cabecera del panel. El diseño de escritorio esconde los accesos de carrito
-  /// y diagnósticos, así que en mobile queda sólo el logo y el título.
-  Widget _buildHeader() {
-    return Padding(
-      padding: const EdgeInsetsDirectional.fromSTEB(20.0, 42.0, 20.0, 0.0),
-      // Título centrado en la pantalla, no entre los íconos: la D y los
-      // accesos quedan encima, a cada lado.
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Text(
-            'Home',
-            textAlign: TextAlign.center,
-            style: FlutterFlowTheme.of(context).bodyMedium.override(
-                  font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
-                  color: FlutterFlowTheme.of(context).primaryText,
-                  fontSize: 18.0,
-                  letterSpacing: 0.0,
-                  lineHeight: 1.2,
-                ),
-          ),
-          Row(
-            children: [
-              SvgPicture.asset(
-                'assets/images/D-verde.svg',
-                width: 28.0,
-                height: 36.0,
-                fit: BoxFit.contain,
-              ),
-              const Spacer(),
-              const AssociateHeaderActions(),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
+  /// Cabecera del panel: la misma del resto de las pantallas del asociado,
+  /// sin volver porque es el inicio.
+  Widget _buildHeader() => const DHASSOCIATEHeaderWidget(tittleText: 'Inicio');
 
   /// Barra de búsqueda: el asociado escribe un servicio u oficio
   /// ("albañilería", "eléctrico"), una zona ("zona 10") o una fecha
   /// ("12/07", "julio") y los dos feeds se filtran.
   Widget _buildSearchBar() {
     return Padding(
-      padding: const EdgeInsetsDirectional.fromSTEB(20.0, 18.0, 20.0, 0.0),
-      child: Container(
-        decoration: BoxDecoration(
-          color: FlutterFlowTheme.of(context).secondaryBackground,
-          borderRadius: BorderRadius.circular(32.0),
-          boxShadow: const [
-            BoxShadow(
-              blurRadius: 8.0,
-              color: Color(0x1A000000),
-              offset: Offset(0.0, 2.0),
-            )
-          ],
-        ),
-        child: Padding(
-          padding: const EdgeInsetsDirectional.fromSTEB(18.0, 4.0, 12.0, 4.0),
-          child: Row(
-            children: [
-              SvgPicture.asset(
-                'assets/images/search.svg',
-                width: 20.0,
-                height: 20.0,
-                fit: BoxFit.contain,
-              ),
-              const SizedBox(width: 12.0),
-              Expanded(
-                child: TextFormField(
-                  controller: _model.searchController,
-                  focusNode: _model.searchFocusNode,
-                  textInputAction: TextInputAction.search,
-                  onChanged: (value) =>
-                      safeSetState(() => _model.searchQuery = value),
-                  decoration: InputDecoration(
-                    isDense: true,
-                    border: InputBorder.none,
-                    enabledBorder: InputBorder.none,
-                    focusedBorder: InputBorder.none,
-                    hintText: 'Buscar por servicio, zona o fecha',
-                    hintStyle: FlutterFlowTheme.of(context).bodyMedium.override(
-                          font: GoogleFonts.inter(),
-                          color: FlutterFlowTheme.of(context).secondaryText,
-                          fontSize: 14.0,
-                          letterSpacing: 0.0,
-                        ),
-                    contentPadding: const EdgeInsets.symmetric(vertical: 14.0),
-                  ),
-                  style: FlutterFlowTheme.of(context).bodyMedium.override(
-                        font: GoogleFonts.inter(),
-                        color: FlutterFlowTheme.of(context).primaryText,
-                        fontSize: 14.0,
-                        letterSpacing: 0.0,
-                      ),
-                ),
-              ),
-              if (_model.searchQuery.isNotEmpty)
-                InkWell(
-                  onTap: () => safeSetState(() {
-                    _model.searchController?.clear();
-                    _model.searchQuery = '';
-                  }),
-                  child: Icon(
-                    Icons.close_rounded,
-                    size: 20.0,
-                    color: FlutterFlowTheme.of(context).secondaryText,
-                  ),
-                ),
-            ],
-          ),
-        ),
+      padding: const EdgeInsetsDirectional.fromSTEB(20.0, 16.0, 20.0, 0.0),
+      child: ListingHqSearchField(
+        controller: _model.searchController,
+        hintText: 'Buscar por servicio, zona o fecha',
+        onChanged: (value) => safeSetState(() => _model.searchQuery = value),
+        onClear: () => safeSetState(() {
+          _model.searchController?.clear();
+          _model.searchQuery = '';
+        }),
       ),
     );
   }
@@ -431,41 +334,14 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
   /// Encabezado de sección con su acción a la derecha.
   Widget _buildSectionHeader(
     String title, {
-    required String actionText,
-    required VoidCallback onAction,
-  }) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Expanded(
-          child: Text(
-            title,
-            style: FlutterFlowTheme.of(context).bodyMedium.override(
-                  font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
-                  color: FlutterFlowTheme.of(context).primaryText,
-                  fontSize: 17.0,
-                  letterSpacing: 0.0,
-                  lineHeight: 1.3,
-                ),
-          ),
-        ),
-        // Acción como texto sin fondo, igual que el "Ver más" del resto de
-        // la app.
-        InkWell(
-          onTap: onAction,
-          child: Text(
-            actionText,
-            style: FlutterFlowTheme.of(context).bodyMedium.override(
-                  font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
-                  color: FlutterFlowTheme.of(context).primary,
-                  fontSize: 14.0,
-                ),
-          ),
-        ),
-      ],
-    );
-  }
+    String? actionText,
+    VoidCallback? onAction,
+  }) =>
+      ListingHqSectionHeader(
+        title: title,
+        linkText: actionText,
+        onLinkTap: onAction,
+      );
 
   /// Carrusel horizontal de los oficios **aprobados para este asociado**. El
   /// botón de la sección dice "Agregar": desde acá suma especialidades a su
@@ -502,19 +378,10 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
               // Segundo toque sobre la misma categoría = quitar el filtro.
               _model.selectedCategoryId = isSelected ? null : category.id;
             }),
-            borderRadius: BorderRadius.circular(8.0),
+            borderRadius: BorderRadius.circular(20.0),
             child: Container(
               width: 100.0,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12.0),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color(0x14000000),
-                    blurRadius: 10.0,
-                    offset: Offset(0.0, 3.0),
-                  ),
-                ],
+              decoration: ListingHqUi.cardDecoration(context).copyWith(
                 border: Border.all(
                   color: isSelected
                       ? FlutterFlowTheme.of(context).primary
@@ -568,25 +435,8 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
     );
   }
 
-  Widget _buildEmptyState(String message) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
-      decoration: BoxDecoration(
-        color: const Color(0x2670ACAD),
-        borderRadius: BorderRadius.circular(12.0),
-      ),
-      child: Text(
-        message,
-        style: FlutterFlowTheme.of(context).bodyMedium.override(
-              font: GoogleFonts.inter(),
-              color: FlutterFlowTheme.of(context).secondaryText,
-              fontSize: 13.0,
-              letterSpacing: 0.0,
-            ),
-      ),
-    );
-  }
+  Widget _buildEmptyState(String message) =>
+      ListingHqUi.emptyText(context, message);
 
   /// Lista de tarjetas de una sección del panel.
   Widget _buildJobsSection({
@@ -657,10 +507,13 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
             : _cardFor(data, onViewDetail),
       );
 
+  /// Oficios aprobados, para mostrar el de cada trabajo en su tarjeta.
+  List<AssociateServiceCategory> _approved = const [];
+
   Widget _cardFor(Map<String, dynamic> data,
           void Function(Map<String, dynamic>) onViewDetail) =>
       DHASSOCIATETrabajoCardWidget(
-        title: asrServiceName(data),
+        title: associateRequestCardTitle(data, _approved),
         addressLabel: asrZoneLabel(data),
         dateLabel: asrFormattedDate(data),
         timeLabel: asrTimeLabel(data),
@@ -730,18 +583,7 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  title,
-                  style: FlutterFlowTheme.of(context).bodyMedium.override(
-                        font:
-                            GoogleFonts.publicSans(fontWeight: FontWeight.w600),
-                        color: FlutterFlowTheme.of(context).primaryText,
-                        fontSize: 17.0,
-                        letterSpacing: 0.0,
-                        lineHeight: 1.3,
-                      ),
-                ),
-                const SizedBox(height: 14.0),
+                _buildSectionHeader(title),
                 for (final data in jobs) _jobCard(data, open, dimmed: dimmed),
               ],
             );
@@ -751,12 +593,9 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
           children: [
             if (inProgress.isNotEmpty) ...[
               section('En curso', inProgress, _openInProgress),
-              const SizedBox(height: 18.0),
             ],
             if (available.isNotEmpty)
-              section('Trabajos disponibles:', available, _openOpportunity),
-            if (available.isNotEmpty && mine.isNotEmpty)
-              const SizedBox(height: 18.0),
+              section('Trabajos disponibles', available, _openOpportunity),
             if (mine.isNotEmpty)
               section('Próximos trabajos', mine, _openScheduledJob,
                   dimmed: (DOVIAAPIDoviaHomeContextGroup
@@ -800,6 +639,7 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
                   // está habilitado a tomar.
                   final categories = snapshot.data?.approved ??
                       const <AssociateServiceCategory>[];
+                  _approved = categories;
 
                   return SingleChildScrollView(
                     child: Column(
@@ -810,7 +650,7 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
                         _buildSearchBar(),
                         Padding(
                           padding: const EdgeInsetsDirectional.fromSTEB(
-                              20.0, 28.0, 20.0, 120.0),
+                              20.0, 0.0, 20.0, 120.0),
                           child: _model.searchQuery.trim().isNotEmpty
                               ? _buildSearchResults(categories)
                               : Column(
@@ -825,7 +665,6 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
                                           .then((_) =>
                                               safeSetState(_loadCategories)),
                                     ),
-                                    const SizedBox(height: 14.0),
                                     if (snapshot.connectionState ==
                                         ConnectionState.waiting)
                                       const SizedBox(
@@ -838,9 +677,8 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
                                     else
                                       _buildCategoriesCarousel(categories),
                                     _buildInProgressSection(),
-                                    const SizedBox(height: 32.0),
                                     _buildSectionHeader(
-                                      'Trabajos disponibles:',
+                                      'Trabajos disponibles',
                                       actionText: 'Ver más',
                                       onAction: () => context
                                           .pushNamed(
@@ -849,7 +687,6 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
                                           .then(
                                               (_) => safeSetState(_loadFeeds)),
                                     ),
-                                    const SizedBox(height: 14.0),
                                     _buildJobsSection(
                                       future: _availableJobsFuture,
                                       extractList: DOVIAAPIDoviaHomeContextGroup
@@ -867,7 +704,6 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
                                           'Por ahora no hay trabajos disponibles en '
                                           'tu zona con estos filtros.',
                                     ),
-                                    const SizedBox(height: 32.0),
                                     _buildSectionHeader(
                                       'Próximos trabajos',
                                       actionText: 'Ver más',
@@ -878,7 +714,6 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
                                           .then(
                                               (_) => safeSetState(_loadFeeds)),
                                     ),
-                                    const SizedBox(height: 14.0),
                                     _buildJobsSection(
                                       future: _myJobsFuture,
                                       extractList: DOVIAAPIDoviaHomeContextGroup

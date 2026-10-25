@@ -91,9 +91,11 @@ void main() {
     await withTallScreen(tester);
     await _pump(tester, role: 'HOME_ASSOCIATE_COMPANY');
 
-    expect(find.text('Servicios', findRichText: true), findsOneWidget);
-    // Inicio + Cotizaciones + Notificaciones + Ajustes.
-    expect(_navItems(), findsNWidgets(4));
+    // El título del header y la pestaña de la barra.
+    expect(find.text('Servicios', findRichText: true), findsNWidgets(2));
+    // Inicio + Cotizaciones + Servicios: avisos y ajustes están en el header.
+    expect(_navItems(), findsNWidgets(3));
+    expect(find.text('Cotizaciones'), findsWidgets);
     expect(tester.takeException(), isNull);
   });
 
@@ -102,8 +104,9 @@ void main() {
     await withTallScreen(tester);
     await _pump(tester, role: 'HOME_ASSOCIATE');
 
-    // Inicio + Notificaciones + Ajustes.
+    // Inicio + Trabajos + Servicios.
     expect(_navItems(), findsNWidgets(3));
+    expect(find.text('Trabajos'), findsOneWidget);
   });
 
   testWidgets('los servicios verificados se pintan y no son accionables',

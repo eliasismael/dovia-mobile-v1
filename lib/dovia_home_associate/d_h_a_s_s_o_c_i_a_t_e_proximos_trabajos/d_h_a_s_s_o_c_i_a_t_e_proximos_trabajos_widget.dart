@@ -14,8 +14,8 @@ import '/flutter_flow/form_field_controller.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
 import '/index.dart';
+import '/listing_hq/listing_hq_ui.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '/auth/custom_auth/auth_util.dart';
@@ -282,61 +282,14 @@ class _DHASSOCIATEProximosTrabajosWidgetState
   // ---------------------------------------------------------------------------
 
   Widget _buildSearchBar() {
-    return Container(
-      decoration: BoxDecoration(
-        color: FlutterFlowTheme.of(context).secondaryBackground,
-        borderRadius: BorderRadius.circular(32.0),
-        boxShadow: const [
-          BoxShadow(
-            blurRadius: 8.0,
-            color: Color(0x1A000000),
-            offset: Offset(0.0, 2.0),
-          )
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsetsDirectional.fromSTEB(18.0, 4.0, 18.0, 4.0),
-        child: Row(
-          children: [
-            SvgPicture.asset(
-              'assets/images/search.svg',
-              width: 20.0,
-              height: 20.0,
-              fit: BoxFit.contain,
-            ),
-            const SizedBox(width: 12.0),
-            Expanded(
-              child: TextFormField(
-                controller: _model.searchController,
-                focusNode: _model.searchFocusNode,
-                textInputAction: TextInputAction.search,
-                onChanged: (value) =>
-                    safeSetState(() => _model.searchQuery = value),
-                decoration: InputDecoration(
-                  isDense: true,
-                  border: InputBorder.none,
-                  enabledBorder: InputBorder.none,
-                  focusedBorder: InputBorder.none,
-                  hintText: 'Buscar por servicio, zona o fecha',
-                  hintStyle: FlutterFlowTheme.of(context).bodyMedium.override(
-                        font: GoogleFonts.inter(),
-                        color: FlutterFlowTheme.of(context).secondaryText,
-                        fontSize: 14.0,
-                        letterSpacing: 0.0,
-                      ),
-                  contentPadding: const EdgeInsets.symmetric(vertical: 14.0),
-                ),
-                style: FlutterFlowTheme.of(context).bodyMedium.override(
-                      font: GoogleFonts.inter(),
-                      color: FlutterFlowTheme.of(context).primaryText,
-                      fontSize: 14.0,
-                      letterSpacing: 0.0,
-                    ),
-              ),
-            ),
-          ],
-        ),
-      ),
+    return ListingHqSearchField(
+      controller: _model.searchController,
+      hintText: 'Buscar por servicio, zona o fecha',
+      onChanged: (value) => safeSetState(() => _model.searchQuery = value),
+      onClear: () => safeSetState(() {
+        _model.searchController?.clear();
+        _model.searchQuery = '';
+      }),
     );
   }
 
@@ -440,19 +393,15 @@ class _DHASSOCIATEProximosTrabajosWidgetState
         ),
       );
 
-  Widget _buildSectionTitle(String title) => Text(
-        title,
-        style: FlutterFlowTheme.of(context).bodyMedium.override(
-              font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
-              color: FlutterFlowTheme.of(context).primaryText,
-              fontSize: 17.0,
-              letterSpacing: 0.34,
-            ),
-      );
+  Widget _buildSectionTitle(String title) =>
+      Text(title, style: ListingHqUi.sectionTitle(context));
 
   /// Las tarjetas de una sección. La cuadrícula de tres columnas del diseño de
   /// escritorio es, en mobile, una sola columna a ancho de pantalla: la misma
   /// tarjeta y el mismo orden, apilados.
+  /// Oficios aprobados, para mostrar el de cada trabajo en su tarjeta.
+  List<AssociateServiceCategory> _approved = const [];
+
   Widget _buildCards(
     List<Map<String, dynamic>> jobs, {
     required void Function(Map<String, dynamic>) onViewDetail,
@@ -463,7 +412,7 @@ class _DHASSOCIATEProximosTrabajosWidgetState
             (data) => Padding(
               padding: const EdgeInsets.only(bottom: _cardGap),
               child: DHASSOCIATETrabajoCardWidget(
-                title: asrServiceName(data),
+                title: associateRequestCardTitle(data, _approved),
                 addressLabel: asrZoneLabel(data),
                 dateLabel: asrFormattedDate(data),
                 timeLabel: asrTimeLabel(data),
@@ -498,6 +447,7 @@ class _DHASSOCIATEProximosTrabajosWidgetState
   }
 
   Widget _buildAgenda(_Agenda agenda) {
+    _approved = agenda.categories.approved;
     if (agenda.jobsFailed) return _buildMessage(agenda.jobsErrorMessage);
 
     final accepted = _acceptedJobs(agenda);

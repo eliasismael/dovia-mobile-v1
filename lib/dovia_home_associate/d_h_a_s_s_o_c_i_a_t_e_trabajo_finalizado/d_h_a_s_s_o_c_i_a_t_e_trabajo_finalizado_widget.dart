@@ -16,6 +16,7 @@ import '/flutter_flow/upload_data.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/fixed_dovia_icon/fixed_dovia_icon_widget.dart';
 import '/shared_components/popup_exito/popup_exito_widget.dart';
+import '/listing_hq/listing_hq_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'd_h_a_s_s_o_c_i_a_t_e_trabajo_finalizado_model.dart';
@@ -192,10 +193,7 @@ class _DHASSOCIATETrabajoFinalizadoWidgetState
           child: Container(
             width: double.infinity,
             height: 104.0,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(10.0),
-            ),
+            decoration: ListingHqUi.cardDecoration(context),
             alignment: Alignment.center,
             child: Column(
               mainAxisSize: MainAxisSize.min,

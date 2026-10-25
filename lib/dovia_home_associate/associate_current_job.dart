@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_dovia_home.dart';
 import '/dovia_home_associate/associate_service_request_fields.dart';
@@ -20,6 +22,28 @@ class AssociateCurrentJob {
   /// Lo último que se sabe, sin pedir nada (null: no hay o no se sabe).
   static Map<String, dynamic>? get cached => _job;
 
+  /// Avisa cada vez que se sabe algo nuevo. La navbar lo escucha: si su
+  /// pedido llegó vacío o se descartó (Ej: la sesión todavía se estaba
+  /// restaurando al abrir la app), "En curso" aparece apenas otro pedido —el
+  /// del inicio, por ejemplo— lo encuentra, sin esperar a cambiar de pantalla.
+  static final ValueNotifier<Map<String, dynamic>?> notifier =
+      ValueNotifier(null);
+
+  /// Guarda lo que encontró otra pantalla que ya trajo los trabajos del
+  /// asociado (el inicio pide todos), así no hace falta otro pedido.
+  static void remember(Map<String, dynamic>? job) {
+    _job = job;
+    _fetchedAt = DateTime.now();
+    notifier.value = job;
+  }
+
+  /// Si lo guardado sigue vigente. Falso también cuando el último pedido
+  /// falló o se descartó.
+  static bool get isFresh {
+    final fetchedAt = _fetchedAt;
+    return fetchedAt != null && DateTime.now().difference(fetchedAt) < _ttl;
+  }
+
   static void invalidate() => _fetchedAt = null;
 
   /// Olvida el trabajo guardado (al cerrar sesión o cambiar de cuenta): si
@@ -28,13 +52,11 @@ class AssociateCurrentJob {
     _job = null;
     _fetchedAt = null;
     _pending = null;
+    notifier.value = null;
   }
 
   static Future<Map<String, dynamic>?> load() {
-    final fetchedAt = _fetchedAt;
-    if (fetchedAt != null && DateTime.now().difference(fetchedAt) < _ttl) {
-      return Future.value(_job);
-    }
+    if (isFresh) return Future.value(_job);
     return _pending ??= _fetch().whenComplete(() => _pending = null);
   }
 
@@ -64,8 +86,7 @@ class AssociateCurrentJob {
           }
         }
       }
-      _job = found;
-      _fetchedAt = DateTime.now();
+      remember(found);
       return found;
     } catch (_) {
       return _job;

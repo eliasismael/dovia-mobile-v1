@@ -77,8 +77,9 @@ void main() {
     await _signInAs('HOME_ASSOCIATE_COMPANY');
     await _pumpPanel(tester);
 
-    // Inicio + Cotizaciones + Notificaciones + Ajustes.
-    expect(_navItems(), findsNWidgets(4));
+    // Inicio + Cotizaciones + Servicios: avisos y ajustes están en el header.
+    expect(_navItems(), findsNWidgets(3));
+    expect(find.text('Cotizaciones'), findsWidgets);
   });
 
   testWidgets('el profesional independiente no ve el ítem de Cotizaciones',
@@ -94,8 +95,9 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
 
-    // Inicio + Notificaciones + Ajustes: los endpoints de cotizaciones son de
+    // Inicio + Trabajos + Servicios: los endpoints de cotizaciones son de
     // empresa y le responderían 403.
     expect(_navItems(), findsNWidgets(3));
+    expect(find.text('Trabajos'), findsOneWidget);
   });
 }
