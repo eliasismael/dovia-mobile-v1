@@ -52,7 +52,7 @@ class _DeleteAccount1WidgetState extends State<DeleteAccount1Widget> {
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             Text(
-              '¿Estás seguro que quieres eliminar\ntu cuenta?',
+              '¿Estás seguro de que quieres eliminar tu cuenta?',
               textAlign: TextAlign.center,
               style: FlutterFlowTheme.of(context).bodyMedium.override(
                     font: GoogleFonts.inter(

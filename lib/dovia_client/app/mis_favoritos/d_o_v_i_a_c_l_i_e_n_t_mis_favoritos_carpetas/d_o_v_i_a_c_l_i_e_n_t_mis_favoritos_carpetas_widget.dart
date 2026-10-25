@@ -346,7 +346,7 @@ class _DOVIACLIENTMisFavoritosCarpetasWidgetState
                                                                           const SizedBox(
                                                                               height: 16.0),
                                                                           Text(
-                                                                            "Estás seguro que querés borrar esta carpeta. Se borrarán todos tus inmuebles guardados en ella",
+                                                                            "¿Estás seguro de que querés borrar esta carpeta? Se borrarán todos tus inmuebles guardados en ella",
                                                                             textAlign:
                                                                                 TextAlign.center,
                                                                             style: FlutterFlowTheme.of(context).bodyMedium.override(

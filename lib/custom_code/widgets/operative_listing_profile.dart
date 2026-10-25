@@ -2,6 +2,7 @@
 // Imports other custom widgets
 // Imports custom functions
 import '/core/network_image_size.dart';
+import '/shared_components/delete_account_confirm_dialog.dart';
 import 'package:flutter/material.dart';
 // Begin custom widget code
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
@@ -1059,7 +1060,7 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
   void _showDeleteAccountFlow() {
     showDialog(
       context: context,
-      builder: (context) => _DeleteConfirmDialog(
+      builder: (context) => DeleteAccountConfirmDialog(
         onConfirm: () {
           Navigator.pop(context);
           _showReasonDialog();
@@ -1071,7 +1072,7 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
   void _showReasonDialog() {
     showDialog(
       context: context,
-      builder: (context) => _DeleteReasonDialog(
+      builder: (context) => DeleteAccountReasonDialog(
         controller: _deleteReasonController,
         onConfirm: () async {
           Navigator.pop(context);
@@ -1443,166 +1444,6 @@ Evasión de comisiones
 abogados. notarios o intermediarios externos. firma contratos fuera de DOVIA. con el
 propósito de evitar el pago de la comisión, DOVIA se reserva el derecho de tomar acciones.
 ''';
-}
-
-class _DeleteConfirmDialog extends StatelessWidget {
-  final VoidCallback onConfirm;
-  const _DeleteConfirmDialog({required this.onConfirm});
-
-  @override
-  Widget build(BuildContext context) {
-    return Dialog(
-      backgroundColor: Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              '¿Estás seguro que quieres eliminar\ntu cuenta?',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: 'Public Sans',
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF00444B),
-              ),
-            ),
-            const SizedBox(height: 32),
-            Row(
-              children: [
-                Expanded(
-                  child: SizedBox(
-                    height: 48,
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: OutlinedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        side: const BorderSide(
-                            color: Color(0xFF007376), width: 1.5),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24),
-                        ),
-                      ),
-                      child: const Text('Cancelar',
-                          style: TextStyle(
-                              fontFamily: 'Public Sans',
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFF007376))),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: SizedBox(
-                    height: 48,
-                    child: ElevatedButton(
-                      onPressed: onConfirm,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFFF0000),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24),
-                        ),
-                        elevation: 0,
-                      ),
-                      child: const Text('Eliminar cuenta',
-                          style: TextStyle(
-                              fontFamily: 'Public Sans',
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white)),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _DeleteReasonDialog extends StatelessWidget {
-  final TextEditingController controller;
-  final VoidCallback onConfirm;
-  const _DeleteReasonDialog(
-      {required this.controller, required this.onConfirm});
-
-  @override
-  Widget build(BuildContext context) {
-    return Dialog(
-      backgroundColor: Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'Cuéntanos por qué deseas eliminar\ntu cuenta',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: 'Public Sans',
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF00444B),
-              ),
-            ),
-            const SizedBox(height: 24),
-            Container(
-              decoration: BoxDecoration(
-                color: const Color(0xFFFAFAFA),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: TextField(
-                controller: controller,
-                maxLines: 4,
-                style: const TextStyle(
-                  fontFamily: 'Public Sans',
-                  fontSize: 14,
-                  color: Color(0xFF00444B),
-                ),
-                decoration: const InputDecoration(
-                  hintText: 'Escribe aquí....',
-                  hintStyle: TextStyle(
-                    fontFamily: 'Public Sans',
-                    fontSize: 14,
-                    color: Color(0xFF888888),
-                  ),
-                  border: InputBorder.none,
-                  contentPadding: EdgeInsets.all(16),
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: ElevatedButton(
-                onPressed: onConfirm,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF007376),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  elevation: 0,
-                ),
-                child: const Text('Enviar',
-                    style: TextStyle(
-                        fontFamily: 'Public Sans',
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white)),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }
 
 class _DeleteSuccessDialog extends StatelessWidget {

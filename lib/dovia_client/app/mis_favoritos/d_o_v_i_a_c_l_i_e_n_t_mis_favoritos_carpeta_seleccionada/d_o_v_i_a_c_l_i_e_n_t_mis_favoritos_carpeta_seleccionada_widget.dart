@@ -341,7 +341,7 @@ class _DOVIACLIENTMisFavoritosCarpetaSeleccionadaWidgetState
                                                               const SizedBox(
                                                                   height: 16.0),
                                                               Text(
-                                                                "¿Estás seguro que querés sacar de favoritos este inmueble?",
+                                                                "¿Estás seguro de que querés sacar de favoritos este inmueble?",
                                                                 textAlign:
                                                                     TextAlign
                                                                         .center,

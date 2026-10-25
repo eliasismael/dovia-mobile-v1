@@ -2,6 +2,7 @@
 // Imports other custom widgets
 // Imports custom functions
 import '/core/network_image_size.dart';
+import '/shared_components/delete_account_confirm_dialog.dart';
 import 'package:flutter/material.dart';
 // Begin custom widget code
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
@@ -691,7 +692,7 @@ class _AjustesScreenState extends State<AjustesScreen> {
   // ── SUBSCRIPTION CANCELLATION FLOW ────────────────────────────────
   void _showCancelSubscriptionFlow() {
     _showConfirmBottomSheet(
-      title: '¿Estás seguro que deseas cancelar tu suscripción?',
+      title: '¿Estás seguro de que deseas cancelar tu suscripción?',
       subtitle: 'Conservás los beneficios hasta el fin del período ya pagado.',
       confirmLabel: 'Continuar',
       isDestructive: true,
@@ -724,38 +725,42 @@ class _AjustesScreenState extends State<AjustesScreen> {
 
   // ── DELETE ACCOUNT FLOW ───────────────────────────────────────────
   void _showDeleteAccountFlow() {
-    _showConfirmBottomSheet(
-      title: '¿Estás seguro de que quieres eliminar tu cuenta?',
-      subtitle: 'Esta acción es permanente y perderás todos tus datos.',
-      confirmLabel: 'Eliminar permanentemente',
-      isDestructive: true,
-      onConfirm: () {
-        // Step 2: Reason
-        _showReasonBottomSheet(
-          title: '¿Por qué abandonas DOVIA?',
-          controller: _deleteReasonCtrl,
-          onConfirm: () async {
-            if (_deletingAccount) return;
-            setState(() => _deletingAccount = true);
-            final reason = _deleteReasonCtrl.text.trim();
-            final deleted = await widget.onDeleteAccount
-                    ?.call(reason.isEmpty ? null : reason) ??
-                false;
-            if (!mounted) return;
-            setState(() => _deletingAccount = false);
-            // Antes se cerraba la sesión aunque el backend hubiera fallado, y
-            // el usuario creía haber borrado una cuenta que seguía activa.
-            if (!deleted) {
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                  content: Text(
-                      'No pudimos eliminar tu cuenta. Inténtalo de nuevo.'),
-                  backgroundColor: _softRed));
-              return;
-            }
-            await widget.onSignOut?.call();
-          },
-        );
-      },
+    // El mismo diálogo que los ajustes de los demás roles.
+    showDialog(
+      context: context,
+      builder: (dialogContext) => DeleteAccountConfirmDialog(
+        onConfirm: () {
+          Navigator.pop(dialogContext);
+          // Paso 2: el motivo, también en el diálogo de los demás roles.
+          showDialog(
+            context: context,
+            builder: (reasonContext) => DeleteAccountReasonDialog(
+              controller: _deleteReasonCtrl,
+              onConfirm: () async {
+                Navigator.pop(reasonContext);
+                if (_deletingAccount) return;
+                setState(() => _deletingAccount = true);
+                final reason = _deleteReasonCtrl.text.trim();
+                final deleted = await widget.onDeleteAccount
+                        ?.call(reason.isEmpty ? null : reason) ??
+                    false;
+                if (!mounted) return;
+                setState(() => _deletingAccount = false);
+                // Antes se cerraba la sesión aunque el backend hubiera fallado, y
+                // el usuario creía haber borrado una cuenta que seguía activa.
+                if (!deleted) {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                      content: Text(
+                          'No pudimos eliminar tu cuenta. Inténtalo de nuevo.'),
+                      backgroundColor: _softRed));
+                  return;
+                }
+                await widget.onSignOut?.call();
+              },
+            ),
+          );
+        },
+      ),
     );
   }
 

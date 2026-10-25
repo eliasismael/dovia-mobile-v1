@@ -55,7 +55,7 @@ class _UnsuscribeModal1WidgetState extends State<UnsuscribeModal1Widget> {
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             Text(
-              '¿Estás seguro que quieres cancelar\nla suscripción?',
+              '¿Estás seguro de que quieres cancelar la suscripción?',
               textAlign: TextAlign.center,
               style: FlutterFlowTheme.of(context).bodyMedium.override(
                     font: GoogleFonts.inter(

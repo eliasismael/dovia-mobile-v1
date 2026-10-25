@@ -174,9 +174,10 @@ void main() {
       await _settle(tester);
 
       await _tapText(tester, 'Eliminar cuenta', settle: false);
-      await _tapText(tester, 'Eliminar permanentemente', settle: false);
+      // El botón del diálogo de confirmación, el mismo que en los asociados.
+      await _tapText(tester, 'Eliminar cuenta', settle: false);
       await tester.enterText(find.byType(TextField).last, 'Ya no la uso');
-      await _tapText(tester, 'Confirmar', settle: false);
+      await _tapText(tester, 'Enviar', settle: false);
 
       expect(sentReason, 'Ya no la uso');
       if (ok) {
