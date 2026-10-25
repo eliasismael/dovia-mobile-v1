@@ -224,16 +224,16 @@ void main() {
       final style = legalHqStatusStyle('BANK_DOCUMENTATION_SUBMITTED');
 
       expect(style.label, 'Documentación enviada al banco');
-      expect(style.background, const Color(0xFFCAE0FF));
-      expect(style.foreground, const Color(0xFF065EDA));
+      expect(style.background, const Color(0xFF065EDA));
+      expect(style.foreground, Colors.white);
     });
 
     test('la etapa 3 se distingue en naranja, no en el morado del paso 1', () {
       final evaluation = legalHqStatusStyle('BANK_EVALUATION');
 
       expect(evaluation.label, 'En evaluación bancaria');
-      expect(evaluation.background, const Color(0xFFFFE3C6));
-      expect(evaluation.foreground, const Color(0xFFF57600));
+      expect(evaluation.background, const Color(0xFFF57600));
+      expect(evaluation.foreground, Colors.white);
       expect(
         evaluation.background,
         isNot(legalHqStatusStyle('BANK_MANAGEMENT_STARTED').background),

@@ -73,7 +73,7 @@ class _LEGALHQAjustesWidgetState extends State<LEGALHQAjustesWidget> {
                     ),
                     Padding(
                       padding: const EdgeInsetsDirectional.fromSTEB(
-                          20.0, 0.0, 20.0, 100.0),
+                          20.0, 0.0, 20.0, 120.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         children: [

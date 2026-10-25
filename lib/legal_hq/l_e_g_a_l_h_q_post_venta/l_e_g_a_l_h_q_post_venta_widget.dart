@@ -6,6 +6,7 @@ import '/legal_hq/l_e_g_a_l_h_q_navbar/l_e_g_a_l_h_q_navbar_widget.dart';
 import '/legal_hq/legal_h_q_header/legal_h_q_header_widget.dart';
 import '/legal_hq/legal_hq_process_data.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
+import '/listing_hq/listing_hq_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'l_e_g_a_l_h_q_post_venta_model.dart';
@@ -104,7 +105,7 @@ class _LEGALHQPostVentaWidgetState extends State<LEGALHQPostVentaWidget> {
                         ),
                         Padding(
                           padding: const EdgeInsetsDirectional.fromSTEB(
-                              20.0, 30.0, 20.0, 100.0),
+                              20.0, 30.0, 20.0, 120.0),
                           child: loading
                               ? const Padding(
                                   padding: EdgeInsets.symmetric(vertical: 80.0),
@@ -185,10 +186,7 @@ class _LEGALHQPostVentaWidgetState extends State<LEGALHQPostVentaWidget> {
       children: [
         // ── 1. Cabecera y metadatos del cierre ────────────────────────────
         Container(
-          decoration: BoxDecoration(
-            color: FlutterFlowTheme.of(context).secondaryBackground,
-            borderRadius: BorderRadius.circular(10.0),
-          ),
+          decoration: ListingHqUi.cardDecoration(context),
           padding: const EdgeInsets.all(10.0),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -231,8 +229,8 @@ class _LEGALHQPostVentaWidgetState extends State<LEGALHQPostVentaWidget> {
                           overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.publicSans(
                             color: statusStyle.foreground,
-                            fontSize: 14.0,
-                            fontWeight: FontWeight.normal,
+                            fontSize: 12.0,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),

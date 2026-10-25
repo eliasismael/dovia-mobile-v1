@@ -1064,19 +1064,19 @@ class LegalHqStatusStyle {
   final Color foreground;
 }
 
-// Paleta de badges del diseño.
-const Color _badgeYellowBg = Color(0xFFFFF1BC);
-const Color _badgeYellowText = Color(0xFFF5A700);
-const Color _badgeOrangeBg = Color(0xFFFFE3C6);
-const Color _badgeOrangeText = Color(0xFFF57600);
-const Color _badgePurpleBg = Color(0xFFD2CCE4);
-const Color _badgePurpleText = Color(0xFF0306B4);
-const Color _badgeGreenBg = Color(0x1A249689);
-const Color _badgeGreenText = Color(0xFF249689);
-const Color _badgeRedBg = Color(0xFFFFE0DB);
-const Color _badgeRedText = Color(0xFFD92D20);
-const Color _badgeBlueBg = Color(0xFFCAE0FF);
-const Color _badgeBlueText = Color(0xFF065EDA);
+// Estados con el estilo del cliente: color sólido y el texto en blanco.
+const Color _badgeYellowBg = Color(0xFFF5A700);
+const Color _badgeYellowText = Colors.white;
+const Color _badgeOrangeBg = Color(0xFFF57600);
+const Color _badgeOrangeText = Colors.white;
+const Color _badgePurpleBg = Color(0xFF5B4BB7);
+const Color _badgePurpleText = Colors.white;
+const Color _badgeGreenBg = Color(0xFF249689);
+const Color _badgeGreenText = Colors.white;
+const Color _badgeRedBg = Color(0xFFD92D20);
+const Color _badgeRedText = Colors.white;
+const Color _badgeBlueBg = Color(0xFF065EDA);
+const Color _badgeBlueText = Colors.white;
 
 /// Etiqueta y colores del "Estado actual" que muestra cada tarjeta.
 LegalHqStatusStyle legalHqStatusStyle(String status) {

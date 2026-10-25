@@ -6,6 +6,7 @@ import '/legal_hq/l_e_g_a_l_h_q_navbar/l_e_g_a_l_h_q_navbar_widget.dart';
 import '/legal_hq/legal_h_q_header/legal_h_q_header_widget.dart';
 import '/legal_hq/legal_hq_process_data.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
+import '/listing_hq/listing_hq_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -67,7 +68,6 @@ class _LEGALHQProcesosCasosConHipotecaWidgetState
   static const Color _dividerColor = Color(0xFFE9EFF2);
   static const Color _rejectionBg = Color(0xFFFFDBDB);
   static const Color _rejectionText = Color(0xFFFB2C36);
-  static const Color _proofButtonBg = Color(0xFFCCE3E4);
 
   @override
   void initState() {
@@ -132,7 +132,7 @@ class _LEGALHQProcesosCasosConHipotecaWidgetState
                         ),
                         Padding(
                           padding: const EdgeInsetsDirectional.fromSTEB(
-                              20.0, 30.0, 20.0, 100.0),
+                              20.0, 30.0, 20.0, 120.0),
                           child: loading
                               ? const Padding(
                                   padding: EdgeInsets.symmetric(vertical: 80.0),
@@ -514,13 +514,14 @@ class _LEGALHQProcesosCasosConHipotecaWidgetState
               height: 40.0,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: available ? _proofButtonBg : _grayStep,
+                color: available ? Colors.white : _grayStep,
+                border: available ? Border.all(color: _aqua) : null,
                 borderRadius: BorderRadius.circular(99.43),
               ),
               child: Icon(
                 Icons.download,
                 size: 24.0,
-                color: available ? _textDark : _grayStepText,
+                color: available ? _aqua : _grayStepText,
               ),
             ),
           ),
@@ -734,10 +735,7 @@ class _LEGALHQProcesosCasosConHipotecaWidgetState
 
     return Container(
       padding: const EdgeInsets.all(12.0),
-      decoration: BoxDecoration(
-        color: FlutterFlowTheme.of(context).secondaryBackground,
-        borderRadius: BorderRadius.circular(10.0),
-      ),
+      decoration: ListingHqUi.cardDecoration(context),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -874,23 +872,7 @@ class _LEGALHQProcesosCasosConHipotecaWidgetState
 
     return Container(
       padding: const EdgeInsets.all(24.0),
-      decoration: BoxDecoration(
-        color: FlutterFlowTheme.of(context).secondaryBackground,
-        borderRadius: BorderRadius.circular(10.0),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x1A000000),
-            blurRadius: 3.0,
-            offset: Offset(0.0, 1.0),
-          ),
-          BoxShadow(
-            color: Color(0x1A000000),
-            blurRadius: 2.0,
-            offset: Offset(0.0, 1.0),
-            spreadRadius: -1.0,
-          ),
-        ],
-      ),
+      decoration: ListingHqUi.cardDecoration(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -963,10 +945,7 @@ class _LEGALHQProcesosCasosConHipotecaWidgetState
 
     return Container(
       padding: const EdgeInsets.all(10.0),
-      decoration: BoxDecoration(
-        color: FlutterFlowTheme.of(context).secondaryBackground,
-        borderRadius: BorderRadius.circular(10.0),
-      ),
+      decoration: ListingHqUi.cardDecoration(context),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1007,7 +986,8 @@ class _LEGALHQProcesosCasosConHipotecaWidgetState
                       overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.publicSans(
                         color: statusStyle.foreground,
-                        fontSize: 14.0,
+                        fontSize: 12.0,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),

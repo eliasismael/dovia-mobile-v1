@@ -8,6 +8,7 @@ import '/legal_hq/l_e_g_a_l_h_q_procesos/l_e_g_a_l_h_q_procesos_widget.dart';
 import '/legal_hq/l_e_g_a_l_h_q_procesos_casos_con_hipoteca/l_e_g_a_l_h_q_procesos_casos_con_hipoteca_widget.dart';
 import '/legal_hq/l_e_g_a_l_h_q_revision_documentos_propiedades/l_e_g_a_l_h_q_revision_documentos_propiedades_widget.dart';
 import '/legal_hq/l_e_g_a_l_h_q_post_venta/l_e_g_a_l_h_q_post_venta_widget.dart';
+import '/listing_hq/listing_hq_ui.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -140,12 +141,12 @@ class _LEGALHQHomeWidgetState extends State<LEGALHQHomeWidget> {
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   children: [
-                    // ── Cabecera: título + ícono de documentos ───────────
+                    // ── Cabecera: título, avisos y ajustes ───────────────
                     wrapWithModel(
                       model: _model.legalHQHeaderModel,
                       updateCallback: () => safeSetState(() {}),
                       child: const LegalHQHeaderWidget(
-                        text: 'Home',
+                        text: 'Inicio',
                         showBack: false,
                       ),
                     ),
@@ -156,7 +157,7 @@ class _LEGALHQHomeWidgetState extends State<LEGALHQHomeWidget> {
                     // ── Carriles ────────────────────────────────────────
                     Padding(
                       padding: const EdgeInsetsDirectional.fromSTEB(
-                          20.0, 20.0, 20.0, 100.0),
+                          20.0, 0.0, 20.0, 120.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -170,14 +171,11 @@ class _LEGALHQHomeWidgetState extends State<LEGALHQHomeWidget> {
                                 'por revisión para publicar',
                             onVerMas: () => _openProcesos('propiedades'),
                           ),
-                          const SizedBox(height: 14.0),
                           _buildFutureCarousel(
                             future: _publicationFuture,
                             emptyMessage:
                                 'No hay propiedades pendientes por revisar',
                           ),
-
-                          const SizedBox(height: 30.0),
 
                           // ────────────────────────────────────────────────
                           // CARRIL 2: revisión del trabajo del Legal Associate
@@ -188,14 +186,11 @@ class _LEGALHQHomeWidgetState extends State<LEGALHQHomeWidget> {
                                 'por revisión de Legal Associate',
                             onVerMas: _openProcesos,
                           ),
-                          const SizedBox(height: 14.0),
                           _buildFutureCarousel(
                             future: _associateFuture,
                             emptyMessage:
                                 'No hay expedientes en manos de Legal Associates',
                           ),
-
-                          const SizedBox(height: 30.0),
 
                           // ────────────────────────────────────────────────
                           // CARRIL 3: pendientes por hipotecas
@@ -205,7 +200,6 @@ class _LEGALHQHomeWidgetState extends State<LEGALHQHomeWidget> {
                             title: 'Propiedades pendientes\npor hipotecas',
                             onVerMas: () => _openProcesos('hipotecas'),
                           ),
-                          const SizedBox(height: 14.0),
                           _buildFutureCarousel(
                             future: _mortgageFuture,
                             emptyMessage:
@@ -218,7 +212,7 @@ class _LEGALHQHomeWidgetState extends State<LEGALHQHomeWidget> {
                 ),
               ),
 
-              // ── Navbar: Procesos / Notificaciones / Ajustes ─────────────
+              // ── Navbar: Inicio / Procesos ──────────────────────────────
               Align(
                 alignment: const AlignmentDirectional(0.0, 0.0),
                 child: Column(
@@ -301,65 +295,14 @@ class _LEGALHQHomeWidgetState extends State<LEGALHQHomeWidget> {
   Widget _buildSearchBar(BuildContext context) {
     return Padding(
       padding: const EdgeInsetsDirectional.fromSTEB(20.0, 16.0, 20.0, 0.0),
-      child: Container(
-        width: double.infinity,
-        height: 48.0,
-        decoration: BoxDecoration(
-          color: FlutterFlowTheme.of(context).secondaryBackground,
-          borderRadius: BorderRadius.circular(100.0),
-        ),
-        child: Padding(
-          padding: const EdgeInsetsDirectional.fromSTEB(15.0, 0.0, 15.0, 0.0),
-          child: Row(
-            children: [
-              Icon(
-                Icons.search,
-                color: FlutterFlowTheme.of(context).secondaryText,
-                size: 24.0,
-              ),
-              const SizedBox(width: 12.0),
-              Expanded(
-                child: TextField(
-                  controller: _model.textController,
-                  focusNode: _model.textFieldFocusNode,
-                  textInputAction: TextInputAction.search,
-                  onChanged: (value) => safeSetState(() => _query = value),
-                  decoration: InputDecoration(
-                    isDense: true,
-                    border: InputBorder.none,
-                    hintText: 'Buscar por ID o dirección',
-                    hintStyle: GoogleFonts.publicSans(
-                      color: FlutterFlowTheme.of(context).secondaryText,
-                      fontSize: 15.0,
-                      fontWeight: FontWeight.normal,
-                    ),
-                  ),
-                  style: GoogleFonts.publicSans(
-                    color: _textDark,
-                    fontSize: 15.0,
-                    fontWeight: FontWeight.normal,
-                  ),
-                ),
-              ),
-              if (_query.isNotEmpty)
-                InkWell(
-                  splashColor: Colors.transparent,
-                  focusColor: Colors.transparent,
-                  hoverColor: Colors.transparent,
-                  highlightColor: Colors.transparent,
-                  onTap: () {
-                    _model.textController?.clear();
-                    safeSetState(() => _query = '');
-                  },
-                  child: Icon(
-                    Icons.close,
-                    color: FlutterFlowTheme.of(context).secondaryText,
-                    size: 20.0,
-                  ),
-                ),
-            ],
-          ),
-        ),
+      child: ListingHqSearchField(
+        controller: _model.textController,
+        hintText: 'Buscar por ID o dirección',
+        onChanged: (value) => safeSetState(() => _query = value),
+        onClear: () {
+          _model.textController?.clear();
+          safeSetState(() => _query = '');
+        },
       ),
     );
   }
@@ -370,9 +313,9 @@ class _LEGALHQHomeWidgetState extends State<LEGALHQHomeWidget> {
     required Future<List<LegalHqProcess>> future,
     required String emptyMessage,
   }) {
-    // Alto suficiente para la variante más alta de tarjeta (la de hipotecas,
-    // que suma el badge de estado bancario).
-    const double height = 172.0;
+    // Alto de los avisos de carga y vacío. Con tarjetas, el carrusel toma el
+    // alto de la más alta (la de hipotecas suma el estado bancario).
+    const double height = 120.0;
 
     return FutureBuilder<List<LegalHqProcess>>(
       future: future,
@@ -389,33 +332,19 @@ class _LEGALHQHomeWidgetState extends State<LEGALHQHomeWidget> {
         final items = _applySearch(snapshot.data ?? []);
 
         if (items.isEmpty) {
-          return SizedBox(
-            height: height,
-            child: Center(
-              child: Text(
-                _query.trim().isEmpty
-                    ? emptyMessage
-                    : 'Sin resultados para "${_query.trim()}"',
-                textAlign: TextAlign.center,
-                style: GoogleFonts.publicSans(
-                  color: _textDark,
-                  fontSize: 14.0,
-                  fontWeight: FontWeight.normal,
-                ),
-              ),
-            ),
+          return ListingHqUi.emptyText(
+            context,
+            _query.trim().isEmpty
+                ? emptyMessage
+                : 'Sin resultados para "${_query.trim()}"',
           );
         }
 
-        return SizedBox(
-          height: height,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemCount: items.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 14.0),
-            itemBuilder: (context, index) =>
-                _buildProcessCard(context, items[index]),
-          ),
+        return ListingHqCarousel(
+          height: null,
+          children: [
+            for (final process in items) _buildProcessCard(context, process),
+          ],
         );
       },
     );
@@ -428,39 +357,10 @@ class _LEGALHQHomeWidgetState extends State<LEGALHQHomeWidget> {
     required String title,
     required VoidCallback onVerMas,
   }) {
-    return Row(
-      mainAxisSize: MainAxisSize.max,
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Expanded(
-          child: Text(
-            title,
-            style: FlutterFlowTheme.of(context).bodyMedium.override(
-                  font: GoogleFonts.publicSans(
-                    fontWeight: FontWeight.w600,
-                  ),
-                  color: _textDark,
-                  fontSize: 17.0,
-                  letterSpacing: 0.34,
-                  fontWeight: FontWeight.w600,
-                  lineHeight: 1.3,
-                ),
-          ),
-        ),
-        // Link de texto, con el estilo de los "Ver más" del resto de la app.
-        GestureDetector(
-          onTap: onVerMas,
-          child: Text(
-            'Ver más',
-            style: GoogleFonts.publicSans(
-              color: _aqua,
-              fontSize: 14.0,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-      ],
+    return ListingHqSectionHeader(
+      title: title,
+      linkText: 'Ver más',
+      onLinkTap: onVerMas,
     );
   }
 
@@ -473,11 +373,8 @@ class _LEGALHQHomeWidgetState extends State<LEGALHQHomeWidget> {
 
     return Container(
       width: 300.0,
-      decoration: BoxDecoration(
-        color: FlutterFlowTheme.of(context).secondaryBackground,
-        borderRadius: BorderRadius.circular(10.0),
-      ),
-      padding: const EdgeInsets.all(10.0),
+      decoration: ListingHqUi.cardDecoration(context),
+      padding: const EdgeInsets.all(12.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -520,25 +417,8 @@ class _LEGALHQHomeWidgetState extends State<LEGALHQHomeWidget> {
                 // Hipotecas: badge de estado bancario. Resto de carriles:
                 // método de pago preferido o fecha/hora de la solicitud.
                 if (isMortgage)
-                  Container(
-                    width: double.infinity,
-                    height: 23.0,
-                    decoration: BoxDecoration(
-                      color: statusStyle.background,
-                      borderRadius: BorderRadius.circular(100.0),
-                    ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      statusStyle.label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.publicSans(
-                        color: statusStyle.foreground,
-                        fontSize: 14.0,
-                        fontWeight: FontWeight.normal,
-                      ),
-                    ),
-                  )
+                  ListingHqUi.statusPill(
+                      statusStyle.label, statusStyle.background)
                 else
                   Text(
                     _paymentOrRequestLabel(process),
@@ -564,7 +444,7 @@ class _LEGALHQHomeWidgetState extends State<LEGALHQHomeWidget> {
                 const SizedBox(height: 8.0),
                 SizedBox(
                   width: double.infinity,
-                  height: 29.0,
+                  height: 30.0,
                   child: ElevatedButton(
                     onPressed: _claimingProcessId != null
                         ? null
@@ -575,8 +455,7 @@ class _LEGALHQHomeWidgetState extends State<LEGALHQHomeWidget> {
                       disabledBackgroundColor: _aqua.withValues(alpha: 0.5),
                       elevation: 0,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(25.0),
-                        side: const BorderSide(color: _aqua),
+                        borderRadius: BorderRadius.circular(99.0),
                       ),
                       padding: const EdgeInsets.symmetric(horizontal: 20.0),
                     ),

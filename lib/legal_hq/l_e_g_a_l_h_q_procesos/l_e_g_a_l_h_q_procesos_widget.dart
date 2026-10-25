@@ -4,6 +4,7 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/legal_hq/l_e_g_a_l_h_q_navbar/l_e_g_a_l_h_q_navbar_widget.dart';
 import '/legal_hq/legal_h_q_header/legal_h_q_header_widget.dart';
 import '/legal_hq/legal_hq_process_data.dart';
+import '/listing_hq/listing_hq_ui.dart';
 import '/legal_hq/l_e_g_a_l_h_q_post_venta/l_e_g_a_l_h_q_post_venta_widget.dart';
 import '/legal_hq/l_e_g_a_l_h_q_procesos_casos_con_hipoteca/l_e_g_a_l_h_q_procesos_casos_con_hipoteca_widget.dart';
 import '/legal_hq/l_e_g_a_l_h_q_revision_documentos_propiedades/l_e_g_a_l_h_q_revision_documentos_propiedades_widget.dart';
@@ -186,7 +187,7 @@ class _LEGALHQProcesosWidgetState extends State<LEGALHQProcesosWidget> {
                     _buildFilterChips(context),
                     Padding(
                       padding: const EdgeInsetsDirectional.fromSTEB(
-                          20.0, 20.0, 20.0, 100.0),
+                          20.0, 20.0, 20.0, 120.0),
                       child: _buildList(context),
                     ),
                   ],
@@ -218,106 +219,55 @@ class _LEGALHQProcesosWidgetState extends State<LEGALHQProcesosWidget> {
   Widget _buildSearchBar(BuildContext context) {
     return Padding(
       padding: const EdgeInsetsDirectional.fromSTEB(20.0, 16.0, 20.0, 0.0),
-      child: Container(
-        width: double.infinity,
-        height: 48.0,
-        decoration: BoxDecoration(
-          color: FlutterFlowTheme.of(context).secondaryBackground,
-          borderRadius: BorderRadius.circular(100.0),
-        ),
-        child: Padding(
-          padding: const EdgeInsetsDirectional.fromSTEB(15.0, 0.0, 15.0, 0.0),
-          child: Row(
-            children: [
-              Icon(
-                Icons.search,
-                color: FlutterFlowTheme.of(context).secondaryText,
-                size: 24.0,
-              ),
-              const SizedBox(width: 12.0),
-              Expanded(
-                child: TextField(
-                  controller: _model.textController,
-                  focusNode: _model.textFieldFocusNode,
-                  textInputAction: TextInputAction.search,
-                  onChanged: (value) => safeSetState(() => _query = value),
-                  decoration: InputDecoration(
-                    isDense: true,
-                    border: InputBorder.none,
-                    hintText: 'Buscar por propiedad, ID, propietario o cliente',
-                    hintStyle: GoogleFonts.publicSans(
-                      color: FlutterFlowTheme.of(context).secondaryText,
-                      fontSize: 15.0,
-                      fontWeight: FontWeight.normal,
-                    ),
-                  ),
-                  style: GoogleFonts.publicSans(
-                    color: _textDark,
-                    fontSize: 15.0,
-                    fontWeight: FontWeight.normal,
-                  ),
-                ),
-              ),
-              if (_query.isNotEmpty)
-                InkWell(
-                  splashColor: Colors.transparent,
-                  focusColor: Colors.transparent,
-                  hoverColor: Colors.transparent,
-                  highlightColor: Colors.transparent,
-                  onTap: () {
-                    _model.textController?.clear();
-                    safeSetState(() => _query = '');
-                  },
-                  child: Icon(
-                    Icons.close,
-                    color: FlutterFlowTheme.of(context).secondaryText,
-                    size: 20.0,
-                  ),
-                ),
-            ],
-          ),
-        ),
+      child: ListingHqSearchField(
+        controller: _model.textController,
+        hintText: 'Propiedad, ID, propietario o cliente',
+        onChanged: (value) => safeSetState(() => _query = value),
+        onClear: () {
+          _model.textController?.clear();
+          safeSetState(() => _query = '');
+        },
       ),
     );
   }
 
   // ── Chips de filtro ───────────────────────────────────────────────────────
 
+  /// Mismos chips que los filtros del cliente: el elegido en blanco.
   Widget _buildFilterChips(BuildContext context) {
     return Padding(
-      padding: const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+      padding: const EdgeInsetsDirectional.fromSTEB(0.0, 16.0, 0.0, 0.0),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
         child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: _ProcesosFilter.values.map((filter) {
-            final isSelected = filter == _filter;
-            return Padding(
-              padding:
-                  const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 12.0, 0.0),
-              child: GestureDetector(
-                onTap: () => _selectFilter(filter),
-                child: Container(
-                  height: 40.0,
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: isSelected ? _aqua : _chipIdleBg,
-                    borderRadius: BorderRadius.circular(100.0),
+          children: [
+            for (final filter in _ProcesosFilter.values)
+              Padding(
+                padding: const EdgeInsetsDirectional.only(end: 8.0),
+                child: ChoiceChip(
+                  label: Text(filter.label),
+                  selected: filter == _filter,
+                  showCheckmark: false,
+                  onSelected: (_) => _selectFilter(filter),
+                  selectedColor: Colors.white,
+                  backgroundColor: _chipIdleBg,
+                  side: BorderSide.none,
+                  labelStyle: GoogleFonts.publicSans(
+                    color: filter == _filter
+                        ? ListingHqUi.textDark
+                        : const Color(0xFF8A8A8A),
+                    fontWeight:
+                        filter == _filter ? FontWeight.w600 : FontWeight.w400,
                   ),
-                  child: Text(
-                    filter.label,
-                    style: GoogleFonts.publicSans(
-                      color: isSelected ? Colors.white : _aqua,
-                      fontSize: 14.0,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20.0)),
+                  elevation: filter == _filter ? 1.0 : 0.0,
+                  pressElevation: 0.0,
+                  shadowColor: _aqua.withValues(alpha: 0.3),
                 ),
               ),
-            );
-          }).toList(),
+          ],
         ),
       ),
     );
@@ -340,18 +290,13 @@ class _LEGALHQProcesosWidgetState extends State<LEGALHQProcesosWidget> {
 
         if (items.isEmpty) {
           return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 60.0),
+            padding: const EdgeInsets.symmetric(vertical: 40.0),
             child: Center(
-              child: Text(
+              child: ListingHqUi.emptyText(
+                context,
                 _query.trim().isEmpty
                     ? _filter.emptyMessage
                     : 'Sin resultados para "${_query.trim()}"',
-                textAlign: TextAlign.center,
-                style: GoogleFonts.publicSans(
-                  color: _textDark,
-                  fontSize: 14.0,
-                  fontWeight: FontWeight.normal,
-                ),
               ),
             ),
           );
@@ -379,10 +324,7 @@ class _LEGALHQProcesosWidgetState extends State<LEGALHQProcesosWidget> {
 
     return Container(
       width: double.infinity,
-      decoration: BoxDecoration(
-        color: FlutterFlowTheme.of(context).secondaryBackground,
-        borderRadius: BorderRadius.circular(10.0),
-      ),
+      decoration: ListingHqUi.cardDecoration(context),
       clipBehavior: Clip.antiAlias,
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -395,7 +337,7 @@ class _LEGALHQProcesosWidgetState extends State<LEGALHQProcesosWidget> {
             child: _buildPropertyImage(process.imageUrl),
           ),
           Padding(
-            padding: const EdgeInsets.all(10.0),
+            padding: const EdgeInsets.all(12.0),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -404,8 +346,8 @@ class _LEGALHQProcesosWidgetState extends State<LEGALHQProcesosWidget> {
                   process.title,
                   style: GoogleFonts.publicSans(
                     color: _textDark,
-                    fontSize: 14.0,
-                    fontWeight: FontWeight.w500,
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.w600,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -439,16 +381,15 @@ class _LEGALHQProcesosWidgetState extends State<LEGALHQProcesosWidget> {
                       ),
                     ),
                     const SizedBox(width: 10.0),
-                    Expanded(
+                    Flexible(
                       child: Align(
                         alignment: AlignmentDirectional.centerEnd,
                         child: Container(
-                          height: 23.0,
-                          padding: const EdgeInsets.symmetric(horizontal: 14.0),
-                          alignment: Alignment.center,
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 4.0, horizontal: 12.0),
                           decoration: BoxDecoration(
                             color: statusStyle.background,
-                            borderRadius: BorderRadius.circular(100.0),
+                            borderRadius: BorderRadius.circular(99.0),
                           ),
                           child: Text(
                             statusStyle.label,
@@ -456,8 +397,8 @@ class _LEGALHQProcesosWidgetState extends State<LEGALHQProcesosWidget> {
                             overflow: TextOverflow.ellipsis,
                             style: GoogleFonts.publicSans(
                               color: statusStyle.foreground,
-                              fontSize: 14.0,
-                              fontWeight: FontWeight.normal,
+                              fontSize: 11.0,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ),
@@ -468,7 +409,7 @@ class _LEGALHQProcesosWidgetState extends State<LEGALHQProcesosWidget> {
                 const SizedBox(height: 12.0),
                 SizedBox(
                   width: double.infinity,
-                  height: 31.0,
+                  height: 30.0,
                   child: ElevatedButton(
                     onPressed: _claimingProcessId != null
                         ? null
@@ -479,8 +420,7 @@ class _LEGALHQProcesosWidgetState extends State<LEGALHQProcesosWidget> {
                       disabledBackgroundColor: _aqua.withValues(alpha: 0.5),
                       elevation: 0,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(25.0),
-                        side: const BorderSide(color: _aqua),
+                        borderRadius: BorderRadius.circular(99.0),
                       ),
                     ),
                     child: _claimingProcessId == process.id

@@ -6,6 +6,7 @@ import '/legal_hq/legal_h_q_header/legal_h_q_header_widget.dart';
 import '/legal_hq/legal_hq_process_data.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/popup_exito/popup_exito_widget.dart';
+import '/listing_hq/listing_hq_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
@@ -131,7 +132,7 @@ class _LEGALHQDocumentoWidgetState extends State<LEGALHQDocumentoWidget> {
                     ),
                     Padding(
                       padding: const EdgeInsetsDirectional.fromSTEB(
-                          20.0, 24.0, 20.0, 100.0),
+                          20.0, 24.0, 20.0, 120.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -217,9 +218,11 @@ class _LEGALHQDocumentoWidgetState extends State<LEGALHQDocumentoWidget> {
             width: 56.0,
             height: 28.0,
             alignment: Alignment.center,
+            // Botón secundario: blanco con borde, como en el cliente.
             decoration: BoxDecoration(
-              color: const Color(0xFFCCE3E4),
-              borderRadius: BorderRadius.circular(6.0),
+              color: Colors.white,
+              border: Border.all(color: _aqua),
+              borderRadius: BorderRadius.circular(99.0),
             ),
             child: const Icon(
               Icons.file_download_outlined,
@@ -240,10 +243,7 @@ class _LEGALHQDocumentoWidgetState extends State<LEGALHQDocumentoWidget> {
       opacity: _isRejecting ? 0.5 : 1.0,
       child: Container(
         height: 420.0,
-        decoration: BoxDecoration(
-          color: FlutterFlowTheme.of(context).secondaryBackground,
-          borderRadius: BorderRadius.circular(10.0),
-        ),
+        decoration: ListingHqUi.cardDecoration(context),
         clipBehavior: Clip.antiAlias,
         child: _buildDocumentViewer(),
       ),
@@ -301,21 +301,14 @@ class _LEGALHQDocumentoWidgetState extends State<LEGALHQDocumentoWidget> {
         color: const Color(0xFFCCE3E4),
         borderRadius: BorderRadius.circular(10.0),
       ),
-      child: Row(
-        children: [
-          const Icon(Icons.history, color: _aqua, size: 18.0),
-          const SizedBox(width: 10.0),
-          Expanded(
-            child: Text(
-              'Versión histórica en modo solo lectura',
-              style: GoogleFonts.publicSans(
-                color: _aqua,
-                fontSize: 14.0,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        ],
+      // Aviso: fondo suave y texto, sin ícono.
+      child: Text(
+        'Versión histórica en modo solo lectura',
+        style: GoogleFonts.publicSans(
+          color: _aqua,
+          fontSize: 14.0,
+          fontWeight: FontWeight.w500,
+        ),
       ),
     );
   }
@@ -567,10 +560,7 @@ class _LEGALHQDocumentoWidgetState extends State<LEGALHQDocumentoWidget> {
         ),
         const SizedBox(height: 14.0),
         Container(
-          decoration: BoxDecoration(
-            color: FlutterFlowTheme.of(context).secondaryBackground,
-            borderRadius: BorderRadius.circular(10.0),
-          ),
+          decoration: ListingHqUi.cardDecoration(context),
           padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 6.0),
           child: TextField(
             controller: _model.textController,
