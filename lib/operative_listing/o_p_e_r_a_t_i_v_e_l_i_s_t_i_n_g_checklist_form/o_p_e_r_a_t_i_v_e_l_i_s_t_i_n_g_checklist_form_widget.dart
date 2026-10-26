@@ -299,7 +299,6 @@ class _OPERATIVELISTINGChecklistFormWidgetState
                       updateCallback: () => safeSetState(() {}),
                       child: const OPERATIVELISTINGHeaderWidget(
                         titleText: 'Checklist',
-                        showLocation: false,
                       ),
                     ),
                     Padding(
@@ -343,19 +342,14 @@ class _OPERATIVELISTINGChecklistFormWidgetState
                               Padding(
                                 padding: const EdgeInsetsDirectional.fromSTEB(
                                     0.0, 20.0, 0.0, 0.0),
-                                child: Container(
-                                  width: MediaQuery.sizeOf(context).width * 1.0,
-                                  decoration: BoxDecoration(
-                                    color: FlutterFlowTheme.of(context).accent1,
-                                    borderRadius: BorderRadius.circular(20.0),
-                                  ),
+                                // Solo texto, sin la caja verde clara.
+                                child: SizedBox(
+                                  width: double.infinity,
                                   child: Align(
                                     alignment:
                                         const AlignmentDirectional(0.0, 0.0),
                                     child: Padding(
-                                      padding:
-                                          const EdgeInsetsDirectional.fromSTEB(
-                                              20.0, 40.0, 20.0, 40.0),
+                                      padding: EdgeInsets.zero,
                                       child: Text(
                                         'Antes de darle enviar, recuerda tomar las fotos en base a las áreas que indico que hay en la propiedad ',
                                         style: FlutterFlowTheme.of(context)

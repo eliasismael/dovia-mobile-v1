@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:dovia/domain/listing_hq_documents.dart';
 import 'package:dovia/domain/property_media_zones.dart';
 import 'package:dovia/domain/property_ownership_view.dart';
+import 'package:dovia/operative_listing/operative_next_visit.dart';
 
 void main() {
   group('listerHqDocIdsToApprove', () {
@@ -141,6 +142,33 @@ void main() {
         'Otras zonas', 'Plano', 'Recorrido 360']) {
         expect(propertySectionForZone(propertyZoneForSection(s)), s);
       }
+    });
+  });
+
+  group('próxima visita del Operative', () {
+    final now = DateTime(2026, 10, 26, 12);
+    Map visit(String id, String date, String time) => {
+          'id': id,
+          'confirmedSlot': {'date': date, 'time': time},
+        };
+
+    test('elige la más cercana que sigue en plazo', () {
+      expect(
+        OperativeNextVisit.nextVisitIdFrom([
+          visit('lejana', '2026-10-30', '10:00'),
+          visit('cercana', '2026-10-27', '11:00'),
+          visit('vencida', '2026-10-24', '09:00'),
+        ], now),
+        'cercana',
+      );
+    });
+
+    test('sin visitas en plazo no hay botón', () {
+      expect(
+        OperativeNextVisit.nextVisitIdFrom(
+            [visit('vencida', '2026-10-24', '09:00'), {'id': 'sin-horario'}], now),
+        isNull,
+      );
     });
   });
 }

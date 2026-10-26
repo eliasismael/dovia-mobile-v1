@@ -5,22 +5,28 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '/shared_components/floating_navbar_inset.dart';
+import '/operative_listing/operative_next_visit.dart';
 import 'o_p_e_r_a_t_i_v_e_l_i_s_t_i_n_g_navbar_model.dart';
 export 'o_p_e_r_a_t_i_v_e_l_i_s_t_i_n_g_navbar_model.dart';
 
 /// Una sección de la barra: sus rutas cuentan como ella para marcarla.
 class _Tab {
-  const _Tab(this.label, this.asset, this.route, this.routeNames);
+  const _Tab(this.label, this.asset, this.route, this.routeNames,
+      {this.isNextVisit = false});
 
   final String label;
   final String asset;
   final String route;
   final List<String> routeNames;
+
+  /// Abre la próxima visita en vez de una sección: no se marca como activa.
+  final bool isNextVisit;
 }
 
 /// Barra de abajo del Operative Lister, con el mismo diseño que la del cliente:
 /// flota sobre el contenido y la curva de la sección abierta se desliza al
-/// cambiar de sección. Avisos y ajustes están en el header.
+/// cambiar de sección. Avisos y ajustes están en el header. Si hay una
+/// próxima visita asignada aparece un botón más para ir directo a ella.
 class OPERATIVELISTINGNavbarWidget extends StatefulWidget {
   const OPERATIVELISTINGNavbarWidget({super.key});
 
@@ -53,6 +59,21 @@ class _OPERATIVELISTINGNavbarWidgetState extends State<OPERATIVELISTINGNavbarWid
     ]),
   ];
 
+  static final _Tab _nextVisitTab = _Tab(
+    'Próxima visita',
+    'assets/images/position.svg',
+    OPERATIVELISTINGPrimeraVisitaWidget.routeName,
+    const [],
+    isNextVisit: true,
+  );
+
+  /// Id de la próxima visita; arranca con el último conocido para que el botón
+  /// no aparezca y desaparezca al cambiar de pantalla.
+  String? _nextVisitId = OperativeNextVisit.lastKnown;
+
+  List<_Tab> get _visibleTabs =>
+      [..._tabs, if (_nextVisitId != null) _nextVisitTab];
+
   /// Cada pantalla tiene su propia barra. La que navega deja anotada su
   /// sección, y la de la pantalla nueva desliza la curva desde ahí.
   static int? _pendingSlideFrom;
@@ -71,6 +92,9 @@ class _OPERATIVELISTINGNavbarWidgetState extends State<OPERATIVELISTINGNavbarWid
     _model = createModel(context, () => OPERATIVELISTINGNavbarModel());
     _slideFrom = _pendingSlideFrom;
     _pendingSlideFrom = null;
+    OperativeNextVisit.fetch().then((id) {
+      if (mounted && id != _nextVisitId) setState(() => _nextVisitId = id);
+    });
 
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
@@ -89,13 +113,24 @@ class _OPERATIVELISTINGNavbarWidgetState extends State<OPERATIVELISTINGNavbarWid
     } catch (_) {
       return null;
     }
-    final i = _tabs.indexWhere((t) => t.routeNames.contains(route));
+    final i = _visibleTabs.indexWhere((t) => t.routeNames.contains(route));
     return i < 0 ? null : i;
   }
 
   /// Entre secciones la pantalla cambia sin animación: lo único que se mueve
   /// es la curva. El inicio vacía la pila; el resto se apila.
   void _open(int index, int? from) {
+    final tab = _visibleTabs[index];
+    if (tab.isNextVisit) {
+      context.pushNamed(
+        tab.route,
+        queryParameters: {
+          'visitId': serializeParam(_nextVisitId, ParamType.String),
+          'isPrimeraVisita': serializeParam(true, ParamType.bool),
+        }.withoutNulls,
+      );
+      return;
+    }
     _pendingSlideFrom = from;
     final extra = <String, dynamic>{
       kTransitionInfoKey: const TransitionInfo(
@@ -103,7 +138,7 @@ class _OPERATIVELISTINGNavbarWidgetState extends State<OPERATIVELISTINGNavbarWid
         duration: Duration.zero,
       ),
     };
-    final route = _tabs[index].route;
+    final route = tab.route;
     if (index == 0) {
       context.goNamed(route, extra: extra);
     } else {
@@ -112,7 +147,7 @@ class _OPERATIVELISTINGNavbarWidgetState extends State<OPERATIVELISTINGNavbarWid
   }
 
   Widget _item(int index, bool active, int? current) {
-    final tab = _tabs[index];
+    final tab = _visibleTabs[index];
     return Expanded(
       child: InkWell(
         splashColor: Colors.transparent,
@@ -164,7 +199,7 @@ class _OPERATIVELISTINGNavbarWidgetState extends State<OPERATIVELISTINGNavbarWid
   }
 
   Widget _indicator(double rowWidth, int target) {
-    final itemWidth = rowWidth / _tabs.length;
+    final itemWidth = rowWidth / _visibleTabs.length;
     double centerOf(int i) => itemWidth * i + itemWidth / 2;
     return TweenAnimationBuilder<double>(
       tween: Tween(
@@ -211,7 +246,7 @@ class _OPERATIVELISTINGNavbarWidgetState extends State<OPERATIVELISTINGNavbarWid
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      for (var i = 0; i < _tabs.length; i++)
+                      for (var i = 0; i < _visibleTabs.length; i++)
                         _item(i, i == current, current),
                     ],
                   ),

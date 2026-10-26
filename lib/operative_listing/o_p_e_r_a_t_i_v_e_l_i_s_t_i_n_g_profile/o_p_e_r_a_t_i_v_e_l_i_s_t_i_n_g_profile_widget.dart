@@ -73,8 +73,7 @@ class _OPERATIVELISTINGProfileWidgetState
                       model: _model.oPERATIVELISTINGHeaderModel,
                       updateCallback: () => safeSetState(() {}),
                       child: const OPERATIVELISTINGHeaderWidget(
-                        titleText: 'Ajustes',
-                        showLocation: false,
+                        titleText: 'Ajustes',
                       ),
                     ),
                     Padding(
