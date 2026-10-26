@@ -1,5 +1,6 @@
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_visits.dart';
+import '/domain/listing_hq_documents.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
@@ -63,6 +64,42 @@ class _LISTINGHQVisorPdfWidgetState extends State<LISTINGHQVisorPdfWidget> {
   void dispose() {
     _model.dispose();
     super.dispose();
+  }
+
+  /// Aprueba todos los documentos de la visita que faltan aprobar, como el
+  /// "Aceptar y enviar a Dovia Legal" de la web: el backend solo aprueba de a
+  /// uno. Devuelve `false` si alguno falló (los que salieron quedan aprobados).
+  Future<bool> _approvePendingDocs() async {
+    final token = currentAuthenticationToken ?? '';
+    final visitId = widget.visitId ?? '';
+    final currentId = widget.documentId ?? '';
+
+    var ids = [currentId];
+    final details = await DOVIAAPIVisitContextGroup.getVisitDetailsCall.call(
+      visitId: visitId,
+      authToken: token,
+    );
+    if (details.succeeded) {
+      ids = listerHqDocIdsToApprove(
+        listerHqVisitDocs(getJsonField(details.jsonBody, r'$.data')),
+        currentId,
+      );
+    } else {
+      // Sin el checklist se aprueba al menos el abierto.
+      debugPrint('[HQ Aprobar] details ${details.statusCode}: ${details.bodyText}');
+    }
+
+    final results = await Future.wait(ids.map((id) =>
+        DOVIAAPIVisitContextGroup.reviewListerHqDocumentCall.call(
+          visitId: visitId,
+          documentId: id,
+          authToken: token,
+          status: 'approved',
+        )));
+    for (final res in results.where((r) => !r.succeeded)) {
+      debugPrint('[HQ Aprobar] ${res.statusCode}: ${res.bodyText}');
+    }
+    return results.every((r) => r.succeeded);
   }
 
   Widget _buildDocumentViewer() {
@@ -266,18 +303,9 @@ class _LISTINGHQVisorPdfWidgetState extends State<LISTINGHQVisorPdfWidget> {
                                   Expanded(
                                     child: FFButtonWidget(
                                       onPressed: () async {
-                                        final token =
-                                            currentAuthenticationToken ?? '';
-                                        final res =
-                                            await DOVIAAPIVisitContextGroup
-                                                .reviewListerHqDocumentCall
-                                                .call(
-                                          visitId: widget.visitId ?? '',
-                                          documentId: widget.documentId,
-                                          authToken: token,
-                                          status: 'approved',
-                                        );
-                                        if (res.succeeded) {
+                                        final approved =
+                                            await _approvePendingDocs();
+                                        if (approved) {
                                           if (context.mounted) {
                                             await showDialog(
                                               context: context,
@@ -301,7 +329,7 @@ class _LISTINGHQVisorPdfWidgetState extends State<LISTINGHQVisorPdfWidget> {
                                                     title:
                                                         'Se envió con éxito al Equipo Legal',
                                                     text:
-                                                        'El documento se ha enviado al equipo de legal para que lo revisen.',
+                                                        'Los documentos se enviaron al equipo de legal para que los revisen.',
                                                     continueText: 'Continuar',
                                                     onContinue: () =>
                                                         Navigator.pop(
@@ -310,9 +338,8 @@ class _LISTINGHQVisorPdfWidgetState extends State<LISTINGHQVisorPdfWidget> {
                                                 );
                                               },
                                             );
-                                            // Volver al checklist, no al Home:
-                                            // normalmente quedan más documentos
-                                            // por revisar en la misma visita.
+                                            // Volver al checklist, que se
+                                            // recarga con todo aprobado.
                                             if (context.mounted) {
                                               Navigator.of(context).pop(true);
                                             }
@@ -323,7 +350,7 @@ class _LISTINGHQVisorPdfWidgetState extends State<LISTINGHQVisorPdfWidget> {
                                                 .showSnackBar(
                                               const SnackBar(
                                                   content: Text(
-                                                      'Error al aprobar el documento')),
+                                                      'Algunos documentos no se pudieron aprobar. Intentá de nuevo.')),
                                             );
                                           }
                                         }

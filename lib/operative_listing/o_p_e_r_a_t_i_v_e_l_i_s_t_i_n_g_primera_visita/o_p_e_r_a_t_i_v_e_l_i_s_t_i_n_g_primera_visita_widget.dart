@@ -17,6 +17,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'o_p_e_r_a_t_i_v_e_l_i_s_t_i_n_g_primera_visita_model.dart';
 import '/shared_components/dovia_spinner.dart';
+import '/operative_listing/operative_next_visit.dart';
+import '/operative_listing/operative_debug.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
 export 'o_p_e_r_a_t_i_v_e_l_i_s_t_i_n_g_primera_visita_model.dart';
 
 class OPERATIVELISTINGPrimeraVisitaWidget extends StatefulWidget {
@@ -55,7 +58,13 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
   String _ownerAvatarUrl = '';
   String _propertyType = '';
   String _address = '';
+  String _propertyName = '';
   String _description = '';
+
+  /// Es la próxima visita del Operative (la misma que abre el botón de la
+  /// navbar), sin importar desde dónde se entró.
+  late bool _isNextVisit = widget.visitId.isNotEmpty &&
+      OperativeNextVisit.lastKnown == widget.visitId;
   double? _lat;
   double? _lng;
   bool _loading = true;
@@ -87,6 +96,9 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
       if (widget.visitId.isNotEmpty) {
         FFAppState().lastActiveVisitId = widget.visitId;
         _loadOverview();
+        OperativeNextVisit.fetch().then((id) {
+          if (mounted) safeSetState(() => _isNextVisit = id == widget.visitId);
+        });
       } else {
         safeSetState(() => _loading = false);
       }
@@ -127,6 +139,7 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
     String ownerAvatarUrl = '';
     String propertyType = '';
     String address = '';
+    String propertyName = '';
     String description = '';
     double? lat;
     double? lng;
@@ -145,6 +158,7 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
       address = locAddr?['fullAddress']?.toString() ??
           locAddr?['street']?.toString() ??
           '';
+      propertyName = prop['name']?.toString().trim() ?? '';
       description = prop['description']?.toString() ?? '';
       final coords = _deepValue(prop, ['location', 'geo', 'coordinates']);
       if (coords is List && coords.length >= 2) {
@@ -175,6 +189,7 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
       _ownerAvatarUrl = ownerAvatarUrl;
       _propertyType = propertyType;
       _address = address;
+      _propertyName = propertyName;
       _description = description;
       _lat = lat;
       _lng = lng;
@@ -247,6 +262,7 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
 
   /// El checklist solo se abre dentro del horario asignado a la visita.
   bool get _isChecklistEnabled {
+    if (OperativeDebug.ignoreSchedule) return true;
     final start = _visitStart;
     if (start == null) return false;
     final now = DateTime.now();
@@ -339,14 +355,12 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
     if (await canLaunchUrl(uri)) await launchUrl(uri);
   }
 
+  /// El header muestra la propiedad; si es la próxima visita lo dice abajo.
   String get _title {
-    if (widget.isPrimeraVisita) return 'Primera visita';
-    final name = widget.propertyName.isNotEmpty
-        ? widget.propertyName
-        : _address.isNotEmpty
-            ? _address
-            : 'la propiedad';
-    return 'Visita en $name';
+    if (widget.propertyName.isNotEmpty) return widget.propertyName;
+    if (_propertyName.isNotEmpty) return _propertyName;
+    if (_address.isNotEmpty) return _address;
+    return 'Visita';
   }
 
   @override
@@ -439,32 +453,30 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
                                   ),
                             ),
                           ),
-                          // Location icon — active only for Primera Visita
-                          Container(
-                            width: 40.0,
-                            height: 40.0,
-                            decoration: BoxDecoration(
-                              color: widget.isPrimeraVisita
-                                  ? _primary
-                                  : FlutterFlowTheme.of(context)
-                                      .secondaryBackground,
-                              shape: BoxShape.circle,
-                            ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(8.0),
-                              child: SvgPicture.asset(
-                                widget.isPrimeraVisita
-                                    ? 'assets/images/WhitePosition.svg'
-                                    : 'assets/images/position.svg',
-                                width: 8.0,
-                                height: 8.0,
-                                fit: BoxFit.none,
-                              ),
-                            ),
-                          ),
+                          // Mismo ancho que volver + logo (35 + 8 + 28): el
+                          // título queda centrado. La próxima visita está en
+                          // la navbar.
+                          const SizedBox(width: 71.0),
                         ],
                       ),
                     ),
+
+                    if (_isNextVisit)
+                      Padding(
+                        padding: const EdgeInsetsDirectional.only(top: 4.0),
+                        child: Text(
+                          'Próxima visita',
+                          textAlign: TextAlign.center,
+                          style:
+                              FlutterFlowTheme.of(context).bodyMedium.override(
+                                    font: GoogleFonts.publicSans(
+                                        fontWeight: FontWeight.w600),
+                                    fontSize: 14.0,
+                                    fontWeight: FontWeight.w600,
+                                    color: _primary,
+                                  ),
+                        ),
+                      ),
 
                     // ── Body ─────────────────────────────────────────────
                     Padding(
@@ -753,6 +765,9 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
                                           FFAppConstants.MapboxAccessToken,
                                       startLat: _lat ?? 0.0,
                                       startLng: _lng ?? 0.0,
+                                      // Solo para ver a dónde ir: el pin de la
+                                      // propiedad no se mueve.
+                                      readOnly: true,
                                     ),
                                   ),
                                 ),
@@ -782,9 +797,12 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
                                             0.0, 12.0, 0.0, 0.0),
                                     child: Column(
                                       children: [
-                                        Row(
+                                        // Uno debajo del otro: lado a lado el
+                                        // texto largo no entraba.
+                                        Column(
                                           children: [
-                                            Expanded(
+                                            SizedBox(
+                                              width: double.infinity,
                                               child: FFButtonWidget(
                                                 onPressed: (_onMyWayLoading ||
                                                         _onMyWaySent)
@@ -799,28 +817,27 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
                                                   height: 44.0,
                                                   color: _onMyWaySent
                                                       ? const Color(0xFF007376)
-                                                      : Colors.transparent,
+                                                      : Colors.white,
                                                   textStyle:
                                                       FlutterFlowTheme.of(
                                                               context)
                                                           .titleSmall
                                                           .override(
                                                             font: GoogleFonts
-                                                                .publicSans(),
+                                                                .publicSans(
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w600),
                                                             color: _onMyWaySent
                                                                 ? Colors.white
-                                                                : FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .primaryText,
+                                                                : _primary,
                                                           ),
                                                   elevation: 0.0,
                                                   borderSide: BorderSide(
                                                     color: _onMyWaySent
                                                         ? const Color(
                                                             0xFF007376)
-                                                        : FlutterFlowTheme.of(
-                                                                context)
-                                                            .primaryText,
+                                                        : _primary,
                                                   ),
                                                   borderRadius:
                                                       BorderRadius.circular(
@@ -828,8 +845,9 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
                                                 ),
                                               ),
                                             ),
-                                            const SizedBox(width: 12),
-                                            Expanded(
+                                            const SizedBox(height: 12),
+                                            SizedBox(
+                                              width: double.infinity,
                                               child: FFButtonWidget(
                                                 onPressed: _isChecklistEnabled
                                                     ? () => context.pushNamed(
@@ -852,7 +870,10 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
                                                           .titleSmall
                                                           .override(
                                                             font: GoogleFonts
-                                                                .publicSans(),
+                                                                .publicSans(
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w600),
                                                             color: Colors.white,
                                                           ),
                                                   elevation: 0.0,
@@ -864,24 +885,36 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
                                             ),
                                           ],
                                         ),
-                                        if (!_isChecklistEnabled && !_loading)
+                                        if ((!_isChecklistEnabled ||
+                                                OperativeDebug
+                                                    .ignoreSchedule) &&
+                                            !_loading)
                                           Padding(
                                             padding:
                                                 const EdgeInsets.only(top: 8),
-                                            child: Text(
-                                              _checklistHint,
-                                              textAlign: TextAlign.center,
-                                              style:
-                                                  FlutterFlowTheme.of(context)
-                                                      .bodySmall
-                                                      .override(
-                                                        font: GoogleFonts
-                                                            .publicSans(),
-                                                        color:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .secondaryText,
-                                                      ),
+                                            // Solo en debug: pulsación larga
+                                            // para probar fuera de horario.
+                                            child: GestureDetector(
+                                              onLongPress: kDebugMode
+                                                  ? () => safeSetState(
+                                                      OperativeDebug.toggle)
+                                                  : null,
+                                              child: Text(
+                                                OperativeDebug.ignoreSchedule
+                                                    ? 'Modo prueba: horario ignorado (mantené apretado para salir).'
+                                                    : _checklistHint,
+                                                textAlign: TextAlign.center,
+                                                style:
+                                                    FlutterFlowTheme.of(context)
+                                                        .bodySmall
+                                                        .override(
+                                                          font: GoogleFonts
+                                                              .publicSans(),
+                                                          color: FlutterFlowTheme
+                                                                  .of(context)
+                                                              .secondaryText,
+                                                        ),
+                                              ),
                                             ),
                                           ),
                                         // "Notificar que llegué" — visible solo cuando el checklist está habilitado
@@ -902,17 +935,20 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
                                               height: 44.0,
                                               color: _arrivedSent
                                                   ? const Color(0xFF007376)
-                                                  : Colors.transparent,
-                                              textStyle:
-                                                  FlutterFlowTheme.of(context)
-                                                      .titleSmall
-                                                      .override(
-                                                        font: GoogleFonts
-                                                            .publicSans(),
-                                                        color: _arrivedSent
-                                                            ? Colors.white
-                                                            : _primary,
-                                                      ),
+                                                  : Colors.white,
+                                              textStyle: FlutterFlowTheme.of(
+                                                      context)
+                                                  .titleSmall
+                                                  .override(
+                                                    font:
+                                                        GoogleFonts.publicSans(
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .w600),
+                                                    color: _arrivedSent
+                                                        ? Colors.white
+                                                        : _primary,
+                                                  ),
                                               elevation: 0.0,
                                               borderSide: BorderSide(
                                                 color: _arrivedSent

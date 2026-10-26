@@ -2,6 +2,7 @@
 // Imports other custom widgets
 // Imports custom functions
 import '/core/network_image_size.dart';
+import '/domain/property_media_zones.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:image_picker/image_picker.dart';
@@ -43,11 +44,28 @@ class ListingHQPropiedad extends StatefulWidget {
 class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
   static const Color primaryColor = Color(0xFF007376);
   static const Color textColor = Color(0xFF00444B);
-  static const Color inputBackground = Color(0xFFFAFAFA);
+  static const Color inputBackground = Colors.white;
   static const Color placeholderColor = Color(0xFF888888);
   static const Color borderColor = Color(0xFFE9EFF2);
   static const Color addButtonBg = Color(0xFFCCE3E4);
   static const Color alertBg = Color(0x3370ACAD);
+
+  // Una sola escala de separaciones para toda la pantalla.
+  /// Título del campo → campo.
+  static const double _gapLabel = 8;
+
+  /// Entre campos o bloques de una misma sección.
+  static const double _gapField = 16;
+
+  /// Fin de una sección → la siguiente.
+  static const double _gapSection = 24;
+
+  /// Inputs: fondo blanco con un borde suave para que se distingan del fondo.
+  static final BoxDecoration _inputDecoration = BoxDecoration(
+    color: inputBackground,
+    borderRadius: BorderRadius.circular(10),
+    border: Border.all(color: borderColor),
+  );
 
   // ==================== SECTION EXPANSION STATE ====================
   bool _datosGeneralesExpanded = true;
@@ -466,8 +484,13 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
       if (propImages is Map) {
         propImages.forEach((category, urls) {
           if (urls is List) {
-            final key = _getSectionKeyFromCategory(category.toString());
-            _images[key] = urls.map((u) => XFile(u.toString())).toList();
+            // Una zona vieja y una nueva (`habitacion` y `habitaciones`) caen
+            // en la misma sección: se suman, no se pisan.
+            final key = propertySectionForZone(category.toString());
+            _images[key] = [
+              ...?_images[key],
+              ...urls.map((u) => XFile(u.toString())),
+            ];
             if (!_imageSections.contains(key)) _imageSections.add(key);
           }
         });
@@ -512,10 +535,22 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
     _saveState();
   }
 
-  bool validateForm() {
-    bool hasError = false;
+  /// Lo que falta para publicar, con el nombre que tiene en la pantalla (como
+  /// la lista de pendientes de la web).
+  List<String> _missingForPublish() {
+    final missing = <String>[
+      if (_tipoVivienda == null) 'Tipo de vivienda',
+      if (_direccion == null) 'Dirección',
+      if (_habitaciones == null) 'Cantidad de habitaciones',
+    ];
 
-    final requiredSections = [
+    if (_selectedCriteria.length < 3) {
+      missing.add('Califica mínimo 3 criterios del sector');
+    } else if (_selectedCriteria.any((c) => (_starRatings[c] ?? 0) == 0)) {
+      missing.add('Estrellas de los criterios del sector elegidos');
+    }
+
+    const requiredSections = [
       'Foto principal',
       'Habitaciones',
       'Sala',
@@ -524,30 +559,24 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
     ];
     for (final section in requiredSections) {
       if (_images[section] == null || _images[section]!.isEmpty) {
-        hasError = true;
+        missing.add(
+            section == 'Foto principal' ? 'Foto principal' : 'Foto de $section');
       }
     }
+    return missing;
+  }
 
-    if (_tipoVivienda == null || _direccion == null || _habitaciones == null) {
-      hasError = true;
-    }
-
-    if (_selectedCriteria.length < 3 ||
-        _selectedCriteria.any((c) => (_starRatings[c] ?? 0) == 0)) {
-      hasError = true;
-    }
-
-    if (hasError) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-              'Por favor completa todos los campos obligatorios y sube las fotos requeridas.'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return false;
-    }
-    return true;
+  bool validateForm() {
+    final missing = _missingForPublish();
+    if (missing.isEmpty) return true;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Para publicar falta:\n• ${missing.join('\n• ')}'),
+        backgroundColor: Colors.red,
+        duration: const Duration(seconds: 6),
+      ),
+    );
+    return false;
   }
 
   @override
@@ -558,35 +587,6 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
     _instruccionesController.dispose();
     _complejoController.dispose();
     super.dispose();
-  }
-
-  String _getSectionKeyFromCategory(String category) {
-    switch (category.toLowerCase()) {
-      case 'principal':
-        return 'Foto principal';
-      case 'habitacion':
-      case 'habitaciones':
-        return 'Habitaciones';
-      case 'sala':
-        return 'Sala';
-      case 'comedor':
-        return 'Comedor';
-      case 'cocina':
-        return 'Cocina';
-      case 'otras':
-      case 'otraszonas':
-      case 'otras_zonas':
-        return 'Otras zonas';
-      case 'plano':
-      case 'planos':
-        return 'Plano';
-      case 'recorrido360':
-      case 'video360':
-        return 'Recorrido 360';
-      default:
-        if (category.isEmpty) return category;
-        return category[0].toUpperCase() + category.substring(1);
-    }
   }
 
   String _cap(String s) => s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);
@@ -785,7 +785,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
           children: [
             // ========== ALERT BANNER ==========
             _buildAlertBanner(),
-            const SizedBox(height: 18),
+            const SizedBox(height: _gapField),
 
             // ========== TITLE ==========
             const Text(
@@ -798,7 +798,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
                 height: 22 / 16,
               ),
             ),
-            const SizedBox(height: 18),
+            const SizedBox(height: _gapField),
 
             // ========== SECTION 1: DATOS GENERALES ==========
             _buildDatosGeneralesSection(),
@@ -816,14 +816,13 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
             _buildInfoHqSection(),
 
             // ========== SECTION 6: ADICIONALES ==========
+            // Cada sección ya termina con `_gapSection`.
             _buildAdicionalesSection(),
-
-            const SizedBox(height: 18),
 
             // ========== SECTION 7: IMAGES ==========
             _buildImagesSection(),
 
-            const SizedBox(height: 18),
+            const SizedBox(height: _gapSection - _gapField),
 
             // ========== ACTION BUTTONS ==========
             _buildActionButtons(),
@@ -837,21 +836,48 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
 
   // ==================== ALERT BANNER ====================
   Widget _buildAlertBanner() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: alertBg,
-        borderRadius: BorderRadius.circular(16),
+    return const Text(
+      'Puedes organizar, completar o ajustar datos sobre la información de la propiedad.',
+      style: TextStyle(
+        fontFamily: 'Public Sans',
+        fontSize: 16,
+        fontWeight: FontWeight.w400,
+        color: textColor,
+        height: 22 / 16,
       ),
-      child: const Text(
-        'Puedes organizar, completar o ajustar datos sobre la información de la propiedad.',
-        style: TextStyle(
-          fontFamily: 'Public Sans',
-          fontSize: 16,
-          fontWeight: FontWeight.w400,
-          color: textColor,
-          height: 16 / 16,
+    );
+  }
+
+  /// "+ Añadir": mismo botón que "Ver más" de las tarjetas (verde lleno,
+  /// texto blanco). [expand] lo estira a todo el ancho.
+  Widget _addButton(String text, VoidCallback onTap, {bool expand = false}) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(99),
+      child: Container(
+        height: 30,
+        width: expand ? double.infinity : null,
+        padding: const EdgeInsets.symmetric(horizontal: 14),
+        decoration: BoxDecoration(
+          color: primaryColor,
+          borderRadius: BorderRadius.circular(99),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.add, size: 16, color: Colors.white),
+            const SizedBox(width: 4),
+            Text(
+              text,
+              style: const TextStyle(
+                fontFamily: 'Public Sans',
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -869,7 +895,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
               () => _datosGeneralesExpanded = !_datosGeneralesExpanded),
         ),
         if (_datosGeneralesExpanded) ...[
-          const SizedBox(height: 11),
+          const SizedBox(height: _gapField),
           // Tipo de vivienda
           _buildDropdownField(
             'Tipo de vivienda',
@@ -884,17 +910,17 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
               'Otro'
             ],
           ),
-          const SizedBox(height: 11),
+          const SizedBox(height: _gapField),
           // Dirección (read-only, comes from property)
           _buildReadOnlyField('Dirección', _direccion ?? 'N/A'),
-          const SizedBox(height: 12),
+          const SizedBox(height: _gapField),
           // Descripción sobre la propiedad (text area)
           _buildTextAreaField(
             'Descripción sobre la propiedad',
             _descripcionController,
             placeholder: 'Añade detalles adicionales si es necesario',
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: _gapSection),
         ],
       ],
     );
@@ -912,7 +938,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
               () => _caracteristicasExpanded = !_caracteristicasExpanded),
         ),
         if (_caracteristicasExpanded) ...[
-          const SizedBox(height: 12),
+          const SizedBox(height: _gapField),
           // Características generales header with "Añadir" button
           _buildSubSectionHeaderWithAdd(
             'Características generales',
@@ -921,7 +947,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
               _generalCharacteristics,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: _gapField),
           // Habitaciones + Baños
           _buildDoubleDropdownRow(
             'Habitaciones',
@@ -931,7 +957,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
             (v) => setState(() => _habitaciones = v),
             (v) => setState(() => _banos = v),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: _gapField),
           // Parqueo + Pisos
           _buildDoubleDropdownRow(
             'Parqueo',
@@ -941,17 +967,17 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
             (v) => setState(() => _parqueo = v),
             (v) => setState(() => _pisos = v),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: _gapField),
           // Medios baños (single full width)
           _buildSingleDropdownRow(
             'Medios baños',
             _mediosBanos,
             (v) => setState(() => _mediosBanos = v),
           ),
-          const SizedBox(height: 11),
+          const SizedBox(height: _gapField),
           // Checkboxes for general characteristics
           _buildCheckboxGroup(_generalCharacteristics),
-          const SizedBox(height: 16),
+          const SizedBox(height: _gapField),
           // Otras características header with "Añadir" button
           _buildSubSectionHeaderWithAdd(
             'Otras características',
@@ -960,10 +986,10 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
               _otherCharacteristics,
             ),
           ),
-          const SizedBox(height: 11),
+          const SizedBox(height: _gapField),
           // Checkboxes for other characteristics
           _buildCheckboxGroup(_otherCharacteristics),
-          const SizedBox(height: 10),
+          const SizedBox(height: _gapSection),
         ],
       ],
     );
@@ -980,7 +1006,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
           () => setState(() => _amenidadesExpanded = !_amenidadesExpanded),
         ),
         if (_amenidadesExpanded) ...[
-          const SizedBox(height: 12),
+          const SizedBox(height: _gapField),
           // Propiedad header with "Añadir"
           _buildSubSectionHeaderWithAdd(
             'Propiedad',
@@ -989,9 +1015,9 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
               _propiedadAmenities,
             ),
           ),
-          const SizedBox(height: 11),
+          const SizedBox(height: _gapField),
           _buildCheckboxGroup(_propiedadAmenities),
-          const SizedBox(height: 16),
+          const SizedBox(height: _gapField),
           // Áreas comunes header with "Añadir"
           _buildSubSectionHeaderWithAdd(
             'Áreas comunes',
@@ -1000,9 +1026,9 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
               _areasComunes,
             ),
           ),
-          const SizedBox(height: 11),
+          const SizedBox(height: _gapField),
           _buildCheckboxGroup(_areasComunes),
-          const SizedBox(height: 10),
+          const SizedBox(height: _gapSection),
         ],
       ],
     );
@@ -1020,7 +1046,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
           fontSize: 14,
         ),
         if (_criteriosExpanded) ...[
-          const SizedBox(height: 12),
+          const SizedBox(height: _gapField),
           // Instruction text
           const Text(
             'Selecciona mínimo 3 criterios y califica de 1 a 5 estrellas',
@@ -1031,7 +1057,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
               color: textColor,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: _gapField),
           Text(
             '${_selectedCriteria.length} seleccionados (mínimo 3)',
             style: const TextStyle(
@@ -1040,7 +1066,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
               color: placeholderColor,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: _gapField),
           // Dos tarjetas por fila: se tocan para elegirlas y las estrellas
           // marcan el valor.
           LayoutBuilder(builder: (context, constraints) {
@@ -1057,7 +1083,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
                   .toList(),
             );
           }),
-          const SizedBox(height: 10),
+          const SizedBox(height: _gapSection),
         ],
       ],
     );
@@ -1075,7 +1101,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
           fontSize: 14,
         ),
         if (_infoHqExpanded) ...[
-          const SizedBox(height: 17),
+          const SizedBox(height: _gapField),
           // Servicios header with "Añadir" button
           _buildSubSectionHeaderWithAdd(
             'Servicios ',
@@ -1084,10 +1110,10 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
               _servicios,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: _gapField),
           // Servicios checkboxes in grid layout (2 per row)
           _buildCheckboxGridGroup(_servicios),
-          const SizedBox(height: 17),
+          const SizedBox(height: _gapField),
           // Hay daños en la propiedad
           _buildDropdownFieldWithArrow(
             'Hay daños en la propiedad',
@@ -1096,7 +1122,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
             options: ['Si', 'No'],
             placeholder: 'No',
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: _gapSection),
         ],
       ],
     );
@@ -1114,35 +1140,35 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
           fontSize: 14,
         ),
         if (_adicionalesExpanded) ...[
-          const SizedBox(height: 18),
+          const SizedBox(height: _gapField),
           _buildTextAreaField(
             'Anota las dudas que tengas',
             _dudasController,
             placeholder: 'XXX',
             labelFontSize: 14,
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: _gapField),
           _buildTextAreaField(
             'Anota las consideraciones que tengas para enseñar (información privada)',
             _consideracionesController,
             placeholder: 'XXX',
             labelFontSize: 14,
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: _gapField),
           _buildTextAreaField(
             'Anota las instrucciones para el visitante',
             _instruccionesController,
             placeholder: 'XXX',
             labelFontSize: 14,
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: _gapField),
           _buildTextAreaField(
             'Anota sobre el complejo',
             _complejoController,
             placeholder: 'XXX',
             labelFontSize: 14,
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: _gapSection),
         ],
       ],
     );
@@ -1164,10 +1190,11 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
             letterSpacing: 0.32,
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: _gapField),
         // "Añadir área adicional" button
-        GestureDetector(
-          onTap: () async {
+        _addButton(
+          'Añadir área adicional',
+          () async {
             final newArea = await _askText('Añadir área adicional',
                 hint: 'Ej: Jardín trasero');
             if (newArea != null) {
@@ -1178,32 +1205,9 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
               });
             }
           },
-          child: Container(
-            width: double.infinity,
-            height: 30,
-            decoration: BoxDecoration(
-              color: addButtonBg,
-              borderRadius: BorderRadius.circular(100),
-            ),
-            child: const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.add, size: 16, color: primaryColor),
-                SizedBox(width: 2),
-                Text(
-                  'Añadir área adicional',
-                  style: TextStyle(
-                    fontFamily: 'Public Sans',
-                    fontSize: 14,
-                    fontWeight: FontWeight.w400,
-                    color: primaryColor,
-                  ),
-                ),
-              ],
-            ),
-          ),
+          expand: true,
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: _gapField),
         // Image upload sections
         ..._imageSections.map(
           (section) => _buildImageUploadSection(section),
@@ -1240,17 +1244,14 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
             ),
           ),
         ],
-        const SizedBox(height: 12),
+        const SizedBox(height: _gapLabel),
         if (imagesForSection.isEmpty)
           GestureDetector(
             onTap: () => _pickImagesFor(label),
             child: Container(
               width: double.infinity,
               height: 104,
-              decoration: BoxDecoration(
-                color: inputBackground,
-                borderRadius: BorderRadius.circular(10),
-              ),
+              decoration: _inputDecoration,
               child: Center(
                 child: Icon(
                   Icons.add_photo_alternate_outlined,
@@ -1262,7 +1263,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
           )
         else
           _buildImageGrid(label, imagesForSection),
-        const SizedBox(height: 12),
+        const SizedBox(height: _gapField),
       ],
     );
   }
@@ -1408,6 +1409,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
             child: Container(
               height: 42,
               decoration: BoxDecoration(
+                color: Colors.white,
                 border: Border.all(color: primaryColor, width: 1),
                 borderRadius: BorderRadius.circular(25),
               ),
@@ -1528,33 +1530,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
             color: textColor,
           ),
         ),
-        GestureDetector(
-          onTap: onAddTap,
-          child: Container(
-            height: 30,
-            width: 91,
-            decoration: BoxDecoration(
-              color: addButtonBg,
-              borderRadius: BorderRadius.circular(100),
-            ),
-            child: const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.add, size: 16, color: primaryColor),
-                SizedBox(width: 2),
-                Text(
-                  'Añadir',
-                  style: TextStyle(
-                    fontFamily: 'Public Sans',
-                    fontSize: 14,
-                    fontWeight: FontWeight.w400,
-                    color: primaryColor,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+        _addButton('Añadir', onAddTap),
       ],
     );
   }
@@ -1686,13 +1662,10 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
             color: textColor,
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: _gapLabel),
         Container(
           height: 35,
-          decoration: BoxDecoration(
-            color: inputBackground,
-            borderRadius: BorderRadius.circular(10),
-          ),
+          decoration: _inputDecoration,
           padding: const EdgeInsets.symmetric(horizontal: 13),
           alignment: Alignment.centerLeft,
           child: Text(
@@ -1730,13 +1703,10 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
             color: textColor,
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: _gapLabel),
         Container(
           height: 35,
-          decoration: BoxDecoration(
-            color: inputBackground,
-            borderRadius: BorderRadius.circular(10),
-          ),
+          decoration: _inputDecoration,
           padding: const EdgeInsets.symmetric(horizontal: 13),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
@@ -1807,7 +1777,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
             ),
           ],
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: _gapLabel),
         Row(
           children: [
             Expanded(
@@ -1841,7 +1811,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
             color: textColor,
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: _gapLabel),
         _buildSmallDropdown(value, onChanged),
       ],
     );
@@ -1852,10 +1822,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
     final List<String> items = List.generate(11, (i) => i.toString()); // 0–10
     return Container(
       height: 36,
-      decoration: BoxDecoration(
-        color: inputBackground,
-        borderRadius: BorderRadius.circular(10),
-      ),
+      decoration: _inputDecoration,
       padding: const EdgeInsets.symmetric(horizontal: 13),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
@@ -1907,12 +1874,10 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
             letterSpacing: 0.28,
           ),
         ),
+        const SizedBox(height: _gapLabel),
         Container(
           height: 50,
-          decoration: BoxDecoration(
-            color: inputBackground,
-            borderRadius: BorderRadius.circular(10),
-          ),
+          decoration: _inputDecoration,
           padding: const EdgeInsets.symmetric(horizontal: 15),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
@@ -1967,14 +1932,11 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
               letterSpacing: labelFontSize == 14 ? 0.28 : 0,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: _gapLabel),
         ],
         Container(
           height: 104,
-          decoration: BoxDecoration(
-            color: inputBackground,
-            borderRadius: BorderRadius.circular(10),
-          ),
+          decoration: _inputDecoration,
           child: TextField(
             controller: controller,
             maxLines: 4,
@@ -2011,7 +1973,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
       if (i + 1 < entries.length) {
         rows.add(
           Padding(
-            padding: const EdgeInsets.only(bottom: 11),
+            padding: EdgeInsets.only(top: i == 0 ? 0 : 11),
             child: Row(
               children: [
                 Expanded(
@@ -2043,7 +2005,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
       } else {
         rows.add(
           Padding(
-            padding: const EdgeInsets.only(bottom: 11),
+            padding: EdgeInsets.only(top: i == 0 ? 0 : 11),
             child: _buildCheckboxItem(
               entries[i].key,
               entries[i].value,
@@ -2068,7 +2030,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
       if (i + 1 < entries.length) {
         rows.add(
           Padding(
-            padding: const EdgeInsets.only(bottom: 11),
+            padding: EdgeInsets.only(top: i == 0 ? 0 : 11),
             child: Row(
               children: [
                 Expanded(
@@ -2100,7 +2062,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
       } else {
         rows.add(
           Padding(
-            padding: const EdgeInsets.only(bottom: 11),
+            padding: EdgeInsets.only(top: i == 0 ? 0 : 11),
             child: _buildCheckboxItem(
               entries[i].key,
               entries[i].value,

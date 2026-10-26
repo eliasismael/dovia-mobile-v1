@@ -322,32 +322,48 @@ class _ListingHQMatchmakingSelectorWidgetState
   Widget build(BuildContext context) {
     final colorScheme = FlutterFlowTheme.of(context);
 
-    // Cuando se usa como página completa (ancho/alto infinito) no aplicamos
-    // esquinas redondeadas para que ocupe toda la pantalla.
-    final bool isFullPage =
-        widget.width == double.infinity || widget.height == double.infinity;
+    // Página completa (alto infinito): sin esquinas y con flecha de volver.
+    // Con alto fijo es el modal que sube desde abajo: esquinas de arriba
+    // redondeadas, manija y una X para cerrar.
+    final bool isFullPage = widget.height == double.infinity;
 
     return Container(
       width: widget.width ?? 800,
       height: widget.height ?? 600,
       decoration: BoxDecoration(
         color: colorScheme.secondaryBackground,
-        borderRadius:
-            isFullPage ? BorderRadius.zero : BorderRadius.circular(16.0),
+        borderRadius: isFullPage
+            ? BorderRadius.zero
+            : const BorderRadius.vertical(top: Radius.circular(20.0)),
       ),
       child: Column(
         children: [
+          if (!isFullPage)
+            Padding(
+              padding: const EdgeInsets.only(top: 10.0),
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: colorScheme.alternate,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
           // Header
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: EdgeInsets.fromLTRB(16, isFullPage ? 16 : 8, 8, 16),
             child: Row(
               children: [
-                IconButton(
-                  icon: Icon(Icons.arrow_back, color: colorScheme.primaryText),
-                  onPressed:
-                      widget.onClose ?? () => Navigator.of(context).pop(),
-                ),
-                const SizedBox(width: 4),
+                if (isFullPage) ...[
+                  IconButton(
+                    icon:
+                        Icon(Icons.arrow_back, color: colorScheme.primaryText),
+                    onPressed:
+                        widget.onClose ?? () => Navigator.of(context).pop(),
+                  ),
+                  const SizedBox(width: 4),
+                ],
                 Expanded(
                   child: Text(
                     'Asignar Operative Listing',
@@ -357,6 +373,13 @@ class _ListingHQMatchmakingSelectorWidgetState
                     ),
                   ),
                 ),
+                if (!isFullPage)
+                  IconButton(
+                    tooltip: 'Cerrar',
+                    icon: Icon(Icons.close, color: colorScheme.primaryText),
+                    onPressed:
+                        widget.onClose ?? () => Navigator.of(context).pop(),
+                  ),
               ],
             ),
           ),

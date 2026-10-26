@@ -39,7 +39,7 @@ class OperativeListingCheckList extends StatefulWidget {
 class OperativeListingCheckListState extends State<OperativeListingCheckList> {
   static const Color primaryColor = Color(0xFF007376);
   static const Color textColor = Color(0xFF00444B);
-  static const Color inputBackground = Color(0xFFFAFAFA);
+  static const Color inputBackground = Colors.white;
   static const Color placeholderColor = Color(0xFF888888);
   static const Color borderColor = Color(0xFFE9EFF2);
   static const Color addButtonBg = Color(0xFFCCE3E4);
@@ -732,30 +732,10 @@ class OperativeListingCheckListState extends State<OperativeListingCheckList> {
             ),
           ),
           const SizedBox(height: 12),
-          GestureDetector(
-            onTap: () {
-              _showAddCustomItemDialog('Servicios', _servicios);
-            },
-            child: Container(
-              width: double.infinity,
-              height: 42,
-              decoration: BoxDecoration(
-                color: primaryColor,
-                borderRadius: BorderRadius.circular(25),
-                border: Border.all(color: primaryColor),
-              ),
-              alignment: Alignment.center,
-              child: const Text(
-                'Añadir servicios',
-                style: TextStyle(
-                  fontFamily: 'Public Sans',
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                  height: 14 / 16,
-                ),
-              ),
-            ),
+          _addButton(
+            'Añadir servicios',
+            () => _showAddCustomItemDialog('Servicios', _servicios),
+            expand: true,
           ),
           const SizedBox(height: 17),
           _buildCheckboxGroup(_servicios),
@@ -854,7 +834,8 @@ class OperativeListingCheckListState extends State<OperativeListingCheckList> {
           ),
         ),
         padding:
-            const EdgeInsets.only(left: 16, right: 12, top: 10, bottom: 10),
+            // Sin sangría: el título y la línea van al ancho del contenido.
+            const EdgeInsets.only(top: 10, bottom: 10),
         child: Row(
           children: [
             Expanded(
@@ -880,6 +861,41 @@ class OperativeListingCheckListState extends State<OperativeListingCheckList> {
     );
   }
 
+  /// "+ Añadir": mismo botón que "Ver más" de las tarjetas (verde lleno,
+  /// texto blanco). [expand] lo estira a todo el ancho.
+  Widget _addButton(String text, VoidCallback onTap, {bool expand = false}) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(99),
+      child: Container(
+        height: 30,
+        width: expand ? double.infinity : null,
+        padding: const EdgeInsets.symmetric(horizontal: 14),
+        decoration: BoxDecoration(
+          color: primaryColor,
+          borderRadius: BorderRadius.circular(99),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.add, size: 16, color: Colors.white),
+            const SizedBox(width: 4),
+            Text(
+              text,
+              style: const TextStyle(
+                fontFamily: 'Public Sans',
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   // ==================== REUSABLE: SUBSECTION HEADER WITH "AÑADIR" ====================
   Widget _buildSubSectionHeaderWithAdd(
       String title, Map<String, bool> targetMap) {
@@ -895,35 +911,7 @@ class OperativeListingCheckListState extends State<OperativeListingCheckList> {
             color: textColor,
           ),
         ),
-        GestureDetector(
-          onTap: () {
-            _showAddCustomItemDialog(title, targetMap);
-          },
-          child: Container(
-            height: 30,
-            width: 91,
-            decoration: BoxDecoration(
-              color: addButtonBg,
-              borderRadius: BorderRadius.circular(100),
-            ),
-            child: const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.add, size: 16, color: primaryColor),
-                SizedBox(width: 2),
-                Text(
-                  'Añadir',
-                  style: TextStyle(
-                    fontFamily: 'Public Sans',
-                    fontSize: 14,
-                    fontWeight: FontWeight.w400,
-                    color: primaryColor,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+        _addButton('Añadir', () => _showAddCustomItemDialog(title, targetMap)),
       ],
     );
   }
@@ -951,13 +939,15 @@ class OperativeListingCheckListState extends State<OperativeListingCheckList> {
     showDialog(
         context: context,
         builder: (context) {
+          // Mismas medidas que el diálogo de añadir del formulario de HQ.
           return Dialog(
             backgroundColor: Colors.white,
+            insetPadding: const EdgeInsets.symmetric(horizontal: 24.0),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
             ),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 32),
+              padding: const EdgeInsets.all(24),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -966,68 +956,66 @@ class OperativeListingCheckListState extends State<OperativeListingCheckList> {
                     titleText,
                     style: const TextStyle(
                       fontFamily: 'Public Sans',
-                      fontSize: 20,
-                      fontWeight: FontWeight.w400,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
                       color: textColor,
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 16),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 22),
-                    height: 60,
+                    padding: const EdgeInsets.symmetric(horizontal: 14),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFAFAFA),
-                      borderRadius: BorderRadius.circular(17),
+                      color: inputBackground,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: borderColor),
                     ),
-                    alignment: Alignment.centerLeft,
                     child: TextField(
                       controller: controller,
+                      autofocus: true,
                       style: const TextStyle(
                         fontFamily: 'Public Sans',
-                        fontSize: 20,
+                        fontSize: 14,
                         color: textColor,
                       ),
                       decoration: InputDecoration(
                         hintText: hintText,
                         hintStyle: TextStyle(
                           fontFamily: 'Public Sans',
-                          fontSize: 20,
+                          fontSize: 14,
                           color: placeholderColor.withValues(alpha: 0.5),
                         ),
                         border: InputBorder.none,
                       ),
                     ),
                   ),
-                  const SizedBox(height: 44),
-                  Center(
-                    child: GestureDetector(
-                      onTap: () {
-                        if (controller.text.trim().isNotEmpty) {
-                          setState(() {
-                            targetMap[controller.text.trim()] = true;
-                          });
-                          Navigator.pop(context);
-                          _showSuccessPopup();
-                        } else {
-                          Navigator.pop(context);
-                        }
-                      },
-                      child: Container(
-                        width: double.infinity,
-                        height: 60,
-                        decoration: BoxDecoration(
-                          color: primaryColor,
-                          borderRadius: BorderRadius.circular(25),
-                        ),
-                        alignment: Alignment.center,
-                        child: const Text(
-                          'Agregar',
-                          style: TextStyle(
-                            fontFamily: 'Public Sans',
-                            fontSize: 24,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
-                          ),
+                  const SizedBox(height: 24),
+                  GestureDetector(
+                    onTap: () {
+                      if (controller.text.trim().isNotEmpty) {
+                        setState(() {
+                          targetMap[controller.text.trim()] = true;
+                        });
+                        Navigator.pop(context);
+                        _showSuccessPopup();
+                      } else {
+                        Navigator.pop(context);
+                      }
+                    },
+                    child: Container(
+                      width: double.infinity,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: primaryColor,
+                        borderRadius: BorderRadius.circular(100),
+                      ),
+                      alignment: Alignment.center,
+                      child: const Text(
+                        'Agregar',
+                        style: TextStyle(
+                          fontFamily: 'Public Sans',
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
                         ),
                       ),
                     ),
@@ -1138,8 +1126,9 @@ class OperativeListingCheckListState extends State<OperativeListingCheckList> {
             decoration: BoxDecoration(
               color: inputBackground,
               borderRadius: BorderRadius.circular(10),
-              border:
-                  hasError ? Border.all(color: Colors.red, width: 1.5) : null,
+              border: hasError
+                  ? Border.all(color: Colors.red, width: 1.5)
+                  : Border.all(color: borderColor),
             ),
             padding: const EdgeInsets.symmetric(horizontal: 13),
             alignment: Alignment.centerLeft,
@@ -1290,14 +1279,16 @@ class OperativeListingCheckListState extends State<OperativeListingCheckList> {
         decoration: BoxDecoration(
           color: inputBackground,
           borderRadius: BorderRadius.circular(10),
-          border: hasError ? Border.all(color: Colors.red, width: 1.5) : null,
+          border: hasError
+              ? Border.all(color: Colors.red, width: 1.5)
+              : Border.all(color: borderColor),
         ),
         padding: const EdgeInsets.symmetric(horizontal: 13),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              value ?? 'x',
+              value ?? '',
               style: TextStyle(
                 fontFamily: 'Public Sans',
                 fontSize: 12,
@@ -1324,7 +1315,7 @@ class OperativeListingCheckListState extends State<OperativeListingCheckList> {
     String? value,
     ValueChanged<String?> onChanged, {
     List<String>? options,
-    String placeholder = 'x',
+    String placeholder = '',
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1355,6 +1346,7 @@ class OperativeListingCheckListState extends State<OperativeListingCheckList> {
             decoration: BoxDecoration(
               color: inputBackground,
               borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: borderColor),
             ),
             padding: const EdgeInsets.symmetric(horizontal: 15),
             child: Row(
@@ -1419,7 +1411,9 @@ class OperativeListingCheckListState extends State<OperativeListingCheckList> {
           decoration: BoxDecoration(
             color: inputBackground,
             borderRadius: BorderRadius.circular(10),
-            border: hasError ? Border.all(color: Colors.red, width: 1.5) : null,
+            border: hasError
+              ? Border.all(color: Colors.red, width: 1.5)
+              : Border.all(color: borderColor),
           ),
           child: TextField(
             controller: controller,
@@ -1631,6 +1625,7 @@ class OperativeListingCheckListState extends State<OperativeListingCheckList> {
           decoration: BoxDecoration(
             color: inputBackground,
             borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: borderColor),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 10),
           alignment: Alignment.centerLeft,

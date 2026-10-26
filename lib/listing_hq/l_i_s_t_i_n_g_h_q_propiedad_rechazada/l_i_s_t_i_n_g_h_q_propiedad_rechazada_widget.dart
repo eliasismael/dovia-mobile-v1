@@ -13,6 +13,7 @@ import '/listing_hq/listing_hq_ui.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_header/l_i_s_t_i_n_g_h_q_header_widget.dart';
 import 'l_i_s_t_i_n_g_h_q_propiedad_rechazada_model.dart';
 import '/shared_components/dovia_spinner.dart';
+import '/shared_components/popup_exito/popup_exito_widget.dart';
 export 'l_i_s_t_i_n_g_h_q_propiedad_rechazada_model.dart';
 
 class LISTINGHQPropiedadRechazadaWidget extends StatefulWidget {
@@ -237,10 +238,22 @@ class _LISTINGHQPropiedadRechazadaWidgetState
     if (!mounted) return;
     setState(() => _submitting = false);
     if (response.succeeded) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Caso enviado a Revisión Legal HQ exitosamente.')),
+      await showDialog(
+        context: context,
+        builder: (dialogContext) => Dialog(
+          elevation: 0,
+          insetPadding: EdgeInsets.zero,
+          backgroundColor: Colors.transparent,
+          // Sin `onContinue` el popup no dibuja el botón de cierre.
+          child: PopupExitoWidget(
+            title: 'Caso enviado a Legal HQ',
+            text: 'Dovia Legal HQ va a revisar los documentos de nuevo.',
+            continueText: 'Continuar',
+            onContinue: () => Navigator.pop(dialogContext),
+          ),
+        ),
       );
+      if (!mounted) return;
       context.goNamed('LISTING_HQ_Home');
     } else {
       final msg = getJsonField(response.jsonBody, r'$.message')?.toString();

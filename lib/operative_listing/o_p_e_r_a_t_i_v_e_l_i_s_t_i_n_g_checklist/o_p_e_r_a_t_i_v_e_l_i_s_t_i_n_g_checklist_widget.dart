@@ -9,6 +9,7 @@ import '/operative_listing/o_p_e_r_a_t_i_v_e_l_i_s_t_i_n_g_navbar/o_p_e_r_a_t_i_
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/index.dart'; // To get OPERATIVELISTINGChecklistFormWidget and Agenda
 import 'package:flutter/material.dart';
+import '/operative_listing/operative_debug.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'o_p_e_r_a_t_i_v_e_l_i_s_t_i_n_g_checklist_model.dart';
 import '/shared_components/dovia_spinner.dart';
@@ -68,7 +69,7 @@ class _ChecklistData {
     final start = slotStart;
     return journey == 'AT_LOCATION' &&
         start != null &&
-        !DateTime.now().isBefore(start);
+        (OperativeDebug.ignoreSchedule || !DateTime.now().isBefore(start));
   }
 
   bool matches(String q) {
@@ -561,29 +562,27 @@ class _OPERATIVELISTINGChecklistWidgetState
   }
 }
 
-// Shared thumbnail with graceful fallback to a placeholder icon.
-Widget _thumbnail(String imageUrl) {
-  Widget placeholder() => Container(
+/// Foto de la propiedad a la izquierda de la tarjeta. Sin foto no se muestra
+/// nada (ni la casita de relleno): el texto ocupa todo el ancho.
+List<Widget> _thumbnail(String imageUrl) {
+  if (imageUrl.isEmpty) return const [];
+  return [
+    ClipRRect(
+      borderRadius: BorderRadius.circular(10),
+      child: SizedBox(
         width: 72,
         height: 100,
-        color: const Color(0xFFEFEFEF),
-        child: const Icon(Icons.home, color: Colors.grey, size: 40),
-      );
-  return ClipRRect(
-    borderRadius: BorderRadius.circular(10),
-    child: SizedBox(
-      width: 72,
-      height: 100,
-      child: imageUrl.isNotEmpty
-          ? Image.network(
-              imageUrl,
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => placeholder(),
-              cacheWidth: networkImageCacheWidth(width: 72, height: 100),
-            )
-          : placeholder(),
+        child: Image.network(
+          imageUrl,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) =>
+              const ColoredBox(color: Color(0xFFEFEFEF)),
+          cacheWidth: networkImageCacheWidth(width: 72, height: 100),
+        ),
+      ),
     ),
-  );
+    const SizedBox(width: 14),
+  ];
 }
 
 class _PendingCard extends StatelessWidget {
@@ -614,8 +613,7 @@ class _PendingCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          _thumbnail(data.imageUrl),
-          const SizedBox(width: 14),
+          ..._thumbnail(data.imageUrl),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -729,8 +727,7 @@ class _RejectedCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          _thumbnail(data.imageUrl),
-          const SizedBox(width: 14),
+          ..._thumbnail(data.imageUrl),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

@@ -650,8 +650,10 @@ class _UpcomingCardState extends State<_UpcomingCard> {
                     onTap: () => _openMaps(context),
                     child: Container(
                       height: 36,
+                      // Secundario: blanco con borde, como los demás de la app.
                       decoration: BoxDecoration(
-                        color: const Color(0xFF70ACAD).withValues(alpha: 0.35),
+                        color: Colors.white,
+                        border: Border.all(color: _primary),
                         borderRadius: BorderRadius.circular(25),
                       ),
                       alignment: Alignment.center,
@@ -660,7 +662,7 @@ class _UpcomingCardState extends State<_UpcomingCard> {
                         style: TextStyle(
                           fontFamily: 'Public Sans',
                           fontSize: 14,
-                          color: _dark,
+                          color: _primary,
                         ),
                       ),
                     ),

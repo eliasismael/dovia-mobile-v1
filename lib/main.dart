@@ -277,6 +277,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         progressIndicatorTheme: const ProgressIndicatorThemeData(
           color: DoviaSpinner.green,
         ),
+        // Idem con los selectores de fecha y hora (showDatePicker,
+        // showTimePicker) y sus botones Cancelar/Aceptar.
+        colorScheme: const ColorScheme.light(
+          primary: DoviaSpinner.green,
+          secondary: DoviaSpinner.green,
+        ),
         // Los botones con borde (los secundarios) van sobre blanco: con el
         // fondo transparente de Material se perdían sobre el degradé.
         outlinedButtonTheme: OutlinedButtonThemeData(
