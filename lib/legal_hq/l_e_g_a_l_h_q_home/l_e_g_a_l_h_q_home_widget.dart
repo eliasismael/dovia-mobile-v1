@@ -82,8 +82,11 @@ class _LEGALHQHomeWidgetState extends State<LEGALHQHomeWidget> {
   void _loadData() {
     // Carril 1 — inmuebles subidos por propietarios/agentes que requieren
     // auditoría legal antes de ser visibles en el marketplace de DOVIA.
+    // Solo las que el Lister HQ ya mandó: el back las pasa a LEGAL_HQ_REVIEW
+    // (con los documentos aprobados copiados) cuando aprueba la visita. Antes,
+    // en IN_PROGRESS, el expediente existe pero todavía no tiene documentos.
     _publicationFuture = LegalHqProcessApi.fetchBoth(
-      status: kActiveStatuses,
+      status: 'LEGAL_HQ_REVIEW',
       category: kCategoryPublication,
     );
 
