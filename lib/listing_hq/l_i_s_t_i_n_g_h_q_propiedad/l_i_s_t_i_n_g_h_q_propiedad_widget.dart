@@ -9,6 +9,7 @@ import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_visits.dart';
 import '/backend/api_requests/api_properties.dart';
 import '/backend/api_requests/api_manager.dart';
+import '/domain/property_media_zones.dart';
 import 'l_i_s_t_i_n_g_h_q_propiedad_model.dart';
 import 'package:mime_type/mime_type.dart';
 import 'package:image_picker/image_picker.dart';
@@ -94,42 +95,6 @@ class _LISTINGHQPropiedadWidgetState extends State<LISTINGHQPropiedadWidget> {
     }
 
     return data;
-  }
-
-  // Maps a UI section name to a backend `zone` slug matching `^[a-z0-9][a-z0-9-_]{0,39}$`.
-  String _zoneForSection(String sectionName) {
-    switch (sectionName) {
-      case 'Foto principal':
-        return 'principal';
-      case 'Habitaciones':
-        return 'habitacion';
-      case 'Sala':
-        return 'sala';
-      case 'Comedor':
-        return 'comedor';
-      case 'Cocina':
-        return 'cocina';
-      case 'Otras zonas':
-        return 'otras';
-      case 'Plano':
-        return 'plano';
-      default:
-        return _slugifyZone(sectionName);
-    }
-  }
-
-  String _slugifyZone(String input) {
-    var s = input.toLowerCase().trim();
-    const from = 'áàäâãéèëêíìïîóòöôõúùüûñç';
-    const to = 'aaaaaeeeeiiiiooooouuuunc';
-    for (int i = 0; i < from.length; i++) {
-      s = s.replaceAll(from[i], to[i]);
-    }
-    s = s.replaceAll(RegExp(r'[^a-z0-9]+'), '-');
-    s = s.replaceAll(RegExp(r'^-+|-+$'), '');
-    if (s.isEmpty) s = 'zona';
-    if (s.length > 40) s = s.substring(0, 40);
-    return s;
   }
 
   @override
@@ -284,11 +249,8 @@ class _LISTINGHQPropiedadWidgetState extends State<LISTINGHQPropiedadWidget> {
                                   final List<String> sectionUrls = [];
                                   uploaded[sectionName] = sectionUrls;
 
-                                  final bool isVideo =
-                                      sectionName == 'Recorrido 360';
-                                  final String zone = isVideo
-                                      ? 'recorrido-360'
-                                      : _zoneForSection(sectionName);
+                                  final String zone =
+                                      propertyZoneForSection(sectionName);
 
                                   final List<XFile> localFiles = [];
                                   for (final dynamic fileObj in files) {

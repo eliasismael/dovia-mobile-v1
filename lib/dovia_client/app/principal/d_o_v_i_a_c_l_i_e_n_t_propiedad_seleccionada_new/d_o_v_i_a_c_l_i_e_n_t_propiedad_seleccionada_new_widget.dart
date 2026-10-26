@@ -1,6 +1,7 @@
 import '/core/network_image_size.dart';
 import '/shared_components/carousel_arrow/carousel_arrow_button.dart';
 import '/backend/api_requests/api_calls.dart';
+import '/domain/property_media_zones.dart';
 import '/dovia_client/app/principal/todas_las_fotos/todas_las_fotos_widget.dart';
 import '/dovia_client/app/principal/agendar_cita/agendar_cita_widget.dart';
 import '/components/porpiedades_amenidades_widget.dart';
@@ -446,11 +447,12 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
     final categories = <String, List<String>>{};
     final inRooms = _imagesByRoom.values.expand((u) => u).toSet();
     final sueltas = _carouselImages.where((u) => !inRooms.contains(u)).toList();
-    if (sueltas.isNotEmpty) categories['Principal'] = sueltas;
+    if (sueltas.isNotEmpty) categories['Foto principal'] = sueltas;
+    // Mismos nombres que la web; las zonas viejas y nuevas se juntan.
     _imagesByRoom.forEach((room, urls) {
-      final label =
-          room.isEmpty ? room : '${room[0].toUpperCase()}${room.substring(1)}';
-      categories.putIfAbsent(label, () => []).addAll(urls);
+      categories
+          .putIfAbsent(propertySectionForZone(room), () => [])
+          .addAll(urls);
     });
     return categories;
   }

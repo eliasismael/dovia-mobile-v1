@@ -65,6 +65,7 @@ class _LISTINGHQPropiedadAsignadaWidgetState
   String? _proposedDateText;
   // URLs de los documentos que se abren desde "Documentos".
   String? _agreementUrl;
+  bool _agreementSigned = false;
   String? _certificationUrl;
 
   /// Slots propuestos por el propietario (`{ 'date', 'time' }`), para el selector.
@@ -220,6 +221,8 @@ class _LISTINGHQPropiedadAsignadaWidgetState
     }
 
     if (visit is Map) {
+      _agreementSigned = _nonEmpty(visit['signedContractUrl']) != null;
+      // Sin firmar: el backend lo genera aparte y puede tardar en llegar.
       _agreementUrl = _nonEmpty(visit['signedContractUrl']) ??
           _nonEmpty(visit['unsignedContractUrl']);
       final checklist = visit['documentChecklist'];
@@ -231,6 +234,12 @@ class _LISTINGHQPropiedadAsignadaWidgetState
             _certificationUrl = _nonEmpty(doc['url']);
           }
         }
+      }
+      // Las visitas nuevas ya no traen la certificación en el checklist: está
+      // en la propiedad.
+      if (_certificationUrl == null && property is Map) {
+        _certificationUrl =
+            _deepString(property, ['legalInfo', 'propertyCertification']);
       }
       // Al pedir reagendar, la fecha que tenía el operative queda como
       // asignación anterior.
@@ -347,33 +356,30 @@ class _LISTINGHQPropiedadAsignadaWidgetState
   // ---------------------------------------------------------------------------
 
   Future<void> _openMatchmaking() async {
-    // Se abre como página dedicada (no modal). Al elegir un operative y tocar
-    // "Aceptar y Continuar" se asigna al hueco y se vuelve a esta pantalla,
-    // donde "Confirmar visita y notificar" hace el commit final.
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (pageContext) => Scaffold(
-          backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-          body: SafeArea(
-            child: custom_widgets.ListingHQMatchmakingSelectorWidget(
-              width: double.infinity,
-              height: double.infinity,
-              propertyId: widget.visitId ?? '',
-              proposedSlots: _proposedSlots,
-              availabilityRanges: _availabilityRanges,
-              ownerPhone: _ownerPhone,
-              onClose: () => Navigator.of(pageContext).pop(),
-              onOperativeSelected: (operative, date, time) {
-                Navigator.of(pageContext).pop();
-                setState(() {
-                  _selectedOperative = operative;
-                  _selectedDate = date;
-                  _selectedTime = time;
-                });
-              },
-            ),
-          ),
-        ),
+    // Modal desde abajo. Al elegir un operative y tocar "Aceptar y continuar"
+    // se cierra y vuelve a esta pantalla, donde "Confirmar visita y notificar"
+    // hace el commit final.
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) => custom_widgets.ListingHQMatchmakingSelectorWidget(
+        width: double.infinity,
+        height: MediaQuery.sizeOf(sheetContext).height * 0.9,
+        propertyId: widget.visitId ?? '',
+        proposedSlots: _proposedSlots,
+        availabilityRanges: _availabilityRanges,
+        ownerPhone: _ownerPhone,
+        onClose: () => Navigator.of(sheetContext).pop(),
+        onOperativeSelected: (operative, date, time) {
+          Navigator.of(sheetContext).pop();
+          setState(() {
+            _selectedOperative = operative;
+            _selectedDate = date;
+            _selectedTime = time;
+          });
+        },
       ),
     );
   }
@@ -588,7 +594,13 @@ class _LISTINGHQPropiedadAsignadaWidgetState
             spacing: 16,
             children: [
               _documentLink(
-                  Icons.description, 'Acuerdo firmado', _agreementUrl),
+                  Icons.description,
+                  _agreementUrl == null
+                      ? 'Contrato en preparación'
+                      : _agreementSigned
+                          ? 'Acuerdo firmado'
+                          : 'Contrato sin firmar',
+                  _agreementUrl),
               _documentLink(
                   Icons.verified_user, 'Certificación', _certificationUrl),
             ],

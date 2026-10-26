@@ -34,8 +34,6 @@ class DOVIAAPIVisitContextGroup {
       AdminAssignListerHqCall();
   static UploadVisitDocumentCall uploadVisitDocumentCall =
       UploadVisitDocumentCall();
-  static ReviewChecklistDocumentsCall reviewChecklistDocumentsCall =
-      ReviewChecklistDocumentsCall();
   static ReviewListerHqDocumentCall reviewListerHqDocumentCall =
       ReviewListerHqDocumentCall();
   static DeleteVisitDocumentCall deleteVisitDocumentCall =
@@ -674,38 +672,6 @@ class UploadVisitDocumentCall {
         'file': file,
       },
       bodyType: BodyType.MULTIPART,
-      returnBody: true,
-      encodeBodyUtf8: false,
-      decodeUtf8: false,
-      cache: false,
-      isStreamingApi: false,
-      alwaysAllowBody: false,
-    );
-  }
-}
-
-class ReviewChecklistDocumentsCall {
-  Future<ApiCallResponse> call({
-    String? visitId = '',
-    String? authToken = '',
-    dynamic items,
-  }) async {
-    final baseUrl = DOVIAAPIVisitContextGroup.getBaseUrl();
-
-    final ffApiRequestBody = '''
-{
-  "items": ${serializeJson(items, true)}
-}''';
-    return ApiManager.instance.makeApiCall(
-      callName: 'Review Checklist Documents',
-      apiUrl: '$baseUrl/visits/$visitId/lister-hq/document-checklist/review',
-      callType: ApiCallType.PATCH,
-      headers: {
-        'Authorization': 'Bearer $authToken',
-      },
-      params: {},
-      body: ffApiRequestBody,
-      bodyType: BodyType.JSON,
       returnBody: true,
       encodeBodyUtf8: false,
       decodeUtf8: false,

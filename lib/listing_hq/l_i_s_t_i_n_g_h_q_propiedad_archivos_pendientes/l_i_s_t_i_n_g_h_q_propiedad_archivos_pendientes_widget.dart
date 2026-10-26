@@ -1,6 +1,9 @@
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_visits.dart';
 import '/backend/api_requests/api_manager.dart';
+import '/backend/api_requests/api_properties.dart';
+import '/domain/listing_hq_documents.dart';
+import '/domain/property_ownership_view.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/listing_hq/listing_hq_ui.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -46,6 +49,10 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
   /// visita que el checklist.
   Map? _property;
   Map? _owner;
+
+  /// Dueño de la propiedad: el del detalle o, en el formato nuevo, el
+  /// completo del backoffice (ver [ownershipView]).
+  dynamic _ownership;
 
   @override
   void initState() {
@@ -405,6 +412,9 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
             'DPI propietario inmueble', _str(legal?['ownerIdDocument'])),
         _ownerDocTile('Certificación de la propiedad',
             _str(legal?['propertyCertification'])),
+        // Registro de inmueble nuevo: DPI del dueño o del representante.
+        for (final doc in ownershipView(_ownership).documents)
+          _ownerDocTile(doc.name, doc.url),
       ]),
     ];
   }
@@ -412,7 +422,8 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
   List<Widget> _buildPropertyData() {
     final p = _property;
     final legal = p?['legalInfo'] is Map ? p!['legalInfo'] as Map : null;
-    final ownership = p?['ownership'] is Map ? p!['ownership'] as Map : null;
+    final ownership =
+        ownershipView(_ownership, accountName: _str(_owner?['fullName']));
     final sale = p?['saleInfo'] is Map ? p!['saleInfo'] as Map : null;
     final rent = p?['rentInfo'] is Map ? p!['rentInfo'] as Map : null;
     final location = p?['location'] is Map ? p!['location'] as Map : null;
@@ -422,7 +433,6 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
         p?['description'] is Map ? p!['description'] as Map : null;
     final listingType = _str(p?['listingType']).toUpperCase();
     final phone = _owner?['phone'] is Map ? _owner!['phone'] as Map : null;
-    final isCompany = ownership?['isCompanyOwned'] == true;
 
     final String operation;
     switch (listingType) {
@@ -448,13 +458,13 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
         _infoRow('Mantenimiento', _money(sale?['maintenanceFee'])),
         _infoRow('IUSI', _money(sale?['singlePropertyTax'])),
         _infoRow('Renta mensual', _money(rent?['monthlyRent'])),
-        _infoRow(
-            'Propietario',
-            isCompany
-                ? '${_str(ownership?['companyName'])} (empresa)'
-                : _str(_owner?['fullName'])),
-        if (isCompany)
-          _infoRow('Representante', _str(ownership?['legalRepresentative'])),
+        if (ownership.typeLabel.isNotEmpty)
+          _infoRow('A nombre de', ownership.typeLabel),
+        _infoRow('Propietario', ownership.ownerName),
+        if (ownership.relationship.isNotEmpty)
+          _infoRow('Relación con quien publica', ownership.relationship),
+        if (ownership.representative.isNotEmpty)
+          _infoRow('Representante', ownership.representative),
         _infoRow(
             'Teléfono',
             phone == null
@@ -515,39 +525,31 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
     if (data is Map) {
       _property = data['property'] is Map ? data['property'] as Map : null;
       _owner = data['ownerProfile'] is Map ? data['ownerProfile'] as Map : null;
-      // The visit details DTO nests the checklist under `visit`. Fall back to
-      // the top level in case the response is unwrapped.
-      final visit = data['visit'];
-      final checklist = (visit is Map ? visit['documentChecklist'] : null) ??
-          data['documentChecklist'];
-      final docs =
-          (visit is Map ? visit['documents'] : null) ?? data['documents'];
-
-      List combined = [];
-      if (checklist is List) combined.addAll(checklist);
-      if (docs is List) {
-        for (var doc in docs) {
-          if (doc is! Map) continue;
-          // Avoid duplicates if they share the same ID
-          final cId = doc['id']?.toString() ?? doc['documentId']?.toString();
-          if (cId != null && cId.isNotEmpty) {
-            final exists = combined.any((c) {
-              final existingId = c is Map
-                  ? (c['id']?.toString() ?? c['documentId']?.toString())
-                  : null;
-              return existingId == cId;
-            });
-            if (!exists) {
-              combined.add(doc);
-            }
-          } else {
-            combined.add(doc);
-          }
-        }
+      _ownership = _property?['ownership'];
+      if (isClassifiedOwnership(_ownership)) {
+        await _loadFullOwnership(data, token);
       }
-      return combined;
+      return listerHqVisitDocs(data);
     }
     return [];
+  }
+
+  /// El detalle de la visita solo trae el tipo del dueño del formato nuevo:
+  /// nombres y documentos vienen en el backoffice de la propiedad.
+  Future<void> _loadFullOwnership(Map data, String token) async {
+    final visit = data['visit'];
+    final propertyId = _str(_property?['id']).isNotEmpty
+        ? _str(_property?['id'])
+        : _str(visit is Map ? visit['propertyId'] : null);
+    if (propertyId.isEmpty) return;
+    final res = await DOVIAAPIPropertyContextGroup.getPropertyBackofficeCall
+        .call(propertyId: propertyId, authToken: token);
+    if (!res.succeeded) {
+      debugPrint('[ListerHQ docs] backoffice ${res.statusCode}: ${res.bodyText}');
+      return;
+    }
+    final full = getJsonField(res.jsonBody, r'$.data.ownership');
+    if (full is Map) _ownership = full;
   }
 
   @override
