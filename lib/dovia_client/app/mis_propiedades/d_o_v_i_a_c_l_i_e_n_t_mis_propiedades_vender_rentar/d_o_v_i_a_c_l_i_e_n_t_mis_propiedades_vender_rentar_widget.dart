@@ -883,16 +883,8 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
         child: Text(title, style: _text(size: 15.0, weight: FontWeight.w600)),
       );
 
-  /// Aviso informativo: fondo suave y texto, sin ícono ni borde.
-  Widget _banner(Widget child) => Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(16.0),
-        decoration: BoxDecoration(
-          color: FlutterFlowTheme.of(context).accent1,
-          borderRadius: BorderRadius.circular(12.0),
-        ),
-        child: child,
-      );
+  /// Texto informativo de arriba y de abajo: solo texto, sin fondo.
+  Widget _banner(Widget child) => SizedBox(width: double.infinity, child: child);
 
   /// Valor que no se edita, con el mismo aspecto que un campo.
   Widget _readOnlyBox(String text, {Widget? trailing}) => Container(
