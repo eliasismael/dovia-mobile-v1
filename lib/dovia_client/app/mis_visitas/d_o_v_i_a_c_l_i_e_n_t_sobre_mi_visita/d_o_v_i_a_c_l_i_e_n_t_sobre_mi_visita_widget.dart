@@ -334,24 +334,7 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
 
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Cancelar visita'),
-        content:
-            const Text('¿Estás seguro de que deseas cancelar esta visita?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('No, volver'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text(
-              'Sí, cancelar',
-              style: TextStyle(color: FlutterFlowTheme.of(context).error),
-            ),
-          ),
-        ],
-      ),
+      builder: (_) => const _CancelVisitDialog(),
     );
 
     if (confirmed != true || !mounted) return;
@@ -936,6 +919,102 @@ class _DOVIACLIENTSobreMiVisitaWidgetState
                   FlutterFlowTheme.of(context).secondaryText.withOpacity(0.6),
               letterSpacing: 0.0,
             ),
+      ),
+    );
+  }
+}
+
+/// Confirmación de cancelar la visita, con el mismo diseño que el modal de
+/// retirar una oferta. Devuelve `true` si el cliente confirma.
+class _CancelVisitDialog extends StatelessWidget {
+  const _CancelVisitDialog();
+
+  static const Color _aqua = Color(0xFF007376);
+  static const Color _text = Color(0xFF00444B);
+  static const Color _destructive = Color(0xFFE85D75);
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 48),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      backgroundColor: Colors.white,
+      elevation: 15,
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Text(
+                    '¿Quieres cancelar esta visita?',
+                    style: GoogleFonts.publicSans(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                      color: _text,
+                      height: 1.4,
+                    ),
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () => Navigator.of(context).pop(false),
+                  child: Opacity(
+                    opacity: 0.7,
+                    child: Icon(Icons.close,
+                        size: 16, color: Colors.black.withOpacity(0.8)),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                Expanded(
+                  child: SizedBox(
+                    height: 42,
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: _aqua),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(25)),
+                      ),
+                      child: Text(
+                        'Volver',
+                        style:
+                            GoogleFonts.publicSans(fontSize: 16, color: _aqua),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: SizedBox(
+                    height: 42,
+                    child: FilledButton(
+                      onPressed: () => Navigator.of(context).pop(true),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: _destructive,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(25)),
+                      ),
+                      child: Text(
+                        'Cancelar visita',
+                        maxLines: 1,
+                        style: GoogleFonts.publicSans(
+                            fontSize: 16, color: Colors.white),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

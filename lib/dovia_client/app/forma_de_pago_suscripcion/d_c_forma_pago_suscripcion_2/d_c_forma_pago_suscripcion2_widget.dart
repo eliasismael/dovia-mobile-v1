@@ -411,6 +411,8 @@ class _DCFormaPagoSuscripcion2WidgetState
                       child: DOVIASHAREDHeaderWidget(
                         showLogo: openedFromHome(context),
                         showSupport: false,
+                        showMap: false,
+                        showCurrency: false,
                         title: 'Dovia Home',
                       ),
                     ),

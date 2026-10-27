@@ -448,8 +448,9 @@ class _DOVIACLIENTOfertaCompraWidgetState
                           ),
                         ),
                         Padding(
+                          // Sin navbar: solo un margen corto bajo Aceptar.
                           padding: const EdgeInsetsDirectional.fromSTEB(
-                              20.0, 0.0, 20.0, 100.0),
+                              20.0, 0.0, 20.0, 24.0),
                           child: Column(
                             mainAxisSize: MainAxisSize.max,
                             children: [
@@ -4896,20 +4897,12 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                       Padding(
                                         padding: const EdgeInsetsDirectional
                                             .fromSTEB(0.0, 20.0, 0.0, 0.0),
-                                        child: Container(
+                                        child: SizedBox(
                                           width:
                                               MediaQuery.sizeOf(context).width *
                                                   1.0,
-                                          decoration: BoxDecoration(
-                                            color: FlutterFlowTheme.of(context)
-                                                .accent1,
-                                            borderRadius:
-                                                BorderRadius.circular(10.0),
-                                          ),
                                           child: Padding(
-                                            padding: const EdgeInsetsDirectional
-                                                .fromSTEB(
-                                                20.0, 40.0, 20.0, 40.0),
+                                            padding: EdgeInsetsDirectional.zero,
                                             child: Text(
                                               'Entiendo que en este complejo NO se permite:\n• Airbnb\n• Subarrendamiento\n• Eventos\n• Mascotas (si aplica)',
                                               style: FlutterFlowTheme.of(
@@ -5077,9 +5070,13 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                     ScaffoldMessenger.of(
                                                             context)
                                                         .showSnackBar(
-                                                      const SnackBar(
+                                                      SnackBar(
                                                           content: Text(
-                                                              'Error al enviar la oferta de renta. Inténtalo de nuevo.')),
+                                                              offerApiErrorMessage(
+                                                        rentResult.jsonBody,
+                                                        fallback:
+                                                            'Error al enviar la oferta de renta. Inténtalo de nuevo.',
+                                                      ))),
                                                     );
                                                     return;
                                                   }
@@ -5381,9 +5378,13 @@ class _DOVIACLIENTOfertaCompraWidgetState
                                                     ScaffoldMessenger.of(
                                                             context)
                                                         .showSnackBar(
-                                                      const SnackBar(
+                                                      SnackBar(
                                                         content: Text(
-                                                            'Error al enviar la oferta de renta. Inténtalo de nuevo.'),
+                                                            offerApiErrorMessage(
+                                                          rentResult.jsonBody,
+                                                          fallback:
+                                                              'Error al enviar la oferta de renta. Inténtalo de nuevo.',
+                                                        )),
                                                       ),
                                                     );
                                                     return;

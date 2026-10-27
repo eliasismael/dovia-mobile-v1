@@ -549,7 +549,6 @@ class CreateOfferRENTIndividualCall {
     "currency": "${escapeStringForJson(currency)}",
     "propertyUse": "${escapeStringForJson(propertyUse)}",
     "considerations": "${escapeStringForJson(considerations)}",
-    "proposedAmount": $proposedAmount,
     "tenantInfo": {
       "type": "${escapeStringForJson(tenantType)}",
       "name": "${escapeStringForJson(tenantName)}",
@@ -558,6 +557,9 @@ class CreateOfferRENTIndividualCall {
     }
   }
 }''';
+    // `proposedAmount` no se manda: el modelo de API Gateway para RENT no lo
+    // admite (`additionalProperties: false`) y rechaza la oferta con 400
+    // INVALID_REQUEST_BODY. El backend tampoco guarda un monto de renta.
     return ApiManager.instance.makeApiCall(
       callName: 'Create Offer RENT Individual',
       apiUrl: '$baseUrl/offers/properties/$propertyId',
