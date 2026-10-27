@@ -20,7 +20,8 @@ class _DoviaIconPosition {
 
 /// Ícono flotante de Dovia. Un toque abre el soporte; deslizando el dedo
 /// sobre él se arrastra por la pantalla y al soltarlo se pega al
-/// borde más cercano.
+/// borde más cercano. Mientras se arrastra aparece una cruz abajo: soltarlo
+/// ahí lo oculta hasta que la app se vuelva a abrir.
 ///
 /// Cada pantalla lo sigue ubicando en su lugar de siempre (arriba del
 /// navbar): ese lugar queda como posición por defecto y como límite de
@@ -35,6 +36,11 @@ class FixedDoviaIconWidget extends StatefulWidget {
   /// Espacio que se deja arriba para no taparle el header a la pantalla.
   static const double headerSpace = 90.0;
 
+  static const double _closeTargetSize = 60.0;
+
+  /// Distancia (entre centros) a la que la cruz atrapa al ícono.
+  static const double _closeRadius = 70.0;
+
   /// Dónde se dibujó por última vez (coordenadas de pantalla). Lo usa el
   /// tutorial para señalarlo.
   static Rect? lastRect;
@@ -45,6 +51,10 @@ class FixedDoviaIconWidget extends StatefulWidget {
   static final ValueNotifier<_DoviaIconPosition?> _saved =
       ValueNotifier<_DoviaIconPosition?>(null);
   static bool _loaded = false;
+
+  /// El usuario lo soltó sobre la cruz. Vive solo en memoria: al volver a
+  /// abrir la app el ícono está de nuevo.
+  static final ValueNotifier<bool> _dismissed = ValueNotifier<bool>(false);
 
   static Future<void> _load() async {
     if (_loaded) return;
@@ -93,6 +103,7 @@ class _FixedDoviaIconWidgetState extends State<FixedDoviaIconWidget> {
     _model = createModel(context, () => FixedDoviaIconModel());
     FixedDoviaIconWidget._load();
     FixedDoviaIconWidget._saved.addListener(_onSavedChanged);
+    FixedDoviaIconWidget._dismissed.addListener(_onSavedChanged);
     _portal.show();
     WidgetsBinding.instance.addPostFrameCallback((_) => _measureAnchor());
   }
@@ -100,6 +111,7 @@ class _FixedDoviaIconWidgetState extends State<FixedDoviaIconWidget> {
   @override
   void dispose() {
     FixedDoviaIconWidget._saved.removeListener(_onSavedChanged);
+    FixedDoviaIconWidget._dismissed.removeListener(_onSavedChanged);
     _model.maybeDispose();
 
     super.dispose();
@@ -127,6 +139,20 @@ class _FixedDoviaIconWidgetState extends State<FixedDoviaIconWidget> {
     final anchor = _anchor;
     if (anchor != null) return anchor.dy;
     return screen.height - FixedDoviaIconWidget.size - 100.0;
+  }
+
+  /// Centro de la cruz, abajo en el medio de la pantalla.
+  Offset _closeCenter(Size screen) => Offset(
+        screen.width / 2,
+        screen.height - MediaQuery.paddingOf(context).bottom - 80.0,
+      );
+
+  /// Si el ícono, con su esquina en [position], está sobre la cruz.
+  bool _overClose(Offset position, Size screen) {
+    const half = FixedDoviaIconWidget.size / 2;
+    final center = position + const Offset(half, half);
+    return (center - _closeCenter(screen)).distance <=
+        FixedDoviaIconWidget._closeRadius;
   }
 
   double _leftFor(bool right, Size screen) => right
@@ -169,10 +195,39 @@ class _FixedDoviaIconWidgetState extends State<FixedDoviaIconWidget> {
     );
   }
 
+  Widget _buildCloseTarget(Size screen, {required bool armed}) {
+    const size = FixedDoviaIconWidget._closeTargetSize;
+    final center = _closeCenter(screen);
+    return Positioned(
+      left: center.dx - size / 2,
+      top: center.dy - size / 2,
+      child: IgnorePointer(
+        child: AnimatedScale(
+          scale: armed ? 1.25 : 1.0,
+          duration: const Duration(milliseconds: 150),
+          curve: Curves.easeOut,
+          child: Container(
+            width: size,
+            height: size,
+            decoration: BoxDecoration(
+              color: Color(armed ? 0xE6000000 : 0x99000000),
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white, width: 2.0),
+            ),
+            child: const Icon(Icons.close, color: Colors.white, size: 28.0),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildFloating(BuildContext overlayContext) {
     final anchor = _anchor;
     // Hasta medir el lugar de la pantalla no se sabe dónde dibujarlo.
-    if (anchor == null) return const SizedBox.shrink();
+    if (anchor == null || FixedDoviaIconWidget._dismissed.value) {
+      FixedDoviaIconWidget.lastRect = null;
+      return const SizedBox.shrink();
+    }
 
     final screen = MediaQuery.sizeOf(context);
     final saved = FixedDoviaIconWidget._saved.value;
@@ -180,9 +235,16 @@ class _FixedDoviaIconWidgetState extends State<FixedDoviaIconWidget> {
     final minTop = _minTop().clamp(0.0, maxTop);
 
     final dragging = _dragPosition != null;
+    final armed = dragging && _overClose(_dragPosition!, screen);
     final double left;
     final double top;
-    if (dragging) {
+    if (armed) {
+      // Sobre la cruz el ícono se centra en ella, como atrapado.
+      const half = FixedDoviaIconWidget.size / 2;
+      final center = _closeCenter(screen);
+      left = center.dx - half;
+      top = center.dy - half;
+    } else if (dragging) {
       left = _dragPosition!.dx;
       top = _dragPosition!.dy;
     } else if (saved != null) {
@@ -195,8 +257,10 @@ class _FixedDoviaIconWidgetState extends State<FixedDoviaIconWidget> {
 
     FixedDoviaIconWidget.lastRect = Rect.fromLTWH(
         left, top, FixedDoviaIconWidget.size, FixedDoviaIconWidget.size);
-    return AnimatedPositioned(
-      duration: dragging ? Duration.zero : const Duration(milliseconds: 280),
+    final bubble = AnimatedPositioned(
+      duration: dragging && !armed
+          ? Duration.zero
+          : const Duration(milliseconds: 280),
       curve: Curves.easeOutCubic,
       left: left,
       top: top,
@@ -213,10 +277,20 @@ class _FixedDoviaIconWidgetState extends State<FixedDoviaIconWidget> {
           if (overlayBox == null) return;
           final local = overlayBox.globalToLocal(details.globalPosition);
           final next = local - _grabOffset;
-          setState(() => _dragPosition = Offset(
-                next.dx.clamp(0.0, screen.width - FixedDoviaIconWidget.size),
-                next.dy.clamp(minTop, maxTop),
-              ));
+          // Mientras se arrastra puede bajar hasta la cruz; al soltarlo
+          // vuelve a quedar arriba del navbar.
+          final bottom = screen.height -
+              MediaQuery.paddingOf(context).bottom -
+              FixedDoviaIconWidget.size;
+          final position = Offset(
+            next.dx.clamp(0.0, screen.width - FixedDoviaIconWidget.size),
+            next.dy.clamp(minTop, bottom),
+          );
+          final wasArmed = _overClose(_dragPosition!, screen);
+          if (_overClose(position, screen) != wasArmed) {
+            HapticFeedback.mediumImpact();
+          }
+          setState(() => _dragPosition = position);
         },
         onPanEnd: (_) => _drop(screen, minTop, maxTop),
         onPanCancel: () {
@@ -225,11 +299,24 @@ class _FixedDoviaIconWidgetState extends State<FixedDoviaIconWidget> {
         child: _buildBubble(lifted: dragging),
       ),
     );
+    return Positioned.fill(
+      child: Stack(
+        children: [
+          if (dragging) _buildCloseTarget(screen, armed: armed),
+          bubble,
+        ],
+      ),
+    );
   }
 
   void _drop(Size screen, double minTop, double maxTop) {
     final position = _dragPosition;
     if (position == null) return;
+    if (_overClose(position, screen)) {
+      setState(() => _dragPosition = null);
+      FixedDoviaIconWidget._dismissed.value = true;
+      return;
+    }
     final center = position.dx + FixedDoviaIconWidget.size / 2;
     final right = center >= screen.width / 2;
     final top = position.dy.clamp(minTop, maxTop);

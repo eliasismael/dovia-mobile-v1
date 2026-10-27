@@ -1274,7 +1274,8 @@ class _DOVIACLIENTHomePageWidgetState extends State<DOVIACLIENTHomePageWidget> {
       TutorialStep(
         title: 'Soporte siempre a mano',
         text: 'También puedes abrir soporte desde este ícono. Arrástralo '
-            'con el dedo para ubicarlo donde prefieras en la pantalla.',
+            'con el dedo para ubicarlo donde prefieras, o llévalo a la cruz '
+            'para ocultarlo.',
         target: () => FixedDoviaIconWidget.lastRect,
       ),
     ]);
