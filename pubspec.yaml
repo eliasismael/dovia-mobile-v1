@@ -63,6 +63,7 @@ dependencies:
   image_picker_macos: 0.2.1+2
   image_picker_platform_interface: 2.10.1
   image_picker_windows: 0.2.1+1
+  intercom_flutter: 9.6.31
   intl: 0.20.2
   intl_phone_field: ^3.2.0
   json_path: 0.7.2

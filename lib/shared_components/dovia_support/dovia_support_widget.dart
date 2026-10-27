@@ -1,3 +1,4 @@
+import '/core/intercom_support.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/shared_components/centered_panel.dart';
@@ -8,9 +9,13 @@ import 'package:google_fonts/google_fonts.dart';
 import 'dovia_support_model.dart';
 export 'dovia_support_model.dart';
 
-/// Abre el panel de soporte centrado sobre un fondo oscuro.
-Future<void> showDoviaSupport(BuildContext context) =>
-    showCenteredPanel<void>(context, const DoviaSupportWidget());
+/// Abre el chat de soporte de Intercom. Si Intercom no está disponible (falta
+/// la key de la plataforma), muestra el panel de soporte centrado.
+Future<void> showDoviaSupport(BuildContext context) async {
+  if (await openIntercomMessenger()) return;
+  if (!context.mounted) return;
+  await showCenteredPanel<void>(context, const DoviaSupportWidget());
+}
 
 class DoviaSupportWidget extends StatefulWidget {
   const DoviaSupportWidget({super.key});

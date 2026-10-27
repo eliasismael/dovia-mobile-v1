@@ -15,6 +15,7 @@ import 'auth/custom_auth/custom_auth_user_provider.dart';
 import 'auth/custom_auth/session_restore.dart';
 import 'auth/custom_auth/token_refresher.dart';
 import 'backend/api_requests/api_manager.dart';
+import 'core/intercom_support.dart';
 import 'dovia_home_associate/associate_current_job.dart';
 import 'index.dart' show DHCLIENTUbicacionWidget, SignInWidget;
 import 'notifications/notification_navigation.dart';
@@ -53,6 +54,8 @@ void main() async {
   await restoreSession();
   // Firebase para push (Android/iOS); sin configuración queda sin push.
   pushMessaging = await initPushMessaging();
+  // Chat de soporte; sin las keys de la plataforma queda apagado.
+  await initIntercom();
 
   final appState = FFAppState(); // Initialize FFAppState
   await appState.initializePersistedState();

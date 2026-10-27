@@ -7,6 +7,7 @@ import '/auth/google/cognito_google_config.dart';
 import '/auth/google/google_oauth_client.dart';
 import '/auth/registration_progress.dart';
 import '/backend/api_requests/api_auth.dart';
+import '/core/intercom_support.dart';
 import '/flutter_flow/nav/nav.dart';
 import '/index.dart' show SignInWidget;
 import '/notifications/push_notifications_service.dart';
@@ -32,6 +33,7 @@ Future<void> signOutAndGoToLogin(
   // Un paso de registro pendiente (p. ej. la revisión del asociado) es de esta
   // cuenta: no debe aplicarse a quien inicie sesión después.
   await RegistrationProgress.clear();
+  await logoutIntercom();
   final wasGoogle = authManager.isGoogleSession;
   router.prepareAuthEvent();
   await authManager.signOut();
