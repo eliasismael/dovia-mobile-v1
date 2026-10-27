@@ -415,7 +415,7 @@ class _AjustesScreenState extends State<AjustesScreen> {
                       color: Colors.white)),
             ),
           ),
-          const SizedBox(height: 40),
+          // Sin espacio extra: la pantalla ya deja lugar para la navbar.
         ],
       ),
     );

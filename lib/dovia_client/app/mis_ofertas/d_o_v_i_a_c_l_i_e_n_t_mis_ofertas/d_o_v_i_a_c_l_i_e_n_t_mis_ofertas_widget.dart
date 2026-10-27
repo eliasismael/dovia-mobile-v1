@@ -291,24 +291,27 @@ class _DOVIACLIENTMisOfertasWidgetState
             ),
           )
         else
-          SizedBox(
-            height: lane == ClientOfferLane.realizadas ? 300.0 : 260.0,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              padding: EdgeInsets.zero,
-              itemCount: offers.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 12.0),
-              itemBuilder: (context, index) {
-                final offer = offers[index];
-                return MiOfertaCardWidget(
-                  offer: offer,
-                  lane: lane,
-                  hasUnreadUpdate: lane == ClientOfferLane.contraoferta &&
-                      offer.awaitsClientResponse &&
-                      hasUnreadClientOfferUpdate(offer),
-                  onOpen: () => _openOffer(offer),
-                );
-              },
+          // Sin alto fijo: el carril mide lo que la tarjeta más alta, así no
+          // queda un hueco hasta el carril siguiente. Son pocas tarjetas por
+          // carril, por eso alcanza con una fila en vez de un ListView.
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            clipBehavior: Clip.none,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (var i = 0; i < offers.length; i++) ...[
+                  if (i > 0) const SizedBox(width: 12.0),
+                  MiOfertaCardWidget(
+                    offer: offers[i],
+                    lane: lane,
+                    hasUnreadUpdate: lane == ClientOfferLane.contraoferta &&
+                        offers[i].awaitsClientResponse &&
+                        hasUnreadClientOfferUpdate(offers[i]),
+                    onOpen: () => _openOffer(offers[i]),
+                  ),
+                ],
+              ],
             ),
           ),
       ],
