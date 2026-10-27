@@ -50,3 +50,6 @@ app.*.map.json
 
 # APKs generadas por tools/build_apks.ps1
 /dist/
+
+# Keys locales que entran con --dart-define-from-file (ver el .example).
+/config/dart_defines.json

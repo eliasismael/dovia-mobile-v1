@@ -1,3 +1,4 @@
+import '/core/intercom_support.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/shared_components/centered_panel.dart';
@@ -7,16 +8,20 @@ import 'package:google_fonts/google_fonts.dart';
 import 'dovia_suupport_messages_model.dart';
 export 'dovia_suupport_messages_model.dart';
 
-/// Abre el chat con soporte centrado sobre un fondo oscuro.
-Future<void> showDoviaSupportChat(BuildContext context) =>
-    showCenteredPanel<void>(
-      context,
-      // Tocar fuera del campo cierra el teclado.
-      GestureDetector(
-        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-        child: const DoviaSuupportMessagesWidget(),
-      ),
-    );
+/// Abre el chat de soporte de Intercom. Si Intercom no está disponible, abre
+/// el chat centrado sobre un fondo oscuro.
+Future<void> showDoviaSupportChat(BuildContext context) async {
+  if (await openIntercomMessenger()) return;
+  if (!context.mounted) return;
+  await showCenteredPanel<void>(
+    context,
+    // Tocar fuera del campo cierra el teclado.
+    GestureDetector(
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+      child: const DoviaSuupportMessagesWidget(),
+    ),
+  );
+}
 
 class DoviaSuupportMessagesWidget extends StatefulWidget {
   const DoviaSuupportMessagesWidget({super.key});

@@ -11,6 +11,9 @@
 # certificado usa la clave privada CERTIFICATE_PRIVATE_KEY del grupo de
 # variables `ios_signing` (secreta; si se pierde, se genera otra y Apple crea
 # un certificado nuevo).
+#
+# La key de iOS de Intercom (chat de soporte) va como variable secreta
+# INTERCOM_IOS_API_KEY en el grupo `ios_signing`.
 
 workflows:
   ios-testflight:
@@ -54,6 +57,7 @@ workflows:
           LATEST=$(app-store-connect get-latest-testflight-build-number "$APP_STORE_APPLE_ID" || echo 0)
           flutter build ipa --release \
             --dart-define=API_BASE_URL="$API_BASE_URL" \
+            --dart-define=INTERCOM_IOS_API_KEY="$INTERCOM_IOS_API_KEY" \
             --build-number=$((LATEST + 1)) \
             --export-options-plist=/Users/builder/export_options.plist
     artifacts:
