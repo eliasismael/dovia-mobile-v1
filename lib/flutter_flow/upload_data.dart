@@ -179,7 +179,7 @@ Future<List<SelectedFile>?> selectMediaWithSourceBottomSheet({
           ),
         );
       });
-  if (mediaSource == null) {
+  if (mediaSource == null || !context.mounted) {
     return null;
   }
   return selectMedia(
