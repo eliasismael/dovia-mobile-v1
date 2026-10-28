@@ -11,13 +11,14 @@ import 'push_messaging.dart';
 /// de Gradle, que exige que cada flavor tenga su paquete registrado.
 ///
 /// En Android cada flavor es un paquete distinto y tiene su propia app en
-/// Firebase. Registrados: `com.mycompany.dovia` (flavor `dev`, que va sin
-/// sufijo, o build sin flavor) y `com.mycompany.dovia.stg` (`staging`).
-const _androidAppIds = <String?, String>{
-  null: '1:240336837682:android:780f6a517ffbc7112df02b',
-  'dev': '1:240336837682:android:780f6a517ffbc7112df02b',
-  'staging': '1:240336837682:android:83b592ef903911b52df02b',
-};
+/// Firebase: `com.doviaapp.dovia` (flavor `dev`, que va sin sufijo, o build
+/// sin flavor) y `com.doviaapp.dovia.stg` (`staging`), el mismo id que iOS.
+///
+/// PENDIENTE: el backend está registrando esas dos apps; cuando pase los
+/// appId (`1:240336837682:android:…`) van acá. Hasta entonces Android queda
+/// sin push ni Crashlytics (los appId viejos eran de `com.mycompany.dovia`, y
+/// con otro paquete Firebase rechaza el token).
+const _androidAppIds = <String?, String>{};
 
 FirebaseOptions? _firebaseOptions() {
   if (kIsWeb) return null;

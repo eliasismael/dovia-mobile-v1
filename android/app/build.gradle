@@ -53,10 +53,13 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId "com.mycompany.dovia"
+        // El mismo id que el bundle de iOS. El namespace (clase R, MainActivity)
+        // quedó en com.mycompany.dovia: es interno y no tiene por qué coincidir.
+        applicationId "com.doviaapp.dovia"
         // Vuelta del login con Google (Cognito): com.mycompany.dovia://oauth/callback
         // y la salida com.mycompany.dovia://auth/login. Lo usa flutter_appauth.
+        // Es el esquema registrado en Cognito y el que usa iOS: no depende del
+        // applicationId.
         manifestPlaceholders += [appAuthRedirectScheme: "com.mycompany.dovia"]
         minSdkVersion flutter.minSdkVersion
         targetSdkVersion 36
@@ -69,8 +72,8 @@ android {
     // (--dart-define=API_BASE_URL, ver tools/build_apks.ps1).
     flavorDimensions "env"
     productFlavors {
-        // Sin sufijo: en Firebase (dovia-notifications) está registrado
-        // com.mycompany.dovia, así dev recibe push igual que staging.
+        // En Firebase (dovia-notifications) están registrados
+        // com.doviaapp.dovia (dev, sin sufijo) y com.doviaapp.dovia.stg.
         dev {
             dimension "env"
             resValue "string", "app_name", "DOVIA Dev"
