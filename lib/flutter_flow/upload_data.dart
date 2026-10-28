@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mime_type/mime_type.dart';
@@ -54,6 +55,32 @@ enum MediaSource {
   photoGallery,
   videoGallery,
   camera,
+}
+
+/// Abre un selector del sistema (cámara, galería, archivos) sin dejar escapar
+/// sus errores.
+///
+/// Si el permiso está negado (`camera_access_denied`, `photo_access_denied`)
+/// o el dispositivo no tiene cámara, el plugin lanza un [PlatformException]:
+/// sin esto el toque no hacía nada y nadie sabía por qué. Devuelve null, como
+/// cuando se cancela, y con [context] avisa cómo resolverlo.
+Future<T?> pickSafely<T>(
+  Future<T?> Function() pick, {
+  BuildContext? context,
+}) async {
+  try {
+    return await pick();
+  } on PlatformException catch (e) {
+    debugPrint('[Picker] ${e.code}: ${e.message}');
+    if (context != null && context.mounted) {
+      showSnackbar(
+        context,
+        'No se pudo abrir la cámara o la galería. Revisá los permisos de la '
+        'app en Ajustes.',
+      );
+    }
+    return null;
+  }
 }
 
 Future<List<SelectedFile>?> selectMediaWithSourceBottomSheet({
@@ -152,10 +179,11 @@ Future<List<SelectedFile>?> selectMediaWithSourceBottomSheet({
           ),
         );
       });
-  if (mediaSource == null) {
+  if (mediaSource == null || !context.mounted) {
     return null;
   }
   return selectMedia(
+    context: context,
     storageFolderPath: storageFolderPath,
     maxWidth: maxWidth,
     maxHeight: maxHeight,
@@ -172,6 +200,8 @@ Future<List<SelectedFile>?> selectMediaWithSourceBottomSheet({
 }
 
 Future<List<SelectedFile>?> selectMedia({
+  /// Para avisar si no hay permiso (ver [pickSafely]).
+  BuildContext? context,
   String? storageFolderPath,
   double? maxWidth,
   double? maxHeight,
@@ -190,13 +220,15 @@ Future<List<SelectedFile>?> selectMedia({
   imageQuality ??= kPhotoUploadQuality;
 
   if (multiImage) {
-    final pickedMediaFuture = picker.pickMultiImage(
-      maxWidth: maxWidth,
-      maxHeight: maxHeight,
-      imageQuality: imageQuality,
+    final pickedMedia = await pickSafely(
+      () => picker.pickMultiImage(
+        maxWidth: maxWidth,
+        maxHeight: maxHeight,
+        imageQuality: imageQuality,
+      ),
+      context: context,
     );
-    final pickedMedia = await pickedMediaFuture;
-    if (pickedMedia.isEmpty) {
+    if (pickedMedia == null || pickedMedia.isEmpty) {
       return null;
     }
     return Future.wait(pickedMedia.asMap().entries.map((e) async {
@@ -223,15 +255,17 @@ Future<List<SelectedFile>?> selectMedia({
   final source = mediaSource == MediaSource.camera
       ? ImageSource.camera
       : ImageSource.gallery;
-  final pickedMediaFuture = isVideo
-      ? picker.pickVideo(source: source)
-      : picker.pickImage(
-          maxWidth: maxWidth,
-          maxHeight: maxHeight,
-          imageQuality: imageQuality,
-          source: source,
-        );
-  final pickedMedia = await pickedMediaFuture;
+  final pickedMedia = await pickSafely(
+    () => isVideo
+        ? picker.pickVideo(source: source)
+        : picker.pickImage(
+            maxWidth: maxWidth,
+            maxHeight: maxHeight,
+            imageQuality: imageQuality,
+            source: source,
+          ),
+    context: context,
+  );
   final mediaBytes = await pickedMedia?.readAsBytes();
   if (mediaBytes == null) {
     return null;

@@ -13,7 +13,7 @@ import 'package:flutter/foundation.dart'; // For kIsWeb
 import 'package:flutter/material.dart';
 import '/shared_components/dovia_spinner.dart';
 import '/flutter_flow/upload_data.dart'
-    show kPhotoUploadMaxSide, kPhotoUploadQuality;
+    show kPhotoUploadMaxSide, kPhotoUploadQuality, pickSafely;
 // Begin custom widget code
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
 
@@ -1243,23 +1243,29 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
     // las amplía.
     final maxSide = label == 'Recorrido 360' ? 4096.0 : kPhotoUploadMaxSide;
     if (label == 'Foto principal') {
-      final image = await _picker.pickImage(
-        source: ImageSource.gallery,
-        maxWidth: maxSide,
-        maxHeight: maxSide,
-        imageQuality: kPhotoUploadQuality,
+      final image = await pickSafely(
+        () => _picker.pickImage(
+          source: ImageSource.gallery,
+          maxWidth: maxSide,
+          maxHeight: maxSide,
+          imageQuality: kPhotoUploadQuality,
+        ),
+        context: context,
       );
       if (image != null) {
         setState(() => _images[label] = [image]);
       }
       return;
     }
-    final List<XFile> selectedImages = await _picker.pickMultiImage(
-      maxWidth: maxSide,
-      maxHeight: maxSide,
-      imageQuality: kPhotoUploadQuality,
+    final selectedImages = await pickSafely(
+      () => _picker.pickMultiImage(
+        maxWidth: maxSide,
+        maxHeight: maxSide,
+        imageQuality: kPhotoUploadQuality,
+      ),
+      context: context,
     );
-    if (selectedImages.isNotEmpty) {
+    if (selectedImages != null && selectedImages.isNotEmpty) {
       setState(() {
         _images[label] = [...(_images[label] ?? []), ...selectedImages];
       });

@@ -1,5 +1,5 @@
 # Genera las APK de prueba de DOVIA, una por entorno, cada una con su URL de
-# API y su flavor (se instalan juntas: com.mycompany.dovia / .stg; las dos
+# API y su flavor (se instalan juntas: com.doviaapp.dovia / .stg; las dos
 # con push).
 #
 # Uso (desde cualquier carpeta):

@@ -285,7 +285,8 @@ void showSnackbar(
               padding: EdgeInsetsDirectional.only(end: 10.0),
               child: DoviaSpinner(small: true, color: Colors.white),
             ),
-          Text(message),
+          // Sin Flexible un mensaje de más de una línea desbordaba la fila.
+          Flexible(child: Text(message)),
         ],
       ),
       duration: Duration(seconds: duration),

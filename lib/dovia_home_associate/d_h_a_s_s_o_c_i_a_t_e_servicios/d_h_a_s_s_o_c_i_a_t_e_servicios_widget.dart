@@ -249,16 +249,17 @@ class _DHASSOCIATEServiciosWidgetState
 
     safeSetState(() => _model.isPickingCertificate = true);
     try {
-      final selected = switch (source) {
-        _CertificateSource.camera =>
-          await selectMedia(mediaSource: MediaSource.camera),
-        _CertificateSource.gallery =>
-          await selectMedia(mediaSource: MediaSource.photoGallery),
-        _CertificateSource.file => await selectFiles(
-            multiFile: false,
-            allowedExtensions: _kCertificateExtensions,
-          ),
-      };
+      final selected = source == _CertificateSource.file
+          ? await selectFiles(
+              multiFile: false,
+              allowedExtensions: _kCertificateExtensions,
+            )
+          : await selectMedia(
+              context: context,
+              mediaSource: source == _CertificateSource.camera
+                  ? MediaSource.camera
+                  : MediaSource.photoGallery,
+            );
 
       if (selected == null || selected.isEmpty) return;
 

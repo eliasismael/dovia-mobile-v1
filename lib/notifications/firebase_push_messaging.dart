@@ -11,12 +11,13 @@ import 'push_messaging.dart';
 /// de Gradle, que exige que cada flavor tenga su paquete registrado.
 ///
 /// En Android cada flavor es un paquete distinto y tiene su propia app en
-/// Firebase. Registrados: `com.mycompany.dovia` (flavor `dev`, que va sin
-/// sufijo, o build sin flavor) y `com.mycompany.dovia.stg` (`staging`).
+/// Firebase: `com.doviaapp.dovia` (flavor `dev`, que va sin sufijo, o build
+/// sin flavor) y `com.doviaapp.dovia.stg` (`staging`), el mismo id que iOS.
+/// Salen de los `google-services.json` de cada app en la consola.
 const _androidAppIds = <String?, String>{
-  null: '1:240336837682:android:780f6a517ffbc7112df02b',
-  'dev': '1:240336837682:android:780f6a517ffbc7112df02b',
-  'staging': '1:240336837682:android:83b592ef903911b52df02b',
+  null: '1:240336837682:android:c809e91b649878122df02b',
+  'dev': '1:240336837682:android:c809e91b649878122df02b',
+  'staging': '1:240336837682:android:f9ad3c28757c191e2df02b',
 };
 
 FirebaseOptions? _firebaseOptions() {
@@ -48,18 +49,18 @@ FirebaseOptions? _firebaseOptions() {
   }
 }
 
-/// Inicializa Firebase y devuelve el proveedor push real. Si la plataforma no
-/// tiene configuración (web, escritorio) o la inicialización falla, devuelve
-/// [NoopPushMessaging]: la app sigue funcionando sin push.
-Future<PushMessaging> initPushMessaging() async {
+/// Inicializa Firebase (push y Crashlytics) y dice si quedó listo. Si la
+/// plataforma no tiene configuración (web, escritorio) o la inicialización
+/// falla devuelve false: la app sigue funcionando sin push ni reportes.
+Future<bool> initFirebase() async {
   final options = _firebaseOptions();
-  if (options == null) return const NoopPushMessaging();
+  if (options == null) return false;
   try {
-    await Firebase.initializeApp(options: options);
-    return FirebasePushMessaging();
+    if (Firebase.apps.isEmpty) await Firebase.initializeApp(options: options);
+    return true;
   } catch (e) {
-    debugPrint('[Push] No se pudo inicializar Firebase: $e');
-    return const NoopPushMessaging();
+    debugPrint('[Firebase] No se pudo inicializar: $e');
+    return false;
   }
 }
 

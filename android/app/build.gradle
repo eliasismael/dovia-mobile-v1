@@ -2,6 +2,9 @@ plugins {
    id "com.android.application"
    id "kotlin-android"
    id "dev.flutter.flutter-gradle-plugin"
+   // Agrega el build ID que Crashlytics exige al arrancar: sin él la app se
+   // cierra apenas se inicializa Firebase.
+   id "com.google.firebase.crashlytics"
 }
 
 def localProperties = new Properties()
@@ -35,12 +38,12 @@ android {
 
     compileOptions {
         coreLibraryDesugaringEnabled true
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8
+        jvmTarget = JavaVersion.VERSION_17
     }
 
     sourceSets {
@@ -53,10 +56,13 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId "com.mycompany.dovia"
+        // El mismo id que el bundle de iOS. El namespace (clase R, MainActivity)
+        // quedó en com.mycompany.dovia: es interno y no tiene por qué coincidir.
+        applicationId "com.doviaapp.dovia"
         // Vuelta del login con Google (Cognito): com.mycompany.dovia://oauth/callback
         // y la salida com.mycompany.dovia://auth/login. Lo usa flutter_appauth.
+        // Es el esquema registrado en Cognito y el que usa iOS: no depende del
+        // applicationId.
         manifestPlaceholders += [appAuthRedirectScheme: "com.mycompany.dovia"]
         minSdkVersion flutter.minSdkVersion
         targetSdkVersion 36
@@ -69,8 +75,8 @@ android {
     // (--dart-define=API_BASE_URL, ver tools/build_apks.ps1).
     flavorDimensions "env"
     productFlavors {
-        // Sin sufijo: en Firebase (dovia-notifications) está registrado
-        // com.mycompany.dovia, así dev recibe push igual que staging.
+        // En Firebase (dovia-notifications) están registrados
+        // com.doviaapp.dovia (dev, sin sufijo) y com.doviaapp.dovia.stg.
         dev {
             dimension "env"
             resValue "string", "app_name", "DOVIA Dev"
@@ -93,10 +99,16 @@ android {
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig signingConfigs.debug
+            // Con android/key.properties (no se versiona, ver README) firma con
+            // la clave de upload; sin él, con la de debug: sirve para las APK de
+            // prueba, no para Play Store.
+            signingConfig keystorePropertiesFile.exists() ? signingConfigs.release : signingConfigs.debug
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            // No hay minify (nada que desofuscar) ni google-services.json, que
+            // la subida del mapping necesita.
+            firebaseCrashlytics {
+                mappingFileUploadEnabled false
+            }
         }
     }
 }

@@ -12,6 +12,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
 import '/repositories/user_repository.dart';
 import '/flutter_flow/flutter_flow_util.dart';
+import '/flutter_flow/upload_data.dart' show pickSafely;
 import '/backend/api_requests/api_users.dart';
 import '/shared_components/dovia_support/dovia_support_widget.dart';
 import '/core/result.dart';
@@ -953,11 +954,14 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
     final picker = ImagePicker();
     // Las fotos del celular pesan varios MB y el backend las rechaza por
     // tamaño: se achican a un avatar razonable antes de subirlas.
-    final XFile? image = await picker.pickImage(
-      source: ImageSource.gallery,
-      maxWidth: 1024,
-      maxHeight: 1024,
-      imageQuality: 85,
+    final XFile? image = await pickSafely(
+      () => picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 85,
+      ),
+      context: context,
     );
     if (image == null) return;
 
@@ -993,10 +997,13 @@ class _OperativeListingProfileState extends State<OperativeListingProfile> {
 
   Future<void> _pickDocument(_DocType doc) async {
     final repo = context.read<UserRepository>();
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png', 'webp'],
-      withData: true,
+    final result = await pickSafely(
+      () => FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png', 'webp'],
+        withData: true,
+      ),
+      context: context,
     );
     if (result == null || result.files.isEmpty) return;
 

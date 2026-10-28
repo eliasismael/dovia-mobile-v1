@@ -15,6 +15,7 @@ import 'auth/custom_auth/custom_auth_user_provider.dart';
 import 'auth/custom_auth/session_restore.dart';
 import 'auth/custom_auth/token_refresher.dart';
 import 'backend/api_requests/api_manager.dart';
+import 'core/crash_reporting.dart';
 import 'core/intercom_support.dart';
 import 'dovia_home_associate/associate_current_job.dart';
 import 'index.dart' show DHCLIENTUbicacionWidget, SignInWidget;
@@ -39,6 +40,8 @@ Stream<LicenseEntry> _fontLicenses() async* {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Primero: un error durante el arranque también tiene que quedar registrado.
+  installErrorHandlers();
   // Las fuentes vienen dentro de la app (assets/google_fonts): sin esto se
   // bajaban de internet la primera vez, lo que en celulares viejos o con mala
   // señal demoraba el arranque y hacía saltar el texto de fuente.
@@ -52,8 +55,12 @@ void main() async {
   ApiManager.freshTokenIfExpired = freshTokenIfExpired;
   ApiManager.sessionGeneration = () => authManager.sessionGeneration;
   await restoreSession();
-  // Firebase para push (Android/iOS); sin configuración queda sin push.
-  pushMessaging = await initPushMessaging();
+  // Firebase para push y reportes de crashes (Android/iOS); sin
+  // configuración la app sigue sin ninguno de los dos.
+  if (await initFirebase()) {
+    pushMessaging = FirebasePushMessaging();
+    crashReporter = FirebaseCrashReporter();
+  }
   // Chat de soporte; sin las keys de la plataforma queda apagado.
   await initIntercom();
 
@@ -181,6 +188,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           context.read<NotificationsRepository>().clear();
         }
         _notificationsUserId = user.loggedIn ? user.uid : null;
+        // Los crashes quedan a nombre de la cuenta (el uid, sin datos
+        // personales) para poder cruzarlos con lo que reporta soporte.
+        crashReporter.setUser(user.loggedIn ? user.uid : null);
         if (mounted && sessionStarted) {
           _push.syncForCurrentSession();
           context.read<NotificationsRepository>().refreshUnreadCount();
