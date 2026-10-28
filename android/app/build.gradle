@@ -2,6 +2,9 @@ plugins {
    id "com.android.application"
    id "kotlin-android"
    id "dev.flutter.flutter-gradle-plugin"
+   // Agrega el build ID que Crashlytics exige al arrancar: sin él la app se
+   // cierra apenas se inicializa Firebase.
+   id "com.google.firebase.crashlytics"
 }
 
 def localProperties = new Properties()
@@ -101,6 +104,11 @@ android {
             // prueba, no para Play Store.
             signingConfig keystorePropertiesFile.exists() ? signingConfigs.release : signingConfigs.debug
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            // No hay minify (nada que desofuscar) ni google-services.json, que
+            // la subida del mapping necesita.
+            firebaseCrashlytics {
+                mappingFileUploadEnabled false
+            }
         }
     }
 }
