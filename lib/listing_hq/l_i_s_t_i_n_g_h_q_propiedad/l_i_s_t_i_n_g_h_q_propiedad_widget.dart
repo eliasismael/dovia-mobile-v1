@@ -213,8 +213,15 @@ class _LISTINGHQPropiedadWidgetState extends State<LISTINGHQPropiedadWidget> {
                                   );
                                 },
                               );
+                              // Vuelve a la lista de donde vino (Inicio,
+                              // Propiedades o Checklists), que se relee al
+                              // volver; sin pila, al inicio.
                               if (context.mounted) {
-                                context.goNamed('LISTING_HQ_Home');
+                                if (context.canPop()) {
+                                  context.pop();
+                                } else {
+                                  context.goNamed('LISTING_HQ_Home');
+                                }
                               }
                             },
                             onSave: (data) async {
