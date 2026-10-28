@@ -14,7 +14,6 @@ export 'schedule_appointment_widget.dart' show ScheduleAppointmentWidget;
 export 'all_photos_widget.dart' show AllPhotosWidget;
 export 'purchase_offer_widget.dart' show PurchaseOfferWidget;
 export 'property_card_widget.dart' show PropertyCardWidget;
-export 'new_custom_widget.dart' show NewCustomWidget;
 export 'how_it_works_widget.dart' show HowItWorksWidget;
 export 'dovia_client_mis_propiedades_vender.dart'
     show DoviaClientMisPropiedadesVender;
