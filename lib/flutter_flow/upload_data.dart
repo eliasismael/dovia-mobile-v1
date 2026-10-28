@@ -13,6 +13,17 @@ import '/shared_components/dovia_spinner.dart';
 
 const allowedFormats = {'image/png', 'image/jpeg', 'video/mp4', 'image/gif'};
 
+/// Lado más largo, en px, con el que se guarda una foto elegida.
+///
+/// El backend rechaza imágenes de más de 10 MB al firmar la subida, y una foto
+/// de un celular actual a resolución completa supera ese límite. Achicadas a
+/// este tamaño y con [kPhotoUploadQuality] quedan en unos pocos MB sin que se
+/// note en pantalla.
+const double kPhotoUploadMaxSide = 2560;
+
+/// Calidad JPEG (0-100) con la que se recomprime una foto elegida.
+const int kPhotoUploadQuality = 85;
+
 class SelectedFile {
   const SelectedFile({
     this.storagePath = '',
@@ -172,6 +183,11 @@ Future<List<SelectedFile>?> selectMedia({
   bool includeBlurHash = false,
 }) async {
   final picker = ImagePicker();
+  // Ninguna pantalla pasa límites propios: sin estos valores la foto sale a
+  // resolución completa y la subida falla por tamaño.
+  maxWidth ??= kPhotoUploadMaxSide;
+  maxHeight ??= kPhotoUploadMaxSide;
+  imageQuality ??= kPhotoUploadQuality;
 
   if (multiImage) {
     final pickedMediaFuture = picker.pickMultiImage(

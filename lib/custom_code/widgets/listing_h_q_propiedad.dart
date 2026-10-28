@@ -11,6 +11,8 @@ import 'dart:io';
 import 'package:flutter/foundation.dart'; // For kIsWeb
 import 'package:flutter/material.dart';
 import '/shared_components/dovia_spinner.dart';
+import '/flutter_flow/upload_data.dart'
+    show kPhotoUploadMaxSide, kPhotoUploadQuality;
 // Begin custom widget code
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
 
@@ -1269,14 +1271,27 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
   }
 
   Future<void> _pickImagesFor(String label) async {
+    // A resolución completa una foto de celular pasa los 10 MB que acepta el
+    // backend. Las panorámicas del 360 conservan más detalle porque el visor
+    // las amplía.
+    final maxSide = label == 'Recorrido 360' ? 4096.0 : kPhotoUploadMaxSide;
     if (label == 'Foto principal') {
-      final image = await _picker.pickImage(source: ImageSource.gallery);
+      final image = await _picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: maxSide,
+        maxHeight: maxSide,
+        imageQuality: kPhotoUploadQuality,
+      );
       if (image != null) {
         setState(() => _images[label] = [image]);
       }
       return;
     }
-    final List<XFile> selectedImages = await _picker.pickMultiImage();
+    final List<XFile> selectedImages = await _picker.pickMultiImage(
+      maxWidth: maxSide,
+      maxHeight: maxSide,
+      imageQuality: kPhotoUploadQuality,
+    );
     if (selectedImages.isNotEmpty) {
       setState(() {
         _images[label] = [...(_images[label] ?? []), ...selectedImages];

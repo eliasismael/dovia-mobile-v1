@@ -635,7 +635,14 @@ class _AjustesScreenState extends State<AjustesScreen> {
   // ── IMAGE PICKER ──────────────────────────────────────────────────
   Future<void> _pickImage() async {
     final picker = ImagePicker();
-    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+    // Es un avatar: alcanza con 1024 px, como en el perfil del operative
+    // lister, y a tamaño completo la foto podía pasar el límite de subida.
+    final XFile? image = await picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 1024,
+      maxHeight: 1024,
+      imageQuality: 85,
+    );
     if (image != null) {
       final bytes = await image.readAsBytes();
       final ffFile = FFUploadedFile(
