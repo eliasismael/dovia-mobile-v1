@@ -192,6 +192,8 @@ export '/listing_hq/l_i_s_t_i_n_g_h_q_propiedad_asignada/l_i_s_t_i_n_g_h_q_propi
     show LISTINGHQPropiedadAsignadaWidget;
 export '/listing_hq/l_i_s_t_i_n_g_h_q_documentos/l_i_s_t_i_n_g_h_q_documentos_widget.dart'
     show LISTINGHQDocumentosWidget;
+export '/listing_hq/l_i_s_t_i_n_g_h_q_checklists/l_i_s_t_i_n_g_h_q_checklists_widget.dart'
+    show LISTINGHQChecklistsWidget;
 export '/listing_hq/l_i_s_t_i_n_g_h_q_propiedad/l_i_s_t_i_n_g_h_q_propiedad_widget.dart'
     show LISTINGHQPropiedadWidget;
 export '/listing_hq/l_i_s_t_i_n_g_h_q_documentos_2/l_i_s_t_i_n_g_h_q_documentos2_widget.dart'

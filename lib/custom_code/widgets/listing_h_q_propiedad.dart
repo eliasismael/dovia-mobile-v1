@@ -3,6 +3,7 @@
 // Imports custom functions
 import '/core/network_image_size.dart';
 import '/domain/property_media_zones.dart';
+import '/domain/property_types.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:image_picker/image_picker.dart';
@@ -344,8 +345,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
 
     setState(() {
       // ── Tipo de vivienda ──────────────────────────────────────────────────
-      _tipoVivienda =
-          _propertyTypeToLabel(prop['propertyType'] ?? prop['type']);
+      _tipoVivienda = propertyTypeLabel(prop['propertyType'] ?? prop['type']);
 
       // ── Dirección (read-only, from property location) ─────────────────────
       final addr = sub(sub(prop, 'location'), 'address');
@@ -561,8 +561,9 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
     ];
     for (final section in requiredSections) {
       if (_images[section] == null || _images[section]!.isEmpty) {
-        missing.add(
-            section == 'Foto principal' ? 'Foto principal' : 'Foto de $section');
+        missing.add(section == 'Foto principal'
+            ? 'Foto principal'
+            : 'Foto de $section');
       }
     }
     return missing;
@@ -592,33 +593,6 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
   }
 
   String _cap(String s) => s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);
-
-  // Backend propertyType enum <-> Spanish dropdown label.
-  static const Map<String, String> _propertyTypeLabels = {
-    'HOUSE': 'Casa',
-    'APARTMENT': 'Apartamento',
-    'CONDO': 'Condominio',
-    'CONDOMINIUM': 'Condominio',
-    'COMMERCIAL': 'Local',
-    'STORE': 'Local',
-    'LOCAL': 'Local',
-    'WAREHOUSE': 'Bodega',
-    'OTHER': 'Otro',
-  };
-
-  String? _propertyTypeToLabel(dynamic raw) {
-    if (raw == null) return null;
-    final key = raw.toString().toUpperCase();
-    return _propertyTypeLabels[key] ?? raw.toString();
-  }
-
-  String? _labelToPropertyType(String? label) {
-    if (label == null) return null;
-    for (final e in _propertyTypeLabels.entries) {
-      if (e.value == label) return e.key;
-    }
-    return label;
-  }
 
   // Merges a feature group's `additionalProperties` (custom bool flags) into
   // the corresponding checkbox map so nothing the Operative sent is lost.
@@ -675,7 +649,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
       final key = _kNeighborhood[label];
       if (key != null && stars > 0) neighborhood[key] = stars;
     });
-    final propertyType = _labelToPropertyType(_tipoVivienda);
+    final propertyType = propertyTypeFromLabel(_tipoVivienda);
     return {
       if (propertyType != null) 'propertyType': propertyType,
       if (_text(_descripcionController) != null)
@@ -712,7 +686,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
       if (!validateForm()) return;
     }
     final data = {
-      'tipoVivienda': _labelToPropertyType(_tipoVivienda),
+      'tipoVivienda': propertyTypeFromLabel(_tipoVivienda),
       'direccion': _direccion,
       'descripcion': _descripcionController.text,
       'caracteristicas': {
@@ -903,14 +877,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
             'Tipo de vivienda',
             _tipoVivienda,
             (val) => setState(() => _tipoVivienda = val),
-            options: [
-              'Casa',
-              'Apartamento',
-              'Condominio',
-              'Local',
-              'Bodega',
-              'Otro'
-            ],
+            options: kPropertyTypeLabels.values.toList(),
           ),
           const SizedBox(height: _gapField),
           // Dirección (read-only, comes from property)
@@ -1704,8 +1671,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
     ValueChanged<String?> onChanged, {
     List<String>? options,
   }) {
-    final List<String> items = options ??
-        ['Casa', 'Apartamento', 'Condominio', 'Local', 'Bodega', 'Otro'];
+    final List<String> items = options ?? kPropertyTypeLabels.values.toList();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

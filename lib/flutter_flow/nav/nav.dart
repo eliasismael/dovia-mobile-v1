@@ -957,6 +957,12 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           builder: (context, params) => const LISTINGHQDocumentosWidget(),
         ),
         FFRoute(
+          name: LISTINGHQChecklistsWidget.routeName,
+          requireAuth: true,
+          path: LISTINGHQChecklistsWidget.routePath,
+          builder: (context, params) => const LISTINGHQChecklistsWidget(),
+        ),
+        FFRoute(
           name: LISTINGHQPropiedadWidget.routeName,
           requireAuth: true,
           path: LISTINGHQPropiedadWidget.routePath,
