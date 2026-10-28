@@ -60,6 +60,28 @@ workflows:
             --dart-define=INTERCOM_IOS_API_KEY="$INTERCOM_IOS_API_KEY" \
             --build-number=$((LATEST + 1)) \
             --export-options-plist=/Users/builder/export_options.plist
+      - name: Símbolos para Crashlytics
+        script: |
+          # Sin los dSYM los crashes de iOS llegan sin nombres de funciones.
+          # La config de Firebase se pasa desde Dart (no hay
+          # GoogleService-Info.plist en el repo): se arma uno mínimo con los
+          # mismos valores de lib/notifications/firebase_push_messaging.dart.
+          # Si falla no frena la subida a TestFlight.
+          PLIST=/tmp/GoogleService-Info.plist
+          cat > "$PLIST" <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+            <key>API_KEY</key><string>AIzaSyBGsuuNXcPyScRKKGon2J0vQBdswbzyv2U</string>
+            <key>GCM_SENDER_ID</key><string>240336837682</string>
+            <key>PROJECT_ID</key><string>dovia-notifications</string>
+            <key>BUNDLE_ID</key><string>$BUNDLE_ID</string>
+            <key>GOOGLE_APP_ID</key><string>1:240336837682:ios:4b87b12a08a1b5542df02b</string>
+          </dict></plist>
+          EOF
+          find build/ios/archive/Runner.xcarchive/dSYMs -name "*.dSYM" -print0 |
+            xargs -0 -I {} ios/Pods/FirebaseCrashlytics/upload-symbols -gsp "$PLIST" -p ios {} ||
+            echo "No se pudieron subir los dSYM a Crashlytics"
     artifacts:
       - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
