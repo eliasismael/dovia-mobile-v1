@@ -13,6 +13,7 @@ import '/repositories/user_repository.dart';
 import '/repositories/payments_repository.dart';
 import '/domain/payment_models.dart';
 import '/flutter_flow/flutter_flow_util.dart';
+import '/flutter_flow/upload_data.dart' show pickSafely;
 import '/shared_components/draw_map_component/draw_map_component_widget.dart';
 import '/shared_components/dovia_support/dovia_support_widget.dart';
 import '/core/result.dart';
@@ -637,11 +638,14 @@ class _AjustesScreenState extends State<AjustesScreen> {
     final picker = ImagePicker();
     // Es un avatar: alcanza con 1024 px, como en el perfil del operative
     // lister, y a tamaño completo la foto podía pasar el límite de subida.
-    final XFile? image = await picker.pickImage(
-      source: ImageSource.gallery,
-      maxWidth: 1024,
-      maxHeight: 1024,
-      imageQuality: 85,
+    final XFile? image = await pickSafely(
+      () => picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 85,
+      ),
+      context: context,
     );
     if (image != null) {
       final bytes = await image.readAsBytes();

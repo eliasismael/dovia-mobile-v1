@@ -251,9 +251,11 @@ class _DHASSOCIATEServiciosWidgetState
     try {
       final selected = switch (source) {
         _CertificateSource.camera =>
-          await selectMedia(mediaSource: MediaSource.camera),
+          await selectMedia(
+              context: context, mediaSource: MediaSource.camera),
         _CertificateSource.gallery =>
-          await selectMedia(mediaSource: MediaSource.photoGallery),
+          await selectMedia(
+              context: context, mediaSource: MediaSource.photoGallery),
         _CertificateSource.file => await selectFiles(
             multiFile: false,
             allowedExtensions: _kCertificateExtensions,

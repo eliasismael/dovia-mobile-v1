@@ -209,11 +209,14 @@ class _DoviaAssociateFormWidgetState extends State<DoviaAssociateFormWidget> {
   // ── Profile image picker ──────────────────────────────────────────────────────
   Future<void> _pickProfileImage() async {
     final picker = ImagePicker();
-    final picked = await picker.pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 85,
-      maxWidth: 512,
-      maxHeight: 512,
+    final picked = await pickSafely(
+      () => picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 85,
+        maxWidth: 512,
+        maxHeight: 512,
+      ),
+      context: context,
     );
     if (picked != null) {
       final bytes = await picked.readAsBytes();
