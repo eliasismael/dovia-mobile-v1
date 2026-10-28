@@ -9,10 +9,15 @@ rootProject.buildDir = '../build'
 
 subprojects {
     afterEvaluate { project ->
-        if (project.hasProperty("kotlin")) {
-            project.tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+        // Kotlin compila para el mismo target de Java que declara cada módulo.
+        // Antes se forzaba 1.8 en todos, y los plugins que piden Java 17
+        // (device_info_plus) fallaban por la diferencia.
+        // configureEach: el target de Java se lee recién al configurar la
+        // tarea, cuando ya está definido.
+        if (project.hasProperty("kotlin") && project.hasProperty("android")) {
+            project.tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
                 kotlinOptions {
-                    jvmTarget = "1.8"
+                    jvmTarget = project.android.compileOptions.targetCompatibility.toString()
                 }
             }
         }
