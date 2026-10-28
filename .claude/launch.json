@@ -3,8 +3,8 @@
   "configurations": [
     {
       "name": "Flutter Web",
-      "runtimeExecutable": "C:/flutter/bin/flutter",
-      "runtimeArgs": ["run", "-d", "chrome", "--web-port", "8080"],
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "C:\\flutter\\bin\\flutter.bat", "run", "-d", "chrome", "--web-port", "8080"],
       "port": 8080
     },
     {
