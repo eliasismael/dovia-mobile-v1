@@ -56,12 +56,12 @@ dependencies:
   html: 0.15.6
   http: 1.4.0
   image_picker: 1.1.2
-  image_picker_android: 0.8.12+23
+  image_picker_android: 0.8.13+25
   image_picker_for_web: 3.0.6
   image_picker_ios: 0.8.12+2
   image_picker_linux: 0.2.1+2
   image_picker_macos: 0.2.1+2
-  image_picker_platform_interface: 2.10.1
+  image_picker_platform_interface: 2.11.2
   image_picker_windows: 0.2.1+1
   intercom_flutter: 9.6.31
   intl: 0.20.2

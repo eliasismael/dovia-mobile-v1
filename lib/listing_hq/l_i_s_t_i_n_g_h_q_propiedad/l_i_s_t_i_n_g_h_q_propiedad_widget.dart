@@ -271,6 +271,13 @@ class _LISTINGHQPropiedadWidgetState extends State<LISTINGHQPropiedadWidget> {
                                     final List<String> mimeTypes = [];
                                     for (final file in localFiles) {
                                       final int sizeBytes = await file.length();
+                                      // El backend no firma imágenes de más
+                                      // de 10 MB: se avisa antes en vez de
+                                      // mostrar su respuesta cruda.
+                                      if (sizeBytes > 10 * 1024 * 1024) {
+                                        throw Exception(
+                                            'La foto "${file.name}" de "$sectionName" pesa más de 10 MB. Quitala y volvé a elegirla.');
+                                      }
                                       String mimeType = mime(file.path) ??
                                           mime(file.name) ??
                                           'image/jpeg';
