@@ -79,8 +79,18 @@ workflows:
             <key>GOOGLE_APP_ID</key><string>1:240336837682:ios:4b87b12a08a1b5542df02b</string>
           </dict></plist>
           EOF
+          # Con Swift Package Manager (Flutter lo activa solo) Crashlytics no
+          # está en Pods sino en los paquetes descargados por Xcode.
+          UPLOAD=$(find ios/Pods/FirebaseCrashlytics build/ios \
+            "$HOME/Library/Developer/Xcode/DerivedData" \
+            -type f -name upload-symbols -path "*Crashlytics*" 2>/dev/null | head -n 1)
+          if [ -z "$UPLOAD" ]; then
+            echo "No se encontró upload-symbols de Crashlytics"
+            exit 0
+          fi
+          echo "Usando $UPLOAD"
           find build/ios/archive/Runner.xcarchive/dSYMs -name "*.dSYM" -print0 |
-            xargs -0 -I {} ios/Pods/FirebaseCrashlytics/upload-symbols -gsp "$PLIST" -p ios {} ||
+            xargs -0 -I {} "$UPLOAD" -gsp "$PLIST" -p ios {} ||
             echo "No se pudieron subir los dSYM a Crashlytics"
     artifacts:
       - build/ios/ipa/*.ipa
