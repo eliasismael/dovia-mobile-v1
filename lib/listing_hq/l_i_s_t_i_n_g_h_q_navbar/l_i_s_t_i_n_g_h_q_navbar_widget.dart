@@ -48,6 +48,11 @@ class _LISTINGHQNavbarWidgetState extends State<LISTINGHQNavbarWidget> {
       LISTINGHQPropiedadRechazadaWidget.routeName,
       LISTINGHQPropiedadArchivosPendientesWidget.routeName,
     ]),
+    _Tab(
+        'Checklists',
+        'assets/images/clipboard-check.svg',
+        LISTINGHQChecklistsWidget.routeName,
+        [LISTINGHQChecklistsWidget.routeName]),
     _Tab('Documentos', 'assets/images/page.svg',
         LISTINGHQDocumentosWidget.routeName, [
       LISTINGHQDocumentosWidget.routeName,

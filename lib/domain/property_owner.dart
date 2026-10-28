@@ -5,8 +5,8 @@ import '/backend/api_requests/api_calls.dart';
 import '/flutter_flow/flutter_flow_util.dart' show getJsonField;
 
 /// IDs de las propiedades publicadas por el usuario logueado, según
-/// `GET /properties/my-properties`. El listado general no trae el dueño, así
-/// que es la forma confiable de reconocerlas.
+/// `GET /properties/my-properties`. Respaldo de la flag `isOwner` de los
+/// listados, que llega en `false` cuando el backend no recibe la sesión.
 Set<String> _ownPropertyIds = {};
 String _ownIdsToken = '';
 
@@ -68,6 +68,8 @@ Future<void> loadOwnPropertyIds() async {
 /// sus propias casas en el Home, la búsqueda y "Ver más".
 bool isOwnProperty(dynamic house) {
   if (house is! Map) return false;
+  // El backend marca `isOwner` cuando el usuario logueado creó la propiedad.
+  if (house['isOwner'] == true) return true;
   final token = currentAuthenticationToken ?? '';
   final id = house['id']?.toString();
   if (token.isNotEmpty &&
