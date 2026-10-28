@@ -13,12 +13,12 @@ import 'push_messaging.dart';
 /// En Android cada flavor es un paquete distinto y tiene su propia app en
 /// Firebase: `com.doviaapp.dovia` (flavor `dev`, que va sin sufijo, o build
 /// sin flavor) y `com.doviaapp.dovia.stg` (`staging`), el mismo id que iOS.
-///
-/// PENDIENTE: el backend está registrando esas dos apps; cuando pase los
-/// appId (`1:240336837682:android:…`) van acá. Hasta entonces Android queda
-/// sin push ni Crashlytics (los appId viejos eran de `com.mycompany.dovia`, y
-/// con otro paquete Firebase rechaza el token).
-const _androidAppIds = <String?, String>{};
+/// Salen de los `google-services.json` de cada app en la consola.
+const _androidAppIds = <String?, String>{
+  null: '1:240336837682:android:c809e91b649878122df02b',
+  'dev': '1:240336837682:android:c809e91b649878122df02b',
+  'staging': '1:240336837682:android:f9ad3c28757c191e2df02b',
+};
 
 FirebaseOptions? _firebaseOptions() {
   if (kIsWeb) return null;
