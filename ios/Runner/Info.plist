@@ -53,11 +53,15 @@
 	<true/>
 
 	<key>NSCameraUsageDescription</key>
-    <string>In order to take a picture or video, this app requires permission to access the camera.</string>
+    <string>Dovia usa la cámara para que saques fotos de propiedades, documentos y trabajos realizados.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-    <string>In order to upload data, this app requires permission to access the photo library.</string>
+    <string>Dovia usa tus fotos para que subas imágenes de propiedades, documentos y trabajos realizados.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
     <string>Dovia usa tu ubicación para confirmar que llegaste al domicilio del cliente y notificarlo.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+    <string>Dovia usa tu ubicación para confirmar que llegaste al domicilio del cliente y notificarlo.</string>
+	<key>NSMicrophoneUsageDescription</key>
+    <string>Dovia usa el micrófono solo si grabás un video con sonido para adjuntarlo.</string>
 
 
 
