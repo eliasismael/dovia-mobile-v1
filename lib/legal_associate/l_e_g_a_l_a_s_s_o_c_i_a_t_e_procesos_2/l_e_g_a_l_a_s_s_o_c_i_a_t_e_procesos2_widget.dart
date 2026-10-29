@@ -603,6 +603,9 @@ class _LEGALASSOCIATEProcesos2WidgetState
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         body: SafeArea(
           top: true,
+          // Sin SafeArea abajo: el contenido pasa por debajo de la barra
+          // flotante hasta el borde de la pantalla.
+          bottom: false,
           child: Stack(
             children: [
               wrapWithModel(
@@ -613,7 +616,10 @@ class _LEGALASSOCIATEProcesos2WidgetState
               RefreshIndicator(
                 onRefresh: _load,
                 child: ListView(
-                  padding: const EdgeInsets.only(bottom: 120),
+                  // Más el indicador de inicio (iPhone): la pantalla no tiene
+                  // SafeArea abajo.
+                  padding: EdgeInsets.only(
+                      bottom: 120 + MediaQuery.viewPaddingOf(context).bottom),
                   children: [
                     wrapWithModel(
                       model: _model.legalAssociateHeaderModel,

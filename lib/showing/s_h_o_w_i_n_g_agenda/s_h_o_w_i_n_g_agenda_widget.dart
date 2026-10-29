@@ -429,6 +429,9 @@ class _SHOWINGAgendaWidgetState extends State<SHOWINGAgendaWidget> {
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         body: SafeArea(
           top: true,
+          // Sin SafeArea abajo: el contenido pasa por debajo de la barra
+          // flotante hasta el borde de la pantalla.
+          bottom: false,
           child: Stack(
             children: [
               wrapWithModel(
@@ -448,6 +451,10 @@ class _SHOWINGAgendaWidgetState extends State<SHOWINGAgendaWidget> {
                   ),
                   Expanded(
                     child: SingleChildScrollView(
+                      // Lo que ocupa el indicador de inicio (iPhone), que ya no
+                      // descuenta el SafeArea: el final queda sobre la barra.
+                      padding: EdgeInsets.only(
+                          bottom: MediaQuery.viewPaddingOf(context).bottom),
                       child: Padding(
                         padding: const EdgeInsetsDirectional.fromSTEB(
                             20.0, 0.0, 20.0, 120.0),
@@ -680,11 +687,12 @@ class _SHOWINGAgendaWidgetState extends State<SHOWINGAgendaWidget> {
                       children: [
                         Text(
                           'Estatus',
-                          style:
-                              FlutterFlowTheme.of(context).bodyMedium.override(
-                                    font: GoogleFonts.publicSans(fontSize: 12.0),
-                                    color: primary,
-                                  ),
+                          style: FlutterFlowTheme.of(context)
+                              .bodyMedium
+                              .override(
+                                font: GoogleFonts.publicSans(fontSize: 12.0),
+                                color: primary,
+                              ),
                         ),
                         _buildStatusPill(visit.status, visit.substatus),
                       ],

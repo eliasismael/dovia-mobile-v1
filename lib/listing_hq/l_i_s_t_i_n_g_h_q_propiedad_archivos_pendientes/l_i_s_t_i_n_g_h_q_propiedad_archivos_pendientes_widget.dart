@@ -545,7 +545,8 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
     final res = await DOVIAAPIPropertyContextGroup.getPropertyBackofficeCall
         .call(propertyId: propertyId, authToken: token);
     if (!res.succeeded) {
-      debugPrint('[ListerHQ docs] backoffice ${res.statusCode}: ${res.bodyText}');
+      debugPrint(
+          '[ListerHQ docs] backoffice ${res.statusCode}: ${res.bodyText}');
       return;
     }
     final full = getJsonField(res.jsonBody, r'$.data.ownership');
@@ -571,6 +572,9 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         body: SafeArea(
           top: true,
+          // Sin SafeArea abajo: el contenido pasa por debajo de la barra
+          // flotante hasta el borde de la pantalla.
+          bottom: false,
           child: Stack(
             children: [
               wrapWithModel(
@@ -579,6 +583,10 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
                 child: const CornerGradientBackgroundWidget(),
               ),
               SingleChildScrollView(
+                // Lo que ocupa el indicador de inicio (iPhone), que ya no
+                // descuenta el SafeArea: el final queda sobre la barra.
+                padding: EdgeInsets.only(
+                    bottom: MediaQuery.viewPaddingOf(context).bottom),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   children: [

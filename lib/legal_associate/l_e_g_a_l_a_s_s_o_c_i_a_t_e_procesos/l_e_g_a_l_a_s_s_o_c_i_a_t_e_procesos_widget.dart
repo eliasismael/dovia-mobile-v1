@@ -176,6 +176,9 @@ class _LEGALASSOCIATEProcesosWidgetState
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         body: SafeArea(
           top: true,
+          // Sin SafeArea abajo: el contenido pasa por debajo de la barra
+          // flotante hasta el borde de la pantalla.
+          bottom: false,
           child: Stack(
             children: [
               wrapWithModel(
@@ -197,7 +200,10 @@ class _LEGALASSOCIATEProcesosWidgetState
                   ),
                   SliverToBoxAdapter(child: _buildFilters(context)),
                   SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 120),
+                    // Más el indicador de inicio (iPhone): la pantalla no
+                    // tiene SafeArea abajo.
+                    padding: EdgeInsets.fromLTRB(20, 20, 20,
+                        120 + MediaQuery.viewPaddingOf(context).bottom),
                     sliver: SliverLayoutBuilder(builder: (context, c) {
                       // Tablet: dos columnas como en el diseño.
                       final cols = c.crossAxisExtent >= 700 ? 2 : 1;
@@ -266,9 +272,8 @@ class _LEGALASSOCIATEProcesosWidgetState
                   color: f.key == _filter.key
                       ? ListingHqUi.textDark
                       : const Color(0xFF8A8A8A),
-                  fontWeight: f.key == _filter.key
-                      ? FontWeight.w600
-                      : FontWeight.w400,
+                  fontWeight:
+                      f.key == _filter.key ? FontWeight.w600 : FontWeight.w400,
                 ),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20)),

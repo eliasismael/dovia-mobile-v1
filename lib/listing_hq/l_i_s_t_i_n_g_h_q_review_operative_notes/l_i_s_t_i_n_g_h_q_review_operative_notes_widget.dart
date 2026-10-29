@@ -79,6 +79,9 @@ class _LISTINGHQReviewOperativeNotesWidgetState
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         body: SafeArea(
           top: true,
+          // Sin SafeArea abajo: el contenido pasa por debajo de la barra
+          // flotante hasta el borde de la pantalla.
+          bottom: false,
           child: Stack(
             children: [
               wrapWithModel(
@@ -187,6 +190,10 @@ class _LISTINGHQReviewOperativeNotesWidgetState
                             },
                           ),
                         ),
+                        // Sin scroll: el contenido termina donde antes cortaba el
+                        // SafeArea, sobre el indicador de inicio (iPhone).
+                        SizedBox(
+                            height: MediaQuery.viewPaddingOf(context).bottom),
                         const SizedBox(height: 80), // Space for navbar
                       ],
                     );

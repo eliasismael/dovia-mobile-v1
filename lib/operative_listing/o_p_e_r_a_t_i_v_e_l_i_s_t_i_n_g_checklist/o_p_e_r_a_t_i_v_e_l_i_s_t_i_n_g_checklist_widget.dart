@@ -324,6 +324,9 @@ class _OPERATIVELISTINGChecklistWidgetState
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         body: SafeArea(
           top: true,
+          // Sin SafeArea abajo: el contenido pasa por debajo de la barra
+          // flotante hasta el borde de la pantalla.
+          bottom: false,
           child: Stack(
             children: [
               wrapWithModel(
@@ -388,8 +391,13 @@ class _OPERATIVELISTINGChecklistWidgetState
 
                   Expanded(
                     child: SingleChildScrollView(
-                      padding: const EdgeInsets.only(
-                          left: 20, right: 20, bottom: 100),
+                      // Abajo suma el indicador de inicio (iPhone): la
+                      // pantalla no tiene SafeArea abajo.
+                      padding: EdgeInsets.only(
+                          left: 20,
+                          right: 20,
+                          bottom:
+                              100 + MediaQuery.viewPaddingOf(context).bottom),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [

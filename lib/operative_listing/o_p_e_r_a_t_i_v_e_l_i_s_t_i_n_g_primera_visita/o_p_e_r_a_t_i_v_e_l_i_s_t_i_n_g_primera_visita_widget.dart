@@ -375,6 +375,9 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         body: SafeArea(
           top: true,
+          // Sin SafeArea abajo: el contenido pasa por debajo de la barra
+          // flotante hasta el borde de la pantalla.
+          bottom: false,
           child: Stack(
             children: [
               wrapWithModel(
@@ -383,6 +386,10 @@ class _OPERATIVELISTINGPrimeraVisitaWidgetState
                 child: const CornerGradientBackgroundWidget(),
               ),
               SingleChildScrollView(
+                // Lo que ocupa el indicador de inicio (iPhone), que ya no
+                // descuenta el SafeArea: el final queda sobre la barra.
+                padding: EdgeInsets.only(
+                    bottom: MediaQuery.viewPaddingOf(context).bottom),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   children: [

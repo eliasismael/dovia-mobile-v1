@@ -105,8 +105,7 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
     // la navbar muestra "En curso" sin esperar su propio pedido.
     final generation = authManager.sessionGeneration;
     _myJobsFuture.then((response) {
-      if (!response.succeeded ||
-          authManager.sessionGeneration != generation) {
+      if (!response.succeeded || authManager.sessionGeneration != generation) {
         return;
       }
       Map<String, dynamic>? current;
@@ -622,6 +621,9 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         body: SafeArea(
           top: true,
+          // Sin SafeArea abajo: el contenido pasa por debajo de la barra
+          // flotante hasta el borde de la pantalla.
+          bottom: false,
           child: Stack(
             children: [
               wrapWithModel(
@@ -642,6 +644,10 @@ class _DHASSOCIATEHomePageWidgetState extends State<DHASSOCIATEHomePageWidget> {
                   _approved = categories;
 
                   return SingleChildScrollView(
+                    // Lo que ocupa el indicador de inicio (iPhone), que ya no
+                    // descuenta el SafeArea: el final queda sobre la barra.
+                    padding: EdgeInsets.only(
+                        bottom: MediaQuery.viewPaddingOf(context).bottom),
                     child: Column(
                       mainAxisSize: MainAxisSize.max,
                       crossAxisAlignment: CrossAxisAlignment.start,

@@ -86,16 +86,17 @@ class _LISTINGHQVisorPdfWidgetState extends State<LISTINGHQVisorPdfWidget> {
       );
     } else {
       // Sin el checklist se aprueba al menos el abierto.
-      debugPrint('[HQ Aprobar] details ${details.statusCode}: ${details.bodyText}');
+      debugPrint(
+          '[HQ Aprobar] details ${details.statusCode}: ${details.bodyText}');
     }
 
-    final results = await Future.wait(ids.map((id) =>
-        DOVIAAPIVisitContextGroup.reviewListerHqDocumentCall.call(
-          visitId: visitId,
-          documentId: id,
-          authToken: token,
-          status: 'approved',
-        )));
+    final results = await Future.wait(ids
+        .map((id) => DOVIAAPIVisitContextGroup.reviewListerHqDocumentCall.call(
+              visitId: visitId,
+              documentId: id,
+              authToken: token,
+              status: 'approved',
+            )));
     for (final res in results.where((r) => !r.succeeded)) {
       debugPrint('[HQ Aprobar] ${res.statusCode}: ${res.bodyText}');
     }
@@ -170,6 +171,9 @@ class _LISTINGHQVisorPdfWidgetState extends State<LISTINGHQVisorPdfWidget> {
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         body: SafeArea(
           top: true,
+          // Sin SafeArea abajo: el contenido pasa por debajo de la barra
+          // flotante hasta el borde de la pantalla.
+          bottom: false,
           child: Stack(
             children: [
               wrapWithModel(
@@ -178,6 +182,10 @@ class _LISTINGHQVisorPdfWidgetState extends State<LISTINGHQVisorPdfWidget> {
                 child: const CornerGradientBackgroundWidget(),
               ),
               SingleChildScrollView(
+                // Lo que ocupa el indicador de inicio (iPhone), que ya no
+                // descuenta el SafeArea: el final queda sobre la barra.
+                padding: EdgeInsets.only(
+                    bottom: MediaQuery.viewPaddingOf(context).bottom),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   children: [

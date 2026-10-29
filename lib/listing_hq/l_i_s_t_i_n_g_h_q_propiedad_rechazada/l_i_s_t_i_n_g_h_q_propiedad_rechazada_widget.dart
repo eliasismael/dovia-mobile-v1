@@ -406,6 +406,9 @@ class _LISTINGHQPropiedadRechazadaWidgetState
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         body: SafeArea(
           top: true,
+          // Sin SafeArea abajo: el contenido pasa por debajo de la barra
+          // flotante hasta el borde de la pantalla.
+          bottom: false,
           child: Stack(
             children: [
               wrapWithModel(
@@ -425,8 +428,14 @@ class _LISTINGHQPropiedadRechazadaWidgetState
                     child: _isLoading
                         ? const Center(child: DoviaSpinner())
                         : SingleChildScrollView(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 20.0, vertical: 10.0),
+                            // Abajo suma el indicador de inicio (iPhone): la
+                            // pantalla no tiene SafeArea abajo.
+                            padding: EdgeInsets.fromLTRB(
+                                20.0,
+                                10.0,
+                                20.0,
+                                10.0 +
+                                    MediaQuery.viewPaddingOf(context).bottom),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
