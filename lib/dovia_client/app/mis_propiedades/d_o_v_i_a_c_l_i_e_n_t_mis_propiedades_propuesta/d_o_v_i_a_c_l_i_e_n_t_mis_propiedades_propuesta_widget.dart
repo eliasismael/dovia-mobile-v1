@@ -433,6 +433,9 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         body: SafeArea(
           top: true,
+          // Sin SafeArea abajo, como en el inicio: el contenido pasa
+          // por debajo de la barra flotante hasta el borde de la pantalla.
+          bottom: false,
           child: Stack(
             children: [
               wrapWithModel(
@@ -556,7 +559,10 @@ class _DOVIACLIENTMisPropiedadesPropuestaWidgetState
     final canAct = _canAct();
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 120),
+      // Más lo que ocupa el indicador de inicio (iPhone): la pantalla
+      // no tiene SafeArea abajo.
+      padding: EdgeInsets.fromLTRB(
+          20, 16, 20, 120 + MediaQuery.viewPaddingOf(context).bottom),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

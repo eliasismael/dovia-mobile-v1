@@ -884,7 +884,8 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
       );
 
   /// Texto informativo de arriba y de abajo: solo texto, sin fondo.
-  Widget _banner(Widget child) => SizedBox(width: double.infinity, child: child);
+  Widget _banner(Widget child) =>
+      SizedBox(width: double.infinity, child: child);
 
   /// Valor que no se edita, con el mismo aspecto que un campo.
   Widget _readOnlyBox(String text, {Widget? trailing}) => Container(
@@ -1410,6 +1411,9 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         body: SafeArea(
           top: true,
+          // Sin SafeArea abajo, como en el inicio: el contenido pasa
+          // por debajo de la barra flotante hasta el borde de la pantalla.
+          bottom: false,
           child: Stack(
             children: [
               wrapWithModel(
@@ -1418,6 +1422,10 @@ class _DOVIACLIENTMisPropiedadesVenderRentarWidgetState
                 child: const CornerGradientBackgroundWidget(),
               ),
               SingleChildScrollView(
+                // Lo que ocupa el indicador de inicio (iPhone), que ya no
+                // descuenta el SafeArea: el final queda sobre la barra.
+                padding: EdgeInsets.only(
+                    bottom: MediaQuery.viewPaddingOf(context).bottom),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   children: [

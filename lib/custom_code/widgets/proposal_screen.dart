@@ -279,8 +279,11 @@ class _ProposalScreenState extends State<ProposalScreen> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      // Abajo deja lugar para la navbar flotante, que tapa el último botón.
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 140),
+      // Abajo deja lugar para la navbar flotante, que tapa el último botón,
+      // y para el indicador de inicio (iPhone): la pantalla no tiene
+      // SafeArea abajo.
+      padding: EdgeInsets.fromLTRB(
+          20, 0, 20, 140 + MediaQuery.viewPaddingOf(context).bottom),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

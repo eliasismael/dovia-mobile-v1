@@ -103,6 +103,9 @@ class _DOVIACLIENTMisVisitasTuPropuestaWidgetState
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         body: SafeArea(
           top: true,
+          // Sin SafeArea abajo, como en el inicio: el contenido pasa
+          // por debajo de la barra flotante hasta el borde de la pantalla.
+          bottom: false,
           child: Stack(
             children: [
               wrapWithModel(

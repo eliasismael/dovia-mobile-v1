@@ -791,6 +791,9 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         body: SafeArea(
           top: true,
+          // Sin SafeArea abajo, como en el inicio: el contenido pasa
+          // por debajo de la barra flotante hasta el borde de la pantalla.
+          bottom: false,
           child: Stack(
             children: [
               wrapWithModel(
@@ -801,6 +804,10 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
               Align(
                 alignment: const AlignmentDirectional(0.0, -1.0),
                 child: SingleChildScrollView(
+                  // Lo que ocupa el indicador de inicio (iPhone), que ya no
+                  // descuenta el SafeArea: el final queda sobre la barra.
+                  padding: EdgeInsets.only(
+                      bottom: MediaQuery.viewPaddingOf(context).bottom),
                   child: Column(
                     mainAxisSize: MainAxisSize.max,
                     children: [
