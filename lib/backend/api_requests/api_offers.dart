@@ -341,11 +341,20 @@ class SelectLegalAssociateCall {
   }
 }
 
+/// POST /offers/{offerId}/bank-agent-data
+/// Roles: CLIENT comprador, con la oferta de hipoteca ya aceptada. Con esto el
+/// backend crea el expediente SALE_MORTGAGE que ve Legal HQ: sin este envío la
+/// operación no llega a su bandeja.
+///
+/// `bankName` y `bankAddress` son obligatorios. Los datos del ejecutivo son
+/// opcionales y no pueden viajar vacíos (el modelo exige `minLength: 1` y no
+/// acepta campos extra), así que solo se mandan los que tienen valor.
 class SubmitBankAgentDataCall {
   Future<ApiCallResponse> call({
     String? offerId = '',
     String? authToken = '',
-    String? bank = '',
+    String? bankName = '',
+    String? bankAddress = '',
     String? firstName = '',
     String? lastName = '',
     String? phone = '',
@@ -353,14 +362,20 @@ class SubmitBankAgentDataCall {
   }) async {
     final baseUrl = DOVIAAPIOfferContextGroup.getBaseUrl();
 
-    final ffApiRequestBody = '''
-{
-  "bank": "${escapeStringForJson(bank)}",
-  "firstName": "${escapeStringForJson(firstName)}",
-  "lastName": "${escapeStringForJson(lastName)}",
-  "phone": "${escapeStringForJson(phone)}",
-  "email": "${escapeStringForJson(email)}"
-}''';
+    final body = <String, String>{
+      'bankName': bankName?.trim() ?? '',
+      'bankAddress': bankAddress?.trim() ?? '',
+    };
+    for (final entry in {
+      'firstName': firstName,
+      'lastName': lastName,
+      'phone': phone,
+      'email': email,
+    }.entries) {
+      final value = entry.value?.trim() ?? '';
+      if (value.isNotEmpty) body[entry.key] = value;
+    }
+    final ffApiRequestBody = jsonEncode(body);
     return ApiManager.instance.makeApiCall(
       callName: 'Submit Bank Agent Data',
       apiUrl: '$baseUrl/offers/$offerId/bank-agent-data',

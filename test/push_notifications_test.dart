@@ -445,6 +445,26 @@ void main() {
       );
     });
 
+    test('proceso legal: el comprador va a Mis ofertas, el dueño a sus '
+        'propuestas', () {
+      expect(
+        notificationDetailFor(
+          role: 'CLIENT',
+          type: 'LEGAL_PROCESS_PAYMENT_PROOF_REMINDER_CLIENT_12H',
+          actionPath: '/legal-processes/lp1',
+        )?.routeName,
+        DOVIACLIENTMisOfertasWidget.routeName,
+      );
+      expect(
+        notificationDetailFor(
+          role: 'CLIENT',
+          type: 'LEGAL_PROCESS_FINISHED_OWNER',
+          actionPath: '/legal-processes/lp1',
+        )?.routeName,
+        DOVIACLIENTPropuestasRecientesWidget.routeName,
+      );
+    });
+
     test('visita sin propertyId: no hay detalle seguro', () {
       expect(
         notificationDetailFor(

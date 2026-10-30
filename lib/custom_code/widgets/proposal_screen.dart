@@ -21,6 +21,7 @@ import '/domain/counter_offer_view.dart';
 import '/domain/offer_json.dart';
 import '/dovia_client/app/mis_ofertas/cierre_legal/cierre_legal_section_widget.dart';
 import '/dovia_client/app/mis_ofertas/contraoferta/negociacion_contraoferta_widget.dart';
+import '/dovia_client/app/mis_ofertas/mortgage_bank_data_card.dart';
 import '/shared_components/dovia_spinner.dart';
 
 enum NegotiationState { negotiation, structuring, signing, completed }
@@ -55,6 +56,11 @@ class ProposalScreen extends StatefulWidget {
 
 class _ProposalScreenState extends State<ProposalScreen> {
   bool _isUploadingPaymentProof = false;
+
+  /// El comprobante ya se subió en esta pantalla. La oferta no dice si el
+  /// proceso tiene comprobante, así que al volver a entrar se puede subir de
+  /// nuevo (el backend reemplaza el anterior).
+  bool _paymentProofUploaded = false;
 
   String? _selectedLegalAssociateId;
   bool _isSelectingAssociate = false;
@@ -748,9 +754,23 @@ class _ProposalScreenState extends State<ProposalScreen> {
   Widget _buildSigningContent(
       {required bool isCompleted, required bool isContractSigned}) {
     if (paymentMethod == PaymentMethod.hipoteca) {
+      final offer = widget.offerData;
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Sin los datos del banco el backend no crea el expediente y la
+          // operación nunca llega a Legal HQ.
+          if (offer is Map && offerNeedsBankData(offer)) ...[
+            MortgageBankDataCard(
+              offerId: (offer['offerId'] ?? offer['id'])?.toString() ?? '',
+              initialBankName: (offer['activeOfferData'] is Map
+                          ? offer['activeOfferData']['bankName']
+                          : null)
+                      ?.toString() ??
+                  '',
+            ),
+            const SizedBox(height: 24),
+          ],
           const Text(
             "Así avanzará tu proceso legal",
             style: TextStyle(
@@ -853,6 +873,18 @@ class _ProposalScreenState extends State<ProposalScreen> {
             ),
           ),
           const SizedBox(height: 24),
+          // Con el crédito aprobado, el comprador sube el comprobante de
+          // honorarios: sin él Legal HQ no puede cerrar la operación.
+          if (_legalProcessApproved) ...[
+            _buildPaymentProofUpload(
+              isUploading: _isUploadingPaymentProof,
+              done: _paymentProofUploaded,
+              onTap: _isUploadingPaymentProof || _paymentProofUploaded
+                  ? null
+                  : _uploadPaymentProof,
+            ),
+            const SizedBox(height: 24),
+          ],
           _buildDocumentItem(
             "Documento a firmar",
             isCompleted: isCompleted,
@@ -912,7 +944,10 @@ class _ProposalScreenState extends State<ProposalScreen> {
         if (!isCompleted && isContractSigned && _legalProcessApproved) ...[
           _buildPaymentProofUpload(
             isUploading: _isUploadingPaymentProof,
-            onTap: _isUploadingPaymentProof ? null : _uploadPaymentProof,
+            done: _paymentProofUploaded,
+            onTap: _isUploadingPaymentProof || _paymentProofUploaded
+                ? null
+                : _uploadPaymentProof,
           ),
           const SizedBox(height: 18),
           _buildPaymentNotification(),
@@ -1205,7 +1240,9 @@ class _ProposalScreenState extends State<ProposalScreen> {
   }
 
   Widget _buildPaymentProofUpload(
-      {required bool isUploading, required VoidCallback? onTap}) {
+      {required bool isUploading,
+      required VoidCallback? onTap,
+      bool done = false}) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(5),
@@ -1244,8 +1281,8 @@ class _ProposalScreenState extends State<ProposalScreen> {
               ),
               child: isUploading
                   ? const DoviaSpinner(small: true)
-                  : const Icon(Icons.upload_outlined,
-                      color: Color(0xFF007376), size: 18),
+                  : Icon(done ? Icons.check : Icons.upload_outlined,
+                      color: const Color(0xFF007376), size: 18),
             ),
           ],
         ),
@@ -1550,7 +1587,10 @@ class _ProposalScreenState extends State<ProposalScreen> {
   }
 
   Future<void> _uploadPaymentProof() async {
-    final processId = widget.offerData?['legalProcessId']?.toString();
+    final data = widget.offerData;
+    final processId = data is Map
+        ? (data['legalProcessId'] ?? data['legalProcess']?['id'])?.toString()
+        : null;
     if (processId == null || processId.isEmpty || processId == 'null') {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -1577,7 +1617,10 @@ class _ProposalScreenState extends State<ProposalScreen> {
     );
 
     if (mounted) {
-      setState(() => _isUploadingPaymentProof = false);
+      setState(() {
+        _isUploadingPaymentProof = false;
+        if (res.succeeded) _paymentProofUploaded = true;
+      });
       if (res.succeeded) {
         showDialog(
           context: context,

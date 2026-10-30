@@ -120,6 +120,17 @@ NotificationDestination? notificationDetailFor({
               DOVIACLIENTPropuestasRecientesWidget.routeName);
         }
         return null;
+      case 'legal-processes':
+        // El proceso legal se sigue desde la oferta: ahí el comprador sube
+        // el comprobante de pago y el propietario ve el avance.
+        if (audience == 'CLIENT') {
+          return NotificationDestination(DOVIACLIENTMisOfertasWidget.routeName);
+        }
+        if (audience == 'OWNER') {
+          return NotificationDestination(
+              DOVIACLIENTPropuestasRecientesWidget.routeName);
+        }
+        return null;
       case 'dovia-home':
         return NotificationDestination(DHCLIENTHomepageWidget.routeName);
     }

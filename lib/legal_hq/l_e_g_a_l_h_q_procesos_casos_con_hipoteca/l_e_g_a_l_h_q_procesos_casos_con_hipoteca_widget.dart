@@ -459,8 +459,8 @@ class _LEGALHQProcesosCasosConHipotecaWidgetState
                 // La regla de negocio es invisible si no se explica: sin este
                 // aviso el botón deshabilitado no tiene explicación.
                 ? 'Abrí el comprobante de pago para poder finalizar el proceso.'
-                : 'El propietario todavía no subió el comprobante de pago de '
-                    'los honorarios.',
+                : 'El comprador todavía no subió el comprobante de pago de '
+                    'los honorarios desde Mis ofertas.',
             style: GoogleFonts.publicSans(
               color: _textDark,
               fontSize: 12.0,
@@ -482,8 +482,7 @@ class _LEGALHQProcesosCasosConHipotecaWidgetState
     return [
       const SizedBox(height: 16.0),
       _buildAlert(
-        'Verifica que el Propietario del inmueble haya pagado los honorarios '
-        'de Dovia',
+        'Verifica que el comprador haya pagado los honorarios de Dovia',
         fontSize: 12.0,
       ),
       const SizedBox(height: 16.0),
