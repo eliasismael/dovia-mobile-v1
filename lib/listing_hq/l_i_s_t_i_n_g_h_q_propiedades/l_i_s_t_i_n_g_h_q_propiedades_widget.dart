@@ -1,4 +1,5 @@
 import '/auth/custom_auth/auth_util.dart';
+import '/domain/property_types.dart';
 import '/backend/api_requests/api_visits.dart';
 import '/backend/api_requests/api_legal_process.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -231,6 +232,8 @@ class _LISTINGHQPropiedadesWidgetState extends State<LISTINGHQPropiedadesWidget>
           if (name.isEmpty) {
             name = prop['name']?.toString() ?? prop['title']?.toString() ?? '';
           }
+          // Tipo y zona, como en la miniatura, en vez del nombre libre.
+          name = propertyShortTitle(prop, fallback: name);
           final locAddr = _deepMap(prop, ['location', 'address']);
           address = locAddr?['fullAddress']?.toString() ??
               locAddr?['street']?.toString() ??
@@ -279,7 +282,9 @@ class _LISTINGHQPropiedadesWidgetState extends State<LISTINGHQPropiedadesWidget>
         final prop = p['property'] ??
             (p['visit'] is Map ? p['visit']['property'] : null);
         if (prop is Map) {
-          name = prop['name']?.toString() ?? prop['title']?.toString() ?? '';
+          name = propertyShortTitle(prop,
+              fallback:
+                  prop['name']?.toString() ?? prop['title']?.toString() ?? '');
           final locAddr = _deepMap(prop, ['location', 'address']);
           address = locAddr?['fullAddress']?.toString() ??
               locAddr?['street']?.toString() ??

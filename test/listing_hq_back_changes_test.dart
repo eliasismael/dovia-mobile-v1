@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:dovia/domain/listing_hq_documents.dart';
 import 'package:dovia/domain/property_media_zones.dart';
 import 'package:dovia/domain/property_ownership_view.dart';
+import 'package:dovia/domain/property_types.dart';
 import 'package:dovia/operative_listing/operative_next_visit.dart';
 
 void main() {
@@ -79,18 +80,28 @@ void main() {
       }, accountName: 'Juan');
       expect(v.typeLabel, 'A mi nombre');
       expect(v.ownerName, 'Juan Pérez');
-      expect(v.documents, isEmpty);
+      expect(v.documents.map((d) => d.name), ['DPI del propietario']);
     });
 
     test('nuevo a nombre de otra persona', () {
       final v = ownershipView({
         'type': {'value': 'THIRD_PARTY', 'label': 'A nombre de otra persona'},
         'relationshipToOwner': {'value': 'PARENT', 'label': 'Padre o madre'},
-        'owner': {'fullName': 'Rosa Pérez', 'identificationDocumentUrl': 'https://s3/dpi.pdf'},
+        'owner': {
+          'fullName': 'Rosa Pérez',
+          'identification': {
+            'type': {'value': 'PASSPORT', 'label': 'Pasaporte'},
+          },
+          'identificationDocumentUrl': 'https://s3/dpi.pdf',
+        },
+        'submitter': {'identificationDocumentUrl': 'https://s3/mio.pdf'},
       });
       expect(v.ownerName, 'Rosa Pérez');
       expect(v.relationship, 'Padre o madre');
-      expect(v.documents.single.url, 'https://s3/dpi.pdf');
+      expect(v.documents.map((d) => (d.name, d.url)), [
+        ('Pasaporte del propietario', 'https://s3/dpi.pdf'),
+        ('DPI de quien registra', 'https://s3/mio.pdf'),
+      ]);
     });
 
     test('nuevo de sociedad', () {
@@ -114,6 +125,121 @@ void main() {
       expect(v.ownerName, 'Juan');
       expect(v.typeLabel, 'A nombre de una sociedad');
     });
+  });
+
+  group('ownershipSections', () {
+    Map<String, dynamic> person(String name) => {
+          'fullName': name,
+          'sex': {'value': 'FEMALE', 'label': 'Femenino'},
+          'age': 40,
+          'nationality': 'Guatemalteca',
+          'maritalStatus': {'value': 'MARRIED', 'label': 'Casado(a)'},
+          'identification': {
+            'type': {'value': 'DPI', 'label': 'DPI'},
+            'number': '1234 56789 0101',
+          },
+          'occupation': 'Abogada',
+          'nit': '1234567-8',
+        };
+
+    String row(OwnershipSection s, String label) =>
+        s.rows.firstWhere((r) => r.$1 == label).$2;
+
+    test('a mi nombre: los datos del titular con el nombre de la cuenta', () {
+      final sections = ownershipSections({
+        'type': {'value': 'SELF', 'label': 'A mi nombre'},
+        'owner': {...person(''), 'fullName': ''},
+      }, accountName: 'Juan Pérez');
+      expect(sections.map((s) => s.title), ['Datos del titular']);
+      expect(row(sections.single, 'Nombre'), 'Juan Pérez');
+      expect(row(sections.single, 'Estado civil'), 'Casado(a)');
+      expect(row(sections.single, 'Número de documento'), '1234 56789 0101');
+    });
+
+    test('a nombre de otra persona: propietario y quien registra', () {
+      final sections = ownershipSections({
+        'type': {'value': 'THIRD_PARTY', 'label': 'A nombre de otra persona'},
+        'relationshipToOwner': {'value': 'CHILD', 'label': 'Hijo(a)'},
+        'owner': {...person('Rosa Pérez'), 'phone': '+502 5555 1234'},
+        'submitter': person(''),
+      }, accountName: 'Juan Pérez');
+      expect(sections.map((s) => s.title),
+          ['Datos del propietario', 'Datos de quien registra']);
+      expect(row(sections[0], 'Teléfono'), '+502 5555 1234');
+      expect(row(sections[0], 'Sexo'), 'Femenino');
+      expect(row(sections[1], 'Relación con el propietario'), 'Hijo(a)');
+      expect(row(sections[1], 'Nombre'), 'Juan Pérez');
+    });
+
+    test('sociedad: sociedad, registro, representante, acta y nombramiento',
+        () {
+      final sections = ownershipSections({
+        'type': {'value': 'COMPANY', 'label': 'A nombre de una sociedad'},
+        'company': {
+          'name': 'Casas SA',
+          'nit': '999',
+          'commercialRegistry': {
+            'number': '10',
+            'folio': '20',
+            'book': '30',
+            'isElectronicBook': true,
+          },
+        },
+        'legalRepresentative': person('Luis Gómez'),
+        'legalRepresentativeAppointment': {
+          'notarialAct': {
+            'city': 'Guatemala',
+            'date': '2026-01-15',
+            'notaryName': 'Ana Ruiz',
+          },
+          'commercialRegistry': {
+            'number': '1',
+            'folio': '2',
+            'book': '3',
+            'registrationDate': '2026-02-01',
+          },
+          'termYears': 5,
+        },
+      });
+      expect(sections.map((s) => s.title), [
+        'Datos de la sociedad',
+        'Inscripción en el Registro Mercantil',
+        'Representante legal',
+        'Acta notarial',
+        'Inscripción del nombramiento',
+      ]);
+      expect(row(sections[1], 'Libro electrónico'), 'Sí');
+      expect(row(sections[3], 'Nombre del notario'), 'Ana Ruiz');
+      expect(row(sections[4], 'Plazo en años'), '5');
+    });
+
+    test('formato viejo: sin secciones', () {
+      expect(ownershipSections({'isCompanyOwned': false}), isEmpty);
+    });
+  });
+
+  test('título corto: tipo y zona', () {
+    expect(
+      propertyShortTitle({
+        'propertyType': 'APARTMENT',
+        'location': {
+          'address': {
+            'fullAddress': '4 Avenida 9-1, Zona 15, Ciudad de Guatemala',
+          },
+        },
+      }),
+      'Apartamento en Zona 15',
+    );
+    expect(
+      propertyShortTitle({
+        'propertyType': 'HOUSE',
+        'location': {
+          'address': {'zone': '10'},
+        },
+      }),
+      'Casa en Zona 10',
+    );
+    expect(propertyShortTitle({'name': 'Algo'}, fallback: 'Algo'), 'Algo');
   });
 
   group('zonas de fotos', () {

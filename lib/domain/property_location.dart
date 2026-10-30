@@ -29,3 +29,21 @@ String? propertyLocationLabel(dynamic property) {
   if (zone.toLowerCase().contains(tail.toLowerCase())) return zone;
   return '$zone, $tail';
 }
+
+/// Zona de la propiedad ("Zona 15"): `location.address.zone` o, si no viene,
+/// el tramo de la dirección que la nombra. `null` si no hay ninguna.
+String? propertyZone(dynamic property) {
+  if (property is! Map) return null;
+  final location = property['location'];
+  final address = location is Map ? location['address'] : null;
+  final explicit = address is Map ? address['zone']?.toString().trim() : null;
+  if (explicit != null && explicit.isNotEmpty && explicit != 'null') {
+    return RegExp(r'^\d+$').hasMatch(explicit) ? 'Zona $explicit' : explicit;
+  }
+  final full = address is Map
+      ? address['fullAddress']?.toString()
+      : address?.toString();
+  final match =
+      RegExp(r'zona\s*(\d+)', caseSensitive: false).firstMatch(full ?? '');
+  return match == null ? null : 'Zona ${match.group(1)}';
+}

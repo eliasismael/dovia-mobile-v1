@@ -5,7 +5,12 @@ import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_header/l_i_s_t_i_n_g_h_q_header_widget.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_navbar/l_i_s_t_i_n_g_h_q_navbar_widget.dart';
-import '/listing_hq/l_i_s_t_i_n_g_h_q_visor_pdf/l_i_s_t_i_n_g_h_q_visor_pdf_widget.dart';
+import '/backend/api_requests/api_properties.dart';
+import '/domain/listing_hq_documents.dart';
+import '/domain/property_ownership_view.dart';
+import '/domain/property_types.dart';
+import '/listing_hq/listing_hq_property_details.dart';
+import '/listing_hq/listing_hq_ui.dart';
 import '/shared_components/corner_gradient_background/corner_gradient_background_widget.dart';
 import '/shared_components/primary_button/primary_button_widget.dart';
 import 'package:flutter/material.dart';
@@ -59,14 +64,21 @@ class _LISTINGHQPropiedadAsignadaWidgetState
   String _ownerName = 'Nombre Apellido';
   String? _ownerAvatar;
   String _ownerPhone = '';
-  String _propertyType = '—';
-  String _address = '—';
-  String _description = '';
   String? _proposedDateText;
+
+  /// Lo que cargó el propietario al publicar, para la ficha de la propiedad.
+  Map? _property;
+  Map? _ownerProfile;
+
+  /// `ownership` completo del backoffice (el del detalle solo trae el tipo).
+  dynamic _ownership;
+
   // URLs de los documentos que se abren desde "Documentos".
-  String? _agreementUrl;
-  bool _agreementSigned = false;
+  String? _signedContractUrl;
+  String? _unsignedContractUrl;
   String? _certificationUrl;
+  String? _ownerIdUrl;
+  String? _accountIdUrl;
 
   /// Slots propuestos por el propietario (`{ 'date', 'time' }`), para el selector.
   final List<Map<String, String>> _proposedSlots = [];
@@ -140,6 +152,7 @@ class _LISTINGHQPropiedadAsignadaWidgetState
 
     final owner = data['ownerProfile'];
     if (owner is Map) {
+      _ownerProfile = owner;
       _ownerName = owner['fullName']?.toString() ?? _ownerName;
       _ownerAvatar = owner['avatar']?.toString();
       final phone = owner['phone'];
@@ -152,14 +165,14 @@ class _LISTINGHQPropiedadAsignadaWidgetState
 
     final property = data['property'];
     if (property is Map) {
-      _propertyType = property['propertyType']?.toString() ??
-          property['name']?.toString() ??
-          _propertyTypeFromListing(property['listingType']);
-      _address =
-          _deepString(property, ['location', 'address', 'fullAddress']) ??
-              _address;
-      _description =
-          _deepString(property, ['description', 'raw']) ?? _description;
+      _property = property;
+      _ownership = property['ownership'];
+      _ownerIdUrl =
+          _deepString(property, ['legalInfo', 'ownerIdDocument']);
+      if (isClassifiedOwnership(_ownership)) {
+        await _loadFullOwnership(property, data, token);
+        if (!mounted) return;
+      }
     }
 
     // Slots propuestos por el propietario (2 obligatorios + 1 opcional).
@@ -221,18 +234,19 @@ class _LISTINGHQPropiedadAsignadaWidgetState
     }
 
     if (visit is Map) {
-      _agreementSigned = _nonEmpty(visit['signedContractUrl']) != null;
+      _signedContractUrl = _nonEmpty(visit['signedContractUrl']);
       // Sin firmar: el backend lo genera aparte y puede tardar en llegar.
-      _agreementUrl = _nonEmpty(visit['signedContractUrl']) ??
-          _nonEmpty(visit['unsignedContractUrl']);
-      final checklist = visit['documentChecklist'];
-      if (checklist is List) {
-        for (final doc in checklist) {
-          if (doc is Map &&
-              (doc['type']?.toString().toUpperCase() ?? '')
-                  .contains('CERTIFICATION')) {
-            _certificationUrl = _nonEmpty(doc['url']);
-          }
+      _unsignedContractUrl = _nonEmpty(visit['unsignedContractUrl']);
+      for (final doc in listerHqVisitDocs(data)) {
+        if (doc is! Map) continue;
+        final type = doc['type']?.toString().toUpperCase() ?? '';
+        final url = _nonEmpty(doc['url'] ?? doc['fileUrl']);
+        if (type.contains('CERTIFICATION')) {
+          _certificationUrl = url;
+        } else if (type == 'USER_ID') {
+          _accountIdUrl = url;
+        } else if (type == 'OWNER_ID') {
+          _ownerIdUrl ??= url;
         }
       }
       // Las visitas nuevas ya no traen la certificación en el checklist: está
@@ -255,6 +269,21 @@ class _LISTINGHQPropiedadAsignadaWidgetState
 
     if (!mounted) return;
     safeSetState(() => _loading = false);
+  }
+
+  /// El detalle de la visita solo trae el tipo del dueño del formato nuevo:
+  /// los datos y documentos vienen en el backoffice de la propiedad.
+  Future<void> _loadFullOwnership(Map property, Map data, String token) async {
+    final visit = data['visit'];
+    final propertyId = _nonEmpty(property['id']) ??
+        _nonEmpty(visit is Map ? visit['propertyId'] : null) ??
+        _nonEmpty(data['propertyId']);
+    if (propertyId == null) return;
+    final res = await DOVIAAPIPropertyContextGroup.getPropertyBackofficeCall
+        .call(propertyId: propertyId, authToken: token);
+    if (!res.succeeded) return;
+    final full = getJsonField(res.jsonBody, r'$.data.ownership');
+    if (full is Map) _ownership = full;
   }
 
   Future<void> _loadRescheduleHistory(String visitId, String token) async {
@@ -287,55 +316,6 @@ class _LISTINGHQPropiedadAsignadaWidgetState
   String? _nonEmpty(dynamic v) {
     final s = v?.toString() ?? '';
     return s.isEmpty ? null : s;
-  }
-
-  void _openDocument(String name, String? url) {
-    if (url == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$name todavía no está disponible.')),
-      );
-      return;
-    }
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => LISTINGHQVisorPdfWidget(
-          documentName: name,
-          documentUrl: url,
-          isPdf: url.toLowerCase().contains('.pdf'),
-        ),
-      ),
-    );
-  }
-
-  Widget _documentLink(IconData icon, String name, String? url) {
-    final color = url != null
-        ? FlutterFlowTheme.of(context).primary
-        : FlutterFlowTheme.of(context).secondaryText;
-    return InkWell(
-      onTap: () => _openDocument(name, url),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6.0),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, color: color, size: 16),
-            const SizedBox(width: 4),
-            Text(name,
-                style: _subTextStyle().copyWith(
-                    color: color,
-                    decoration: url != null ? TextDecoration.underline : null)),
-          ],
-        ),
-      ),
-    );
-  }
-
-  String _propertyTypeFromListing(dynamic listingType) {
-    if (listingType is List && listingType.isNotEmpty) {
-      return listingType.map((e) => e.toString()).join(', ');
-    }
-    return '—';
   }
 
   String? _deepString(Map map, List<String> path) {
@@ -565,17 +545,22 @@ class _LISTINGHQPropiedadAsignadaWidgetState
             }),
           ),
           const SizedBox(height: 20.0),
-          Text('Tipo de vivienda', style: _sectionTitleStyle()),
-          const SizedBox(height: 4.0),
-          Text(_propertyType, style: _subTextStyle()),
-          const SizedBox(height: 12.0),
-          Text('Dirección', style: _sectionTitleStyle()),
-          const SizedBox(height: 4.0),
-          Text(_address, style: _subTextStyle()),
-          if (_description.isNotEmpty) ...[
-            const SizedBox(height: 12.0),
-            Text(_description, style: _subTextStyle()),
-          ],
+          // Tipo y zona, como en la miniatura: el nombre que escribe el
+          // propietario puede ser una descripción larga.
+          Text(
+            propertyShortTitle(_property),
+            style: GoogleFonts.publicSans(
+              color: ListingHqUi.textDark,
+              fontSize: 18.0,
+              fontWeight: FontWeight.w600,
+              height: 1.3,
+            ),
+          ),
+          ListingHqPropertyDetails(
+            property: _property,
+            ownerProfile: _ownerProfile,
+            ownership: _ownership,
+          ),
           const SizedBox(height: 20.0),
           Text('Fecha Ingresada por el propietario para la visita',
               style: _sectionTitleStyle()),
@@ -595,23 +580,46 @@ class _LISTINGHQPropiedadAsignadaWidgetState
               ),
             ),
           ],
+          const SizedBox(height: 24.0),
+          Text('Documentos', style: ListingHqUi.sectionTitle(context)),
           const SizedBox(height: 12.0),
-          Text('Documentos', style: _sectionTitleStyle()),
-          const SizedBox(height: 4.0),
-          Wrap(
-            spacing: 16,
-            children: [
-              _documentLink(
-                  Icons.description,
-                  _agreementUrl == null
-                      ? 'Contrato en preparación'
-                      : _agreementSigned
-                          ? 'Acuerdo firmado'
-                          : 'Contrato sin firmar',
-                  _agreementUrl),
-              _documentLink(
-                  Icons.verified_user, 'Certificación', _certificationUrl),
-            ],
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16.0),
+            decoration: ListingHqUi.cardDecoration(context),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // El contrato firmado es el único obligatorio: sin él la
+                // propiedad no puede avanzar.
+                ListingHqDocTile(
+                  name: 'Contrato firmado',
+                  url: _signedContractUrl ?? '',
+                  missingText: 'Falta documento todavía',
+                  required: true,
+                ),
+                if (_signedContractUrl == null && _unsignedContractUrl != null)
+                  ListingHqDocTile(
+                    name: 'Contrato sin firmar',
+                    url: _unsignedContractUrl!,
+                  ),
+                ListingHqDocTile(
+                  name: 'DPI propietario inmueble',
+                  url: _ownerIdUrl ?? '',
+                ),
+                ListingHqDocTile(
+                  name: 'DPI propietario cuenta',
+                  url: _accountIdUrl ?? '',
+                ),
+                ListingHqDocTile(
+                  name: 'Certificación de la propiedad',
+                  url: _certificationUrl ?? '',
+                ),
+                // Pasaporte, DPI del representante, acta de nombramiento...
+                for (final doc in ownershipView(_ownership).documents)
+                  ListingHqDocTile(name: doc.name, url: doc.url),
+              ],
+            ),
           ),
           Padding(
             padding: const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),

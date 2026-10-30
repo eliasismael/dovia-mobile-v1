@@ -5,7 +5,9 @@ import '/backend/api_requests/api_properties.dart';
 import '/domain/listing_hq_documents.dart';
 import '/domain/property_ownership_view.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
+import '/listing_hq/listing_hq_property_details.dart';
 import '/listing_hq/listing_hq_ui.dart';
+import '/domain/property_types.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_navbar/l_i_s_t_i_n_g_h_q_navbar_widget.dart';
@@ -222,12 +224,6 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
 
   String _str(dynamic v) => v == null ? '' : v.toString().trim();
 
-  String _money(dynamic v) {
-    final n = v is num ? v : num.tryParse(_str(v));
-    if (n == null) return '';
-    return 'Q ${NumberFormat('#,##0', 'en_US').format(n)}';
-  }
-
   Widget _buildSectionTitle(String text) => Padding(
         padding: const EdgeInsets.only(top: 24.0, bottom: 12.0),
         child: Align(
@@ -250,156 +246,6 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
         ),
       );
 
-  Widget _infoRow(String label, String value) {
-    if (value.isEmpty) return const SizedBox.shrink();
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 120.0,
-            child: Text(
-              label,
-              style: FlutterFlowTheme.of(context).bodyMedium.override(
-                    font: GoogleFonts.publicSans(),
-                    color: FlutterFlowTheme.of(context).secondaryText,
-                    fontSize: 13.0,
-                    letterSpacing: 0.0,
-                  ),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: FlutterFlowTheme.of(context).bodyMedium.override(
-                    font: GoogleFonts.publicSans(fontWeight: FontWeight.w500),
-                    fontSize: 13.0,
-                    letterSpacing: 0.0,
-                  ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Finca, folio y libro destacados: con ellos el Lister HQ saca la
-  /// certificación del registro.
-  Widget _registryBox(Map? legal) {
-    Widget cell(String label, String value) => Expanded(
-          child: Column(
-            children: [
-              Text(
-                label,
-                style: FlutterFlowTheme.of(context).bodyMedium.override(
-                      font: GoogleFonts.publicSans(),
-                      color: FlutterFlowTheme.of(context).secondaryText,
-                      fontSize: 12.0,
-                      letterSpacing: 0.0,
-                    ),
-              ),
-              const SizedBox(height: 4.0),
-              SelectableText(
-                value.isEmpty ? '—' : value,
-                style: FlutterFlowTheme.of(context).bodyMedium.override(
-                      font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
-                      fontSize: 16.0,
-                      letterSpacing: 0.0,
-                    ),
-              ),
-            ],
-          ),
-        );
-    // Sin fondo de color: una línea fina lo separa de los datos de arriba.
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(top: 8.0),
-      padding: const EdgeInsets.only(top: 14.0),
-      decoration: const BoxDecoration(
-        border: Border(top: BorderSide(color: Color(0xFFE9EFF2))),
-      ),
-      child: Column(
-        children: [
-          Text(
-            'Datos registrales',
-            style: FlutterFlowTheme.of(context).bodyMedium.override(
-                  font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
-                  color: ListingHqUi.textDark,
-                  fontSize: 13.0,
-                  letterSpacing: 0.0,
-                ),
-          ),
-          const SizedBox(height: 8.0),
-          Row(
-            children: [
-              cell('Finca', _str(legal?['finca'])),
-              cell('Folio', _str(legal?['folio'])),
-              cell('Libro', _str(legal?['libro'])),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Documento que el propietario subió al publicar. Se abre solo para ver:
-  /// no es parte del checklist, así que no se aprueba ni se rechaza.
-  Widget _ownerDocTile(String name, String url) {
-    final has = url.isNotEmpty;
-    return InkWell(
-      onTap: !has
-          ? null
-          : () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => LISTINGHQVisorPdfWidget(
-                    documentName: name,
-                    documentUrl: url,
-                    isPdf: url.toLowerCase().contains('.pdf'),
-                  ),
-                ),
-              ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
-        child: Row(
-          children: [
-            Icon(
-              has ? Icons.description_outlined : Icons.remove_circle_outline,
-              color: has
-                  ? FlutterFlowTheme.of(context).primary
-                  : FlutterFlowTheme.of(context).secondaryText,
-              size: 22.0,
-            ),
-            const SizedBox(width: 10.0),
-            Expanded(
-              child: Text(
-                name,
-                style: FlutterFlowTheme.of(context).bodyMedium.override(
-                      font: GoogleFonts.publicSans(),
-                      fontSize: 14.0,
-                      letterSpacing: 0.0,
-                    ),
-              ),
-            ),
-            Text(
-              has ? 'Ver' : 'No lo subió',
-              style: FlutterFlowTheme.of(context).bodyMedium.override(
-                    font: GoogleFonts.publicSans(
-                        fontWeight: has ? FontWeight.w600 : FontWeight.w400),
-                    color: has
-                        ? FlutterFlowTheme.of(context).primary
-                        : FlutterFlowTheme.of(context).secondaryText,
-                    fontSize: 13.0,
-                    letterSpacing: 0.0,
-                  ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   /// Orden de la pantalla: documentos del propietario, checklist y, al final,
   /// los datos de la propiedad como referencia.
   List<Widget> _buildOwnerDocs() {
@@ -408,75 +254,26 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
     return [
       _buildSectionTitle('Documentos que subió el propietario'),
       _card([
-        _ownerDocTile(
-            'DPI propietario inmueble', _str(legal?['ownerIdDocument'])),
-        _ownerDocTile('Certificación de la propiedad',
-            _str(legal?['propertyCertification'])),
+        ListingHqDocTile(
+            name: 'DPI propietario inmueble',
+            url: _str(legal?['ownerIdDocument'])),
+        ListingHqDocTile(
+            name: 'Certificación de la propiedad',
+            url: _str(legal?['propertyCertification'])),
         // Registro de inmueble nuevo: DPI del dueño o del representante.
         for (final doc in ownershipView(_ownership).documents)
-          _ownerDocTile(doc.name, doc.url),
+          ListingHqDocTile(name: doc.name, url: doc.url),
       ]),
     ];
   }
 
-  List<Widget> _buildPropertyData() {
-    final p = _property;
-    final legal = p?['legalInfo'] is Map ? p!['legalInfo'] as Map : null;
-    final ownership =
-        ownershipView(_ownership, accountName: _str(_owner?['fullName']));
-    final sale = p?['saleInfo'] is Map ? p!['saleInfo'] as Map : null;
-    final rent = p?['rentInfo'] is Map ? p!['rentInfo'] as Map : null;
-    final location = p?['location'] is Map ? p!['location'] as Map : null;
-    final address =
-        location?['address'] is Map ? location!['address'] as Map : null;
-    final description =
-        p?['description'] is Map ? p!['description'] as Map : null;
-    final listingType = _str(p?['listingType']).toUpperCase();
-    final phone = _owner?['phone'] is Map ? _owner!['phone'] as Map : null;
-
-    final String operation;
-    switch (listingType) {
-      case 'SALE':
-        operation = 'Venta';
-      case 'RENT':
-        operation = 'Renta';
-      case '':
-        operation = '';
-      default:
-        operation = 'Venta y renta';
-    }
-
-    return [
-      _buildSectionTitle('Datos de la propiedad'),
-      _card([
-        _infoRow('Nombre', _str(p?['name'])),
-        _infoRow('Dirección', _str(address?['fullAddress'])),
-        _infoRow('Referencia', _str(address?['extra'])),
-        _infoRow('Tipo', _str(p?['propertyType'])),
-        _infoRow('Operación', operation),
-        _infoRow('Precio de venta', _money(sale?['salePrice'])),
-        _infoRow('Mantenimiento', _money(sale?['maintenanceFee'])),
-        _infoRow('IUSI', _money(sale?['singlePropertyTax'])),
-        _infoRow('Renta mensual', _money(rent?['monthlyRent'])),
-        if (ownership.typeLabel.isNotEmpty)
-          _infoRow('A nombre de', ownership.typeLabel),
-        _infoRow('Propietario', ownership.ownerName),
-        if (ownership.relationship.isNotEmpty)
-          _infoRow('Relación con quien publica', ownership.relationship),
-        if (ownership.representative.isNotEmpty)
-          _infoRow('Representante', ownership.representative),
-        _infoRow(
-            'Teléfono',
-            phone == null
-                ? ''
-                : '${_str(phone['countryCode'])} ${_str(phone['number'])}'
-                    .trim()),
-        _infoRow('Email', _str(_owner?['email'])),
-        _infoRow('Descripción', _str(description?['raw'])),
-        _registryBox(legal),
-      ]),
-    ];
-  }
+  List<Widget> _buildPropertyData() => [
+        ListingHqPropertyDetails(
+          property: _property,
+          ownerProfile: _owner,
+          ownership: _ownership,
+        ),
+      ];
 
   /// El motivo que da el backend (documento inexistente, visita de otro
   /// Lister HQ, etapa que ya no admite cambios...) en vez de un error genérico.
@@ -529,6 +326,8 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
       if (isClassifiedOwnership(_ownership)) {
         await _loadFullOwnership(data, token);
       }
+      // El título (tipo y zona) está fuera del FutureBuilder.
+      if (mounted) safeSetState(() {});
       return listerHqVisitDocs(data);
     }
     return [];
@@ -593,16 +392,20 @@ class _LISTINGHQPropiedadArchivosPendientesWidgetState
                     const LISTINGHQHeaderWidget(
                       titleText: 'Revisar documentación',
                     ),
-                    // El nombre de la casa va completo, sin cortar.
+                    // Tipo y zona, como en la miniatura: el nombre que
+                    // escribe el propietario puede ser una descripción larga.
                     Padding(
                       padding: const EdgeInsetsDirectional.fromSTEB(
                           20.0, 20.0, 20.0, 0.0),
                       child: SizedBox(
                         width: double.infinity,
                         child: Text(
-                          (widget.title ?? '').isNotEmpty
-                              ? widget.title!
-                              : 'Propiedad',
+                          propertyShortTitle(
+                            _property,
+                            fallback: (widget.title ?? '').isNotEmpty
+                                ? widget.title!
+                                : 'Propiedad',
+                          ),
                           style: GoogleFonts.publicSans(
                             color: ListingHqUi.textDark,
                             fontSize: 18.0,

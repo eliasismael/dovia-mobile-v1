@@ -1,4 +1,5 @@
 import '/auth/custom_auth/auth_util.dart';
+import '/domain/property_types.dart';
 import '/backend/api_requests/api_visits.dart';
 import '/backend/api_requests/api_legal_process.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -290,9 +291,10 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget>
         final prop = p['property'] ??
             (p['visit'] is Map ? p['visit']['property'] : null);
         if (prop is Map) {
-          title = prop['name']?.toString() ??
-              prop['title']?.toString() ??
-              'Propiedad';
+          title = propertyShortTitle(prop,
+              fallback: prop['name']?.toString() ??
+                  prop['title']?.toString() ??
+                  'Propiedad');
           final locAddr = _deepMap(prop, ['location', 'address']);
           address = locAddr?['fullAddress']?.toString() ??
               locAddr?['street']?.toString() ??
@@ -336,9 +338,10 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget>
       if (v is Map) {
         final prop = v['property'];
         if (prop is Map) {
-          title = prop['name']?.toString() ??
-              prop['title']?.toString() ??
-              'Propiedad';
+          title = propertyShortTitle(prop,
+              fallback: prop['name']?.toString() ??
+                  prop['title']?.toString() ??
+                  'Propiedad');
           final locAddr = _deepMap(prop, ['location', 'address']);
           address = locAddr?['fullAddress']?.toString() ??
               locAddr?['street']?.toString() ??
