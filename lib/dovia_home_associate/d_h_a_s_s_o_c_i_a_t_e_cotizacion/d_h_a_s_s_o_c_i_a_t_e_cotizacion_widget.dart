@@ -199,7 +199,10 @@ class _DHASSOCIATECotizacionWidgetState
         final request = Map<String, dynamic>.from(data);
         safeSetState(() {
           _model.detail = request;
-          _model.clientProfile = cqExtractClientProfile(request);
+          // El detalle del trabajo aprobado no trae al cliente: no se pisa el
+          // que ya se tenía.
+          _model.clientProfile =
+              cqExtractClientProfile(request) ?? _model.clientProfile;
         });
       }
     } catch (_) {
@@ -375,11 +378,20 @@ class _DHASSOCIATECotizacionWidgetState
   }
 
   // ---------------------------------------------------------------------------
-  // Datos del cliente (Estado 3).
+  // Datos del cliente.
   // ---------------------------------------------------------------------------
 
-  void _showClientInfoDialog() {
-    final profile = _model.clientProfile ?? const <String, dynamic>{};
+  /// Datos del cliente para armar el PDF de la cotización: nombre y zona
+  /// desde que la oportunidad está activa; teléfono y correo recién cuando el
+  /// cliente acepta.
+  Future<void> _showClientInfoDialog() async {
+    final approved = _state == _QuoteState.approved;
+    if (approved) await _loadClientContact();
+    if (!mounted) return;
+    final request = _request;
+    final profile = _model.clientProfile ??
+        (request == null ? null : cqExtractClientProfile(request)) ??
+        const <String, dynamic>{};
     showDialog<void>(
       context: context,
       builder: (dialogContext) => Dialog(
@@ -388,11 +400,50 @@ class _DHASSOCIATECotizacionWidgetState
         insetPadding: const EdgeInsets.symmetric(horizontal: 24.0),
         child: _ClientInfoDialog(
           name: cqClientName(profile),
+          // La zona, como en el resto de la pantalla: la dirección exacta se
+          // ve en el flujo operativo, con el trabajo ya en la agenda.
+          zone: request == null ? null : asrZone(request),
           phone: cqClientPhone(profile),
           email: cqClientEmail(profile),
+          showContact: approved,
         ),
       ),
     );
+  }
+
+  /// El detalle del trabajo aprobado no trae al cliente: su teléfono y correo
+  /// vienen en la propuesta aceptada del listado de la empresa.
+  Future<void> _loadClientContact() async {
+    final request = _request;
+    final current = _model.clientProfile ??
+        (request == null ? null : cqExtractClientProfile(request));
+    if (current != null && cqClientPhone(current) != null) return;
+    final acceptedId =
+        _model.proposal == null ? '' : proposalId(_model.proposal!);
+    final response =
+        await DOVIAAPIDoviaHomeContextGroup.listAssociateProposalsCall.call(
+      status: kProposalAccepted,
+      limit: 50,
+      authToken: currentAuthenticationToken ?? '',
+    );
+    if (!mounted || !response.succeeded) return;
+    final proposals = DOVIAAPIDoviaHomeContextGroup.listAssociateProposalsCall
+            .proposalsList(response.jsonBody) ??
+        const [];
+    for (final raw in proposals.whereType<Map>()) {
+      final proposal = Map<String, dynamic>.from(raw);
+      final matches =
+          (acceptedId.isNotEmpty && proposalId(proposal) == acceptedId) ||
+              proposalServiceRequestId(proposal) == _requestId;
+      final client = proposal['clientProfile'];
+      if (matches && client is Map) {
+        safeSetState(() => _model.clientProfile = {
+              ...?current,
+              ...Map<String, dynamic>.from(client),
+            });
+        return;
+      }
+    }
   }
 
   Future<void> _openDocument(String url) async {
@@ -764,13 +815,13 @@ class _DHASSOCIATECotizacionWidgetState
     );
   }
 
-  /// [Información del cliente]: outline aqua, deshabilitado hasta que el
-  /// proyecto sea de la empresa.
+  /// [Información del cliente]: outline aqua. Disponible desde que la
+  /// oportunidad está activa, para armar el PDF con los datos del cliente.
   Widget _infoButton({required bool enabled}) {
     final theme = FlutterFlowTheme.of(context);
     final tint = enabled ? theme.primary : theme.alternate;
     return FFButtonWidget(
-      onPressed: enabled ? _showClientInfoDialog : null,
+      onPressed: enabled ? () => _showClientInfoDialog() : null,
       text: 'Información del cliente',
       options: FFButtonOptions(
         width: double.infinity,
@@ -823,36 +874,52 @@ class _DHASSOCIATECotizacionWidgetState
     );
   }
 
-  /// Acciones del estado. Activa: Enviar. Enviada: un aviso de que el
-  /// contacto se habilita al aceptar (un botón gris sin explicación
-  /// confundía). Aprobada: Información del cliente.
+  /// Acciones del estado. En todos está [Información del cliente]. Activa:
+  /// además Enviar. Enviada: un aviso de que el contacto se habilita al
+  /// aceptar.
   Widget _buildActions() {
     switch (_state) {
       case _QuoteState.active:
-        return _sendButton();
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _infoButton(enabled: true),
+            const SizedBox(height: 12.0),
+            _sendButton(),
+          ],
+        );
       case _QuoteState.submitted:
-        return Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(14.0),
-          decoration: BoxDecoration(
-            color: const Color(0x2670ACAD),
-            borderRadius: BorderRadius.circular(12.0),
-          ),
-          child: Text(
-            'Cuando el cliente acepte tu presupuesto vas a poder ver sus '
-            'datos de contacto.',
-            textAlign: TextAlign.center,
-            style: GoogleFonts.publicSans(
-              color: const Color(0xFF00444B),
-              fontSize: 13.0,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _infoButton(enabled: true),
+            const SizedBox(height: 12.0),
+            _contactPendingNote(),
+          ],
         );
       case _QuoteState.approved:
         return _infoButton(enabled: true);
     }
   }
+
+  Widget _contactPendingNote() => Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(14.0),
+        decoration: BoxDecoration(
+          color: const Color(0x2670ACAD),
+          borderRadius: BorderRadius.circular(12.0),
+        ),
+        child: Text(
+          'Cuando el cliente acepte tu presupuesto vas a poder ver su '
+          'teléfono y correo.',
+          textAlign: TextAlign.center,
+          style: GoogleFonts.publicSans(
+            color: const Color(0xFF00444B),
+            fontSize: 13.0,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      );
 
   List<Widget> _buildBody() {
     final state = _state;
@@ -1015,18 +1082,25 @@ class _AutoCloseDialogContentState extends State<_AutoCloseDialogContent> {
 class _ClientInfoDialog extends StatelessWidget {
   const _ClientInfoDialog({
     required this.name,
+    required this.zone,
     required this.phone,
     required this.email,
+    required this.showContact,
   });
 
   final String name;
+  final String? zone;
   final String? phone;
   final String? email;
+
+  /// El teléfono y el correo se muestran recién con la cotización aceptada.
+  final bool showContact;
 
   static const String _kUnavailable = 'No disponible';
 
   /// Teléfono listo para marcar: sólo dígitos y el `+` del código de país.
-  String get _dialable => (phone ?? '').replaceAll(RegExp(r'[^0-9+]'), '');
+  String get _dialable =>
+      showContact ? (phone ?? '').replaceAll(RegExp(r'[^0-9+]'), '') : '';
 
   Future<void> _launch(BuildContext context, Uri uri,
       {required String error}) async {
@@ -1105,10 +1179,26 @@ class _ClientInfoDialog extends StatelessWidget {
           ),
           const SizedBox(height: 18.0),
           line(name),
+          if (zone != null) ...[
+            const SizedBox(height: 12.0),
+            line('Zona: $zone'),
+          ],
           const SizedBox(height: 12.0),
-          line('Número: ${phone ?? _kUnavailable}'),
-          const SizedBox(height: 12.0),
-          line('Correo: ${email ?? _kUnavailable}'),
+          if (showContact) ...[
+            line('Número: ${phone ?? _kUnavailable}'),
+            const SizedBox(height: 12.0),
+            line('Correo: ${email ?? _kUnavailable}'),
+          ] else
+            Text(
+              'El teléfono y el correo se habilitan cuando el cliente acepte '
+              'tu cotización.',
+              textAlign: TextAlign.center,
+              style: theme.bodySmall.override(
+                font: GoogleFonts.publicSans(),
+                color: theme.secondaryText,
+                fontSize: 13.0,
+              ),
+            ),
           // Contacto directo con el cliente, sin copiar el número a mano.
           if (_dialable.isNotEmpty) ...[
             const SizedBox(height: 18.0),

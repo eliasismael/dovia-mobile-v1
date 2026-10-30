@@ -4,6 +4,7 @@ import '/dovia_home_client/subscription_renewal_notice.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_navbar/d_h_c_l_i_e_n_t_navbar_widget.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_proximas_visitas/d_h_c_l_i_e_n_t_proximas_visitas_widget.dart';
 import '/dovia_home_client/proposal_fields.dart';
+import '/dovia_home_client/quote_proposals_nav.dart';
 import '/dovia_home_client/service_request_fields.dart';
 import '/dovia_home_client/upcoming_service_requests.dart';
 import '/shared_components/error_state/error_state_widget.dart';
@@ -75,9 +76,11 @@ class _QuoteCard {
     required this.status,
     required this.onTap,
     this.serviceRequestId,
+    this.subtitle = 'Visita realizada',
   });
 
   final String title;
+  final String subtitle;
   final String date;
   final String status;
   final VoidCallback onTap;
@@ -359,12 +362,18 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
   /// campos son de solo lectura; el botón "Aceptar" aparece únicamente cuando
   /// hay una visita tomada por un asociado pendiente de confirmar. Al volver
   /// refresca el Dashboard.
-  void _openVisitDetail(Map<String, dynamic> data) {
+  Future<void> _openVisitDetail(Map<String, dynamic> data) async {
     // Sin pagar: se retoma el cobro, no hay visita que mostrar todavía.
     if (srAwaitsPayment(data)) {
       openPendingPayment(context, data).then((_) => safeSetState(() {}));
       return;
     }
+    // Una cotización con propuestas abre sus propuestas, no el detalle.
+    if (await openQuoteProposalsIfAny(context, data)) {
+      if (mounted) safeSetState(_loadDashboardData);
+      return;
+    }
+    if (!mounted) return;
     DHCLIENTCasaAWidget.requestData = data;
     DHCLIENTCasaAWidget.houseName = srHouseName(data);
     final id = srId(data);
@@ -662,13 +671,6 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
         _str(request is Map ? request['id'] : null);
   }
 
-  /// Píldora de la tarjeta. El enum de la propuesta es
-  /// `SUBMITTED | REJECTED | ACCEPTED`: mientras el cliente no decida queda en
-  /// `SUBMITTED`, que para él es "Pendiente" aunque el proveedor ya la haya
-  /// enviado.
-  String _proposalStatusLabel(Map<String, dynamic> proposal) =>
-      proposalStatusLabel(proposal);
-
   /// Fecha con el formato del diseño (DD/MM/AAAA). Sin fecha se deja el
   /// placeholder en vez de inventar una.
   String _shortDate(DateTime? date) {
@@ -677,13 +679,6 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
     final month = date.month.toString().padLeft(2, '0');
     return '$day/$month/${date.year}';
   }
-
-  DateTime? _parseDate(String? raw) =>
-      raw == null ? null : DateTime.tryParse(raw)?.toLocal();
-
-  /// Fecha en la que se recibió la propuesta.
-  String _proposalDate(Map<String, dynamic> proposal) => _shortDate(
-      _parseDate(_str(proposal['createdAt']) ?? _str(proposal['sentAt'])));
 
   /// Subestados de la solicitud que delatan un trabajo fuera de alcance vivo,
   /// con la píldora que le corresponde a cada uno.
@@ -834,7 +829,7 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
               _verTodoLink(() {
                 // Sin solicitud fijada la pantalla lista todas las propuestas
                 // recibidas por el cliente.
-                _openProposals(null);
+                _openAllProposals();
               }),
             ],
           ),
@@ -873,8 +868,7 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
               'No pudimos cargar tus cotizaciones. Intenta de nuevo más tarde.'));
         }
         if (!snapshot.hasData) {
-          return onlyForSubscribers(
-              const Center(child: DoviaSpinner()));
+          return onlyForSubscribers(const Center(child: DoviaSpinner()));
         }
 
         final data = snapshot.data!;
@@ -914,22 +908,25 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
             .proposalsList(response.jsonBody) ??
         [];
 
+    // Una tarjeta por trabajo: varias empresas que cotizaron lo mismo son una
+    // sola cotización para el cliente, y al tocarla las compara todas.
+    final jobs = groupProposalsByJob(proposals
+        .whereType<Map>()
+        .map((e) => Map<String, dynamic>.from(e))
+        .toList());
     final cards = <_QuoteCard>[];
-    final seenRequestIds = <String>{};
-    for (final proposal in proposals.whereType<Map>()) {
-      final data = Map<String, dynamic>.from(proposal);
-      final requestId = _proposalRequestId(data);
-      // Si el backend no informa la solicitud la propuesta se muestra igual (al
-      // tocarla se abre el listado completo), pero entonces no hay con qué
-      // agruparla: se la trata como una cotización aparte.
-      final key = requestId ?? _str(data['id']) ?? 'proposal_${cards.length}';
-      if (!seenRequestIds.add(key)) continue;
+    for (final job in jobs) {
+      final first = job.proposals.first;
+      final count = job.proposals.length;
       cards.add(_QuoteCard(
-        title: _proposalRequestTitle(data),
-        date: _proposalDate(data),
-        status: _proposalStatusLabel(data),
-        onTap: () => _openProposals(requestId),
-        serviceRequestId: requestId,
+        title: job.description ?? _proposalRequestTitle(first),
+        subtitle: count == 1
+            ? 'Propuesta enviada el'
+            : '$count propuestas · última enviada el',
+        date: _shortDate(job.lastSentAt),
+        status: job.jobStatusLabel,
+        onTap: () => _openProposals(job),
+        serviceRequestId: _proposalRequestId(first),
       ));
     }
     return cards;
@@ -963,10 +960,27 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
     ];
   }
 
-  /// Abre la comparación de propuestas. Sin solicitud se listan todas las
-  /// recibidas por el cliente.
-  void _openProposals(String? serviceRequestId) {
-    DHCLIENTCotizacionesRecibidasWidget.serviceRequestId = serviceRequestId;
+  /// Abre las propuestas de un trabajo. Las de fuera de alcance se piden por
+  /// otra ruta: con la de cotizaciones el backend no encuentra el trabajo.
+  void _openAllProposals() {
+    DHCLIENTCotizacionesRecibidasWidget.serviceRequestId = null;
+    DHCLIENTCotizacionesRecibidasWidget.outOfScopeServiceRequestId = null;
+    DHCLIENTCotizacionesRecibidasWidget.jobTitle = null;
+    context
+        .pushNamed(DHCLIENTCotizacionesRecibidasWidget.routeName)
+        .then((_) => safeSetState(_loadDashboardData));
+  }
+
+  void _openProposals(ProposalJob job) {
+    final requestId = proposalServiceRequestId(job.proposals.first);
+    if (job.isOutOfScope) {
+      DHCLIENTCotizacionesRecibidasWidget.serviceRequestId = null;
+      DHCLIENTCotizacionesRecibidasWidget.outOfScopeServiceRequestId =
+          requestId;
+    } else {
+      DHCLIENTCotizacionesRecibidasWidget.serviceRequestId = requestId;
+    }
+    DHCLIENTCotizacionesRecibidasWidget.jobTitle = job.description;
     context
         .pushNamed(DHCLIENTCotizacionesRecibidasWidget.routeName)
         .then((_) => safeSetState(_loadDashboardData));
@@ -1032,7 +1046,7 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                     borderRadius: BorderRadius.circular(16.0),
                     child: _buildQuoteResultCard(
                       title: cards[i].title,
-                      subtitle: 'Visita realizada',
+                      subtitle: cards[i].subtitle,
                       date: cards[i].date,
                       status: cards[i].status,
                     ),
@@ -1495,8 +1509,7 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                           future: _upcomingVisitsFuture,
                           builder: (context, snapshot) {
                             if (!snapshot.hasData) {
-                              return const Center(
-                                  child: DoviaSpinner());
+                              return const Center(child: DoviaSpinner());
                             }
                             final response = snapshot.data!;
                             if (!response.succeeded) {
@@ -1504,8 +1517,7 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                               // había visitas.
                               return ErrorStateWidget.fromResponse(
                                 response,
-                                onRetry: () =>
-                                    safeSetState(_loadDashboardData),
+                                onRetry: () => safeSetState(_loadDashboardData),
                               );
                             }
                             final rawVisits = DOVIAAPIDoviaHomeContextGroup
@@ -1601,8 +1613,7 @@ class _DHCLIENTHomepageWidgetState extends State<DHCLIENTHomepageWidget> {
                           future: _completedVisitsFuture,
                           builder: (context, snapshot) {
                             if (!snapshot.hasData) {
-                              return const Center(
-                                  child: DoviaSpinner());
+                              return const Center(child: DoviaSpinner());
                             }
                             final response = snapshot.data!;
                             if (!response.succeeded) {

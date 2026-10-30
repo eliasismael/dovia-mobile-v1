@@ -1,3 +1,4 @@
+import '/dovia_home_client/quote_proposals_nav.dart';
 import '/dovia_home_client/pending_payment.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_homepage/d_h_c_l_i_e_n_t_homepage_widget.dart';
 import '/dovia_home_client/d_h_c_l_i_e_n_t_navbar/d_h_c_l_i_e_n_t_navbar_widget.dart';
@@ -186,12 +187,15 @@ class _DHCLIENTProximasVisitasListaWidgetState
 
   /// Abre el detalle de la solicitud en **modo consulta** (solo lectura). Sin
   /// botón "Aceptar" y sin edición de campos: es estrictamente un registro.
-  void _openDetail(Map<String, dynamic> data) {
+  Future<void> _openDetail(Map<String, dynamic> data) async {
     // Sin pagar: se retoma el cobro, no hay visita que mostrar todavía.
     if (srAwaitsPayment(data)) {
       openPendingPayment(context, data).then((_) => safeSetState(() {}));
       return;
     }
+    // Una cotización con propuestas abre sus propuestas, no el detalle.
+    if (await openQuoteProposalsIfAny(context, data)) return;
+    if (!mounted) return;
     DHCLIENTCasaAWidget.requestData = data;
     DHCLIENTCasaAWidget.houseName = srHouseName(data);
     // Modo consulta: este listado es un registro, no el flujo de confirmación,

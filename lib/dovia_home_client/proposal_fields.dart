@@ -196,3 +196,93 @@ String proposalFormatAmount(num amount, String currency) {
   final body = parts[1] == '00' ? grouped : '$grouped.${parts[1]}';
   return currency == 'GTQ' ? 'Q$body' : '$currency $body';
 }
+
+/// Si la propuesta sigue vigente. Al aceptar una, el backend desactiva las
+/// demás del mismo trabajo (`active: false`) pero las deja en `SUBMITTED`.
+/// Sólo el historial por servicio trae el campo; sin él se asume vigente.
+bool proposalIsActive(Map<String, dynamic> proposal) =>
+    proposal['active'] != false;
+
+/// Fecha en que el proveedor envió la propuesta.
+DateTime? proposalSentAt(Map<String, dynamic> proposal) {
+  final raw = _firstStr([proposal['createdAt'], proposal['sentAt']]);
+  return raw == null ? null : DateTime.tryParse(raw)?.toLocal();
+}
+
+/// [proposalSentAt] en `dd/mm/aaaa`, o null si no vino.
+String? proposalSentDateLabel(Map<String, dynamic> proposal) {
+  final date = proposalSentAt(proposal);
+  if (date == null) return null;
+  String two(int v) => v.toString().padLeft(2, '0');
+  return '${two(date.day)}/${two(date.month)}/${date.year}';
+}
+
+/// Propuestas de un mismo trabajo: varias empresas cotizan la misma solicitud
+/// y el cliente elige una sola.
+class ProposalJob {
+  ProposalJob(this.key, this.proposals);
+
+  /// Solicitud cotizada (en `OUT_OF_SCOPE`, el hijo).
+  final String key;
+  final List<Map<String, dynamic>> proposals;
+
+  /// El cliente ya aceptó una: las demás quedan rechazadas.
+  bool get hasAccepted =>
+      proposals.any((p) => proposalStatus(p) == kProposalAccepted);
+
+  bool get isOutOfScope => proposals.any(proposalIsOutOfScope);
+
+  /// Lo que el cliente pidió. El historial por servicio no trae descripción.
+  String? get description {
+    for (final p in proposals) {
+      final value = proposalDescription(p);
+      if (value != null) return value;
+    }
+    return null;
+  }
+
+  /// Envío más reciente: es la novedad del trabajo.
+  DateTime? get lastSentAt {
+    DateTime? latest;
+    for (final p in proposals) {
+      final sent = proposalSentAt(p);
+      if (sent != null && (latest == null || sent.isAfter(latest))) {
+        latest = sent;
+      }
+    }
+    return latest;
+  }
+
+  /// Todavía se puede aceptar o rechazar esta propuesta.
+  bool canDecide(Map<String, dynamic> proposal) =>
+      !hasAccepted &&
+      proposalStatus(proposal) == kProposalSubmitted &&
+      proposalIsActive(proposal);
+
+  /// Estado de la propuesta dentro del trabajo: con otra aceptada, una que
+  /// quedó en `SUBMITTED` ya no se puede elegir, así que es rechazada.
+  String statusLabel(Map<String, dynamic> proposal) {
+    final status = proposalStatus(proposal);
+    if (status == kProposalAccepted) return 'Aceptada';
+    if (status == kProposalRejected || !canDecide(proposal)) {
+      return 'Rechazada';
+    }
+    return 'Pendiente';
+  }
+
+  /// Estado del trabajo para su tarjeta.
+  String get jobStatusLabel {
+    if (hasAccepted) return 'Aceptada';
+    return proposals.any(canDecide) ? 'Pendiente' : 'Rechazada';
+  }
+}
+
+/// Agrupa las propuestas por trabajo, en el orden en que llegaron.
+List<ProposalJob> groupProposalsByJob(List<Map<String, dynamic>> proposals) {
+  final jobs = <String, ProposalJob>{};
+  for (final p in proposals) {
+    final key = proposalServiceRequestId(p) ?? 'proposal_${proposalId(p)}';
+    jobs.putIfAbsent(key, () => ProposalJob(key, [])).proposals.add(p);
+  }
+  return jobs.values.toList();
+}

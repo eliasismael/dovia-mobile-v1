@@ -61,6 +61,10 @@ class DHCLIENTCotizacionesRecibidasWidget extends StatefulWidget {
   /// backend responde `DOVIA_HOME_SERVICE_REQUEST_NOT_FOUND`—.
   static String? outOfScopeServiceRequestId;
 
+  /// Nombre del trabajo cuando se abre uno solo (Ej: desde su tarjeta). El
+  /// historial de una cotización no trae la descripción del trabajo.
+  static String? jobTitle;
+
   @override
   State<DHCLIENTCotizacionesRecibidasWidget> createState() =>
       _DHCLIENTCotizacionesRecibidasWidgetState();
@@ -82,6 +86,8 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
   /// qué listado se pide: son dos rutas distintas sobre el mismo path param.
   bool _outOfScope = false;
 
+  String? _jobTitle;
+
   @override
   void initState() {
     super.initState();
@@ -97,6 +103,8 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
         ? outOfScopeId
         : DHCLIENTCotizacionesRecibidasWidget.serviceRequestId;
     DHCLIENTCotizacionesRecibidasWidget.outOfScopeServiceRequestId = null;
+    _jobTitle = DHCLIENTCotizacionesRecibidasWidget.jobTitle;
+    DHCLIENTCotizacionesRecibidasWidget.jobTitle = null;
 
     _proposalsFuture = _buildProposalsFuture();
 
@@ -173,11 +181,11 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
   String _serviceTitle(Map<String, dynamic> proposal) =>
       proposalDescription(proposal) ?? 'Trabajo cotizado';
 
-  /// Nombre de la cotización: se rotulan por orden de llegada siguiendo el
-  /// diseño ("Cotización A", "Cotización B", …). Cuando el proveedor mandó más
+  /// Nombre de la propuesta dentro de su trabajo, por orden de llegada
+  /// ("Propuesta 1", "Propuesta 2", …). Cuando el proveedor mandó más
   /// de una versión se aclara cuál es, porque el listado las devuelve todas.
   String _proposalTitle(Map<String, dynamic> proposal, int index) {
-    final label = 'Cotización ${String.fromCharCode(65 + index)}';
+    final label = 'Propuesta ${index + 1}';
     final version = proposalVersion(proposal);
     return (version == null || version <= 1) ? label : '$label · v$version';
   }
@@ -446,6 +454,7 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
                           );
                         }
 
+                        final jobs = groupProposalsByJob(proposals);
                         return Column(
                           mainAxisSize: MainAxisSize.max,
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -454,9 +463,11 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
                               padding:
                                   const EdgeInsets.symmetric(horizontal: 20.0),
                               child: Text(
-                                proposals.length == 1
-                                    ? 'Revisa la propuesta y continúa si te sirve.'
-                                    : 'Desliza para comparar las propuestas y elige la que prefieras.',
+                                jobs.length > 1
+                                    ? 'Cada trabajo tiene sus propias propuestas. Compáralas, descárgalas y elige una por trabajo.'
+                                    : proposals.length == 1
+                                        ? 'Revisa la propuesta y continúa si te sirve.'
+                                        : 'Desliza para comparar las propuestas y elige la que prefieras.',
                                 style: FlutterFlowTheme.of(context)
                                     .bodyMedium
                                     .override(
@@ -467,14 +478,18 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
                                     ),
                               ),
                             ),
-                            const SizedBox(height: 16.0),
-                            _proposalsCarousel(proposals, isPremium),
-                            const SizedBox(height: 18.0),
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 20.0),
-                              child: _continueButton(proposals, isPremium),
-                            ),
+                            for (final job in jobs) ...[
+                              const SizedBox(height: 24.0),
+                              _jobHeader(job, jobs.length),
+                              const SizedBox(height: 12.0),
+                              _proposalsCarousel(job),
+                              const SizedBox(height: 18.0),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 20.0),
+                                child: _continueButton(job, isPremium),
+                              ),
+                            ],
                           ],
                         );
                       },
@@ -541,8 +556,8 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
   ///
   /// [IntrinsicHeight] las iguala a la más alta, que es lo que hace comparables
   /// campo contra campo dos propuestas con textos de distinto largo.
-  Widget _proposalsCarousel(
-      List<Map<String, dynamic>> proposals, bool isPremium) {
+  Widget _proposalsCarousel(ProposalJob job) {
+    final proposals = job.proposals;
     const horizontalPadding = 20.0;
     const gap = 12.0;
     final screenWidth = MediaQuery.sizeOf(context).width;
@@ -564,7 +579,7 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
                     right: i == proposals.length - 1 ? 0.0 : gap),
                 child: SizedBox(
                   width: cardWidth,
-                  child: _proposalCard(proposals[i], i),
+                  child: _proposalCard(job, proposals[i], i),
                 ),
               ),
           ],
@@ -573,12 +588,56 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
     );
   }
 
-  /// Tarjeta de una cotización recibida con su radio button de selección.
-  Widget _proposalCard(Map<String, dynamic> proposal, int index) {
+  /// Encabezado de un trabajo: qué pidió el cliente y cuántas propuestas
+  /// recibió. Separa los presupuestos de trabajos distintos.
+  Widget _jobHeader(ProposalJob job, int jobCount) {
+    final title = (jobCount == 1 ? _jobTitle : null) ??
+        job.description ??
+        _jobTitle ??
+        'Trabajo cotizado';
+    final count = job.proposals.length;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
+            style: FlutterFlowTheme.of(context).bodyMedium.override(
+                  font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
+                  color: const Color(0xFF00444B),
+                  fontSize: 16.0,
+                ),
+          ),
+          const SizedBox(height: 2.0),
+          Text(
+            job.hasAccepted
+                ? 'Ya elegiste una propuesta para este trabajo.'
+                : count == 1
+                    ? '1 propuesta recibida'
+                    : '$count propuestas recibidas',
+            style: FlutterFlowTheme.of(context).bodySmall.override(
+                  font: GoogleFonts.publicSans(),
+                  color: const Color(0xFF6A7282),
+                  fontSize: 12.0,
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Tarjeta de una propuesta recibida con su radio button de selección.
+  Widget _proposalCard(
+      ProposalJob job, Map<String, dynamic> proposal, int index) {
     final id = proposalId(proposal);
-    final selected = id.isNotEmpty && _model.selectedProposalId == id;
+    final selectable = id.isNotEmpty && job.canDecide(proposal);
+    final selected = selectable && _model.selectedProposalId == id;
     final providerName = proposalProviderName(proposal);
-    final description = proposalDescription(proposal);
+    final sentDate = proposalSentDateLabel(proposal);
+    final status = job.statusLabel(proposal);
     final documentUrl = proposalDocumentUrl(proposal);
 
     return Semantics(
@@ -590,7 +649,7 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
         focusColor: Colors.transparent,
         hoverColor: Colors.transparent,
         highlightColor: Colors.transparent,
-        onTap: id.isEmpty ? null : () => _selectProposal(id),
+        onTap: selectable ? () => _selectProposal(id) : null,
         child: Container(
           width: double.infinity,
           decoration: BoxDecoration(
@@ -606,8 +665,11 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              _radioButton(selected),
-              const SizedBox(width: 14.0),
+              if (selectable) ...[
+                _radioButton(selected),
+                const SizedBox(width: 14.0),
+              ] else
+                const SizedBox(width: 8.0),
               Expanded(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -632,17 +694,13 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
                             ),
                       ),
                     const SizedBox(height: 8.0),
-                    // El alcance se acota a 4 líneas: con descripciones largas
-                    // las tarjetas dejaban de ser comparables de un vistazo. El
-                    // historial por servicio no trae descripción; ahí el PDF es
-                    // todo el detalle que hay.
-                    if (description != null)
-                      _proposalField(
-                        'Trabajo a realizar:',
-                        description,
-                        maxLines: 4,
-                      ),
+                    // Lo que pidió el cliente va en el encabezado del trabajo:
+                    // acá sólo lo que distingue a cada propuesta.
+                    if (sentDate != null)
+                      _proposalField('Enviada el:', sentDate),
                     _priceField(_priceLabel(proposal)),
+                    if (status != 'Pendiente')
+                      _proposalField('Estado:', status),
                     // El PDF es la propuesta en sí: sin abrirlo el cliente no
                     // tiene sobre qué decidir.
                     if (documentUrl != null) _documentLink(documentUrl),
@@ -723,7 +781,7 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
         child: InkWell(
           onTap: () => _openDocument(url),
           child: Text(
-            'Ver propuesta (PDF)',
+            'Descargar propuesta',
             style: FlutterFlowTheme.of(context).bodySmall.override(
                   font: GoogleFonts.publicSans(fontWeight: FontWeight.w600),
                   color: const Color(0xFF007376),
@@ -747,13 +805,15 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
   /// Debajo se ofrece rechazarla, que es la otra mitad de la decisión del
   /// contrato: rechazar no cierra la solicitud, deja esa versión fuera y habilita
   /// al proveedor a mandar otra.
-  Widget _continueButton(List<Map<String, dynamic>> proposals, bool isPremium) {
+  Widget _continueButton(ProposalJob job, bool isPremium) {
+    // Trabajo ya decidido: no queda nada que aceptar ni rechazar.
+    if (!job.proposals.any(job.canDecide)) return const SizedBox.shrink();
+    final proposals = job.proposals;
     final selected = _selected(proposals);
     // Sólo una propuesta viva admite decisión: una ya aceptada o rechazada se
     // sigue mostrando en el historial, pero no se vuelve a operar.
-    final actionable = selected != null &&
-        proposalIsActionable(selected) &&
-        !_model.isAccepting;
+    final actionable =
+        selected != null && job.canDecide(selected) && !_model.isAccepting;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -761,7 +821,9 @@ class _DHCLIENTCotizacionesRecibidasWidgetState
           onPressed: actionable
               ? () async => _acceptSelected(proposals, isPremium)
               : null,
-          text: _model.isAccepting ? 'Aceptando…' : 'Continuar',
+          text: _model.isAccepting && selected != null
+              ? 'Aceptando…'
+              : 'Aceptar propuesta',
           options: FFButtonOptions(
             width: double.infinity,
             height: 50.0,

@@ -90,11 +90,11 @@ void main() {
         find.text('Necesito montar dos televisores en pared de concreto.'),
         findsOneWidget,
       );
-      expect(find.text('Indica el precio total de la cotización'),
-          findsOneWidget);
-      expect(find.text('Carga las Cotización'), findsOneWidget);
       expect(
-          find.text('Sube el PDF o la imagen con tu presupuesto'), findsOneWidget);
+          find.text('Indica el precio total de la cotización'), findsOneWidget);
+      expect(find.text('Carga las Cotización'), findsOneWidget);
+      expect(find.text('Sube el PDF o la imagen con tu presupuesto'),
+          findsOneWidget);
       expect(find.text('Enviar cotización'), findsOneWidget);
     });
 
@@ -104,7 +104,8 @@ void main() {
       tester.view.devicePixelRatio = 3.0;
       addTearDown(tester.view.reset);
 
-      final data = _request()..['address'] = {
+      final data = _request()
+        ..['address'] = {
           'zone': 'Zona 10',
           'address': 'Calle Falsa 123',
         };
@@ -139,7 +140,8 @@ void main() {
       expect(_button(tester, 'Enviar cotización').onPressed, isNull);
     });
 
-    testWidgets('sin requerimiento fijado lo dice en vez de un formulario vacío',
+    testWidgets(
+        'sin requerimiento fijado lo dice en vez de un formulario vacío',
         (tester) async {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 3.0;
@@ -167,15 +169,31 @@ void main() {
       );
     });
 
-    testWidgets('el botón de información del cliente está deshabilitado',
-        (tester) async {
+    testWidgets(
+        'información del cliente muestra nombre y zona para armar el PDF, '
+        'sin teléfono ni correo', (tester) async {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 3.0;
       addTearDown(tester.view.reset);
 
-      await _pump(tester, data: _request());
+      await _pump(
+        tester,
+        data: _request()
+          ..['clientProfile'] = {'id': 'c1', 'fullName': 'Ana López'},
+      );
 
-      expect(_button(tester, 'Información del cliente').onPressed, isNull);
+      expect(_button(tester, 'Información del cliente').onPressed, isNotNull);
+      await tester.ensureVisible(find.text('Información del cliente'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Información del cliente'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Datos del cliente'), findsOneWidget);
+      expect(find.text('Ana López'), findsOneWidget);
+      expect(find.text('Zona: Zona 10'), findsOneWidget);
+      expect(find.textContaining('Número:'), findsNothing);
+      expect(find.textContaining('se habilitan cuando el cliente acepte'),
+          findsOneWidget);
     });
 
     testWidgets('no muestra ningún banner de estado', (tester) async {
@@ -208,7 +226,7 @@ void main() {
         find.textContaining('Tu cotización fue enviada correctamente'),
         findsOneWidget,
       );
-      expect(_button(tester, 'Información del cliente').onPressed, isNull);
+      expect(_button(tester, 'Información del cliente').onPressed, isNotNull);
     });
   });
 
