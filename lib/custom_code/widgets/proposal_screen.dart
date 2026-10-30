@@ -54,11 +54,6 @@ class ProposalScreen extends StatefulWidget {
 }
 
 class _ProposalScreenState extends State<ProposalScreen> {
-  // TEMPORAL: resalta el Legal Associate de pruebas para encontrarlo rápido.
-  // Borrar cuando termine el testing.
-  static const String _testLegalAssociateEmail =
-      'legal_associate_gato222@dovia.com';
-
   bool _isUploadingPaymentProof = false;
 
   String? _selectedLegalAssociateId;
@@ -648,14 +643,6 @@ class _ProposalScreenState extends State<ProposalScreen> {
                   : (rawData is Map
                       ? rawData['items'] as List<dynamic>? ?? []
                       : []));
-              bool isTestAssociate(dynamic user) =>
-                  user is Map &&
-                  user['email']?.toString().toLowerCase() ==
-                      _testLegalAssociateEmail;
-              // TEMPORAL: el de pruebas va primero.
-              items.sort((a, b) =>
-                  (isTestAssociate(b) ? 1 : 0) - (isTestAssociate(a) ? 1 : 0));
-
               // Ya eligió: sólo su asociado, con la misma tarjeta que ve el
               // propietario. Las demás opciones ya no aplican.
               if (_associateSubmitted) {
@@ -695,7 +682,6 @@ class _ProposalScreenState extends State<ProposalScreen> {
 
                     return _buildLegalAssociateCard(
                       name,
-                      isTest: isTestAssociate(user),
                       isSelected ||
                           (_associateSubmitted &&
                               _selectedLegalAssociateId == id),
@@ -1337,9 +1323,8 @@ class _ProposalScreenState extends State<ProposalScreen> {
   }
 
   Widget _buildLegalAssociateCard(
-      String name, bool isSelected, VoidCallback onTap,
-      {bool isTest = false}) {
-    final card = GestureDetector(
+      String name, bool isSelected, VoidCallback onTap) {
+    return GestureDetector(
       onTap: onTap,
       child: Container(
         width: 160,
@@ -1389,32 +1374,6 @@ class _ProposalScreenState extends State<ProposalScreen> {
           ],
         ),
       ),
-    );
-    if (!isTest) return card;
-    // TEMPORAL: etiqueta del Legal Associate de pruebas.
-    return Stack(
-      children: [
-        card,
-        Positioned(
-          top: 6,
-          left: 6,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF57E00),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: const Text(
-              'Pruebas',
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
-            ),
-          ),
-        ),
-      ],
     );
   }
 

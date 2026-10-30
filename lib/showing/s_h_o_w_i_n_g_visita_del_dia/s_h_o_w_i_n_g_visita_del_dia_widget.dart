@@ -465,8 +465,6 @@ class _SHOWINGVisitaDelDiaWidgetState extends State<SHOWINGVisitaDelDiaWidget> {
                                                   Expanded(
                                                     child: FFButtonWidget(
                                                       onPressed: () {
-                                                        print(
-                                                            'Button pressed ...');
                                                       },
                                                       text: 'Tuve un problema',
                                                       options: FFButtonOptions(
@@ -527,8 +525,6 @@ class _SHOWINGVisitaDelDiaWidgetState extends State<SHOWINGVisitaDelDiaWidget> {
                                                   Expanded(
                                                     child: FFButtonWidget(
                                                       onPressed: () {
-                                                        print(
-                                                            'Button pressed ...');
                                                       },
                                                       text: 'Iniciar ruta',
                                                       options: FFButtonOptions(

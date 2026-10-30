@@ -226,7 +226,6 @@ class _DOVIACLIENTMisPropiedadesVisita3WidgetState
                                 ),
                                 FFButtonWidget(
                                   onPressed: () {
-                                    print('Button pressed ...');
                                   },
                                   text: 'Ver más',
                                   options: FFButtonOptions(
@@ -294,7 +293,6 @@ class _DOVIACLIENTMisPropiedadesVisita3WidgetState
                                 ),
                                 FFButtonWidget(
                                   onPressed: () {
-                                    print('Button pressed ...');
                                   },
                                   text: 'Ver más',
                                   options: FFButtonOptions(
@@ -391,7 +389,6 @@ class _DOVIACLIENTMisPropiedadesVisita3WidgetState
                                 ),
                                 FFButtonWidget(
                                   onPressed: () {
-                                    print('Button pressed ...');
                                   },
                                   text: 'Ver más',
                                   options: FFButtonOptions(

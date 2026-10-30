@@ -207,7 +207,6 @@ class _DHASSOCIATEBienvenidaWidgetState
                             38.0, 35.0, 38.0, 0.0),
                         child: FFButtonWidget(
                           onPressed: () {
-                            print('Button pressed ...');
                           },
                           text: 'Siguiente',
                           options: FFButtonOptions(

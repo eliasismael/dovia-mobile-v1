@@ -402,7 +402,8 @@ class _DOVIACLIENTHomepageBusquedaWidgetState
                 ),
               ),
 
-              // Al usar busqueda con IA entiendo que se muestra el modal inferior con las casas, y solo tocando el logo de al lado de los filtros sale otro modal de los filtros
+              // Con la búsqueda con IA se muestra el modal inferior con las casas;
+              // el ícono junto a los filtros abre el modal de filtros.
               Align(
                 alignment: const AlignmentDirectional(0.0, 0.0),
                 child: Column(

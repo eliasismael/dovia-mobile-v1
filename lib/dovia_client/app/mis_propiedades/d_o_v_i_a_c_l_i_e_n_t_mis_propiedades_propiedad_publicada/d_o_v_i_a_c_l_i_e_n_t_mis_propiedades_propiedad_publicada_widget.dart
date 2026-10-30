@@ -323,10 +323,6 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
           _activeOffers = active;
           _isLoadingOffers = false;
         });
-        // Debug: print first offer structure to see field names
-        if (active.isNotEmpty) {
-          debugPrint('[OfferCard] First offer JSON: ${active.first}');
-        }
       } else {
         debugPrint('[OfferCard] API error: ${res.statusCode} ${res.jsonBody}');
         safeSetState(() => _isLoadingOffers = false);
@@ -525,7 +521,6 @@ class _DOVIACLIENTMisPropiedadesPropiedadPublicadaWidgetState
               ),
             );
           } else {
-            // Log the response for debugging
             debugPrint(
                 '[UpdateProperty] Error: statusCode=${res.statusCode}, body=${res.jsonBody}');
             messenger.showSnackBar(

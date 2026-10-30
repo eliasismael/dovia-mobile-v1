@@ -68,7 +68,6 @@ class _TextoYBotonWidgetState extends State<TextoYBotonWidget> {
           ),
           FFButtonWidget(
             onPressed: () {
-              print('Button pressed ...');
             },
             text: 'Ver más',
             options: FFButtonOptions(

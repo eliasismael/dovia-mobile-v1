@@ -237,7 +237,6 @@ class _DOVIACLIENTMisPropiedadesCardOperativeListerWidgetState
                   const EdgeInsetsDirectional.fromSTEB(0.0, 18.0, 0.0, 0.0),
               child: FFButtonWidget(
                 onPressed: () {
-                  print('Button pressed ...');
                 },
                 text: 'Descargar',
                 options: FFButtonOptions(

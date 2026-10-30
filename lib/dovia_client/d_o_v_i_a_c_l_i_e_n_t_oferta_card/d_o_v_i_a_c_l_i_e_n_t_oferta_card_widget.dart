@@ -223,7 +223,6 @@ class _DOVIACLIENTOfertaCardWidgetState
                   ),
                   FFButtonWidget(
                     onPressed: () {
-                      print('Button pressed ...');
                     },
                     text: 'Cancelar oferta',
                     options: FFButtonOptions(

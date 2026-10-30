@@ -30,7 +30,6 @@ class DoviaMapExplorerWidget extends StatefulWidget {
 
   /// Callback when user taps a property icon on the map.
   /// Receives the property ID.
-  // final Future Function(String propertyId)? onIconSelected;
   final Future Function(String propertyId, String name, double price,
       String listingType, double landArea, bool isFavorite)? onIconSelected;
 
@@ -59,25 +58,6 @@ class _DoviaMapExplorerWidgetState extends State<DoviaMapExplorerWidget> {
   // ── Selected Property ────────────────────────────────────
   _PropertyData? _selectedProperty;
 
-  // ── Sample Properties ────────────────────────────────────
-  // final List<_PropertyData> _properties = const [
-  //   _PropertyData(
-  //     id: '019cfdf5-0a42-71e6-8eb3-0972663c40d5',
-  //     lat: 19.4320,
-  //     lng: -99.1900,
-  //   ),
-  //   _PropertyData(
-  //     id: '019cbf84-b5cd-74ac-a298-f1ac5cdcd329',
-  //     lat: 19.4118,
-  //     lng: -99.1738,
-  //   ),
-  //   _PropertyData(
-  //     id: '019cbea9-3038-74d0-8937-cf2c7b7fa777',
-  //     lat: 19.3467,
-  //     lng: -99.1617,
-  //   )
-  // ];
-  //
   List<_PropertyData> get _properties => widget.filteredProperties.map((p) {
         return _PropertyData(
           id: p.id,
@@ -355,27 +335,6 @@ class _HouseMarkerWidget extends StatelessWidget {
     );
   }
 }
-
-// class _TrianglePainter extends CustomPainter {
-//   final Color color;
-//   _TrianglePainter({required this.color});
-
-//   @override
-//   void paint(Canvas canvas, Size size) {
-//     final paint = Paint()
-//       ..color = color
-//       ..style = PaintingStyle.fill;
-//     final path = ui.Path()
-//       ..moveTo(0, 0)
-//       ..lineTo(size.width / 2, size.height)
-//       ..lineTo(size.width, 0)
-//       ..close();
-//     canvas.drawPath(path, paint);
-//   }
-
-//   @override
-//   bool shouldRepaint(covariant _TrianglePainter old) => old.color != color;
-// }
 
 // ══════════════════════════════════════════════════════════════
 //  DATA MODELS

@@ -70,7 +70,6 @@ class _DOVIACLIENTMisPropiedadesAcuerdoWidgetState
   }
 
   double get _computedStep {
-    // return 3.5;
     if (_offerData != null) {
       // Misma lectura que la pantalla del cliente: el estado del proceso
       // (en minúsculas y traducido desde `legalProcess`) manda sobre el de la

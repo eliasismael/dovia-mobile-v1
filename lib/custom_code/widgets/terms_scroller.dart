@@ -29,12 +29,6 @@ class _TermsScrollerState extends State<TermsScroller> {
   late ScrollController _scrollController;
   bool _hasReachedBottom = false;
 
-  // Reemplazá este texto con tus términos reales
-//   final String terminos = """
-// 1. ¿QUÉ ES DOVIA?
-// • DOVIA es una plataforma digital que permite: publicar propiedades, coordinar visitas...
-//   """;
-
   @override
   void initState() {
     super.initState();
