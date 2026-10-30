@@ -310,7 +310,9 @@ class _LEGALHQDocumentoWidgetState extends State<LEGALHQDocumentoWidget> {
       ),
       // Aviso: fondo suave y texto, sin ícono.
       child: Text(
-        'Versión histórica en modo solo lectura',
+        // Lo usan el historial del contrato, la hipoteca y los documentos de
+        // la visita, así que no habla de versiones.
+        'Documento en modo solo lectura',
         style: GoogleFonts.publicSans(
           color: _aqua,
           fontSize: 14.0,

@@ -14,6 +14,8 @@ import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_legal_process.dart';
 import '/backend/api_requests/api_manager.dart';
 import '/backend/api_requests/api_offers.dart';
+import '/backend/api_requests/api_visits.dart';
+import '/domain/listing_hq_documents.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 
 // ── Enums confirmados por el backend ────────────────────────────────────────
@@ -270,6 +272,7 @@ class LegalHqDocument {
     this.uploadedAt = '',
     this.updatedAt = '',
     this.required_ = false,
+    this.fromVisit = false,
   });
 
   final String id;
@@ -292,6 +295,11 @@ class LegalHqDocument {
   final String uploadedAt;
   final String updatedAt;
   final bool required_;
+
+  /// `true` para los documentos del checklist de la visita de publicación
+  /// (DPI del propietario, escrituras…). Los revisó el Lister HQ, así que el
+  /// Legal HQ solo los consulta: no tienen revisión en el expediente.
+  final bool fromVisit;
 
   bool get isReviewedByHq => hqReviewDecision.isNotEmpty;
   bool get hasFile => url.isNotEmpty;
@@ -324,13 +332,18 @@ class LegalHqDocument {
         haystack.contains('final');
   }
 
-  factory LegalHqDocument.fromJson(Map<String, dynamic> json) {
+  /// Lee tanto los documentos del expediente como los ítems del checklist de
+  /// la visita, que usan `documentId` y `fileUrl`.
+  factory LegalHqDocument.fromJson(
+    Map<String, dynamic> json, {
+    bool fromVisit = false,
+  }) {
     return LegalHqDocument(
-      id: json['id']?.toString() ?? '',
+      id: (json['id'] ?? json['documentId'])?.toString() ?? '',
       label: json['label']?.toString() ?? 'Documento',
-      status: json['status']?.toString() ?? '',
+      status: json['status']?.toString().toLowerCase() ?? '',
       type: json['type']?.toString() ?? '',
-      url: json['url']?.toString() ?? '',
+      url: (json['url'] ?? json['fileUrl'])?.toString() ?? '',
       note: json['note']?.toString() ?? '',
       hqReviewDecision: json['hqReviewDecision']?.toString() ?? '',
       mimeType: json['mimeType']?.toString() ?? '',
@@ -338,6 +351,7 @@ class LegalHqDocument {
       uploadedAt: json['uploadedAt']?.toString() ?? '',
       updatedAt: json['updatedAt']?.toString() ?? '',
       required_: json['required'] == true,
+      fromVisit: fromVisit,
     );
   }
 }
@@ -637,6 +651,7 @@ class LegalHqProcessDetail {
   const LegalHqProcessDetail({
     required this.process,
     required this.documents,
+    this.visitDocuments = const [],
     this.unsignedContractUrl = '',
     this.paymentProofUrl = '',
     this.offerId = '',
@@ -657,7 +672,27 @@ class LegalHqProcessDetail {
   final String meetingNotes;
 
   final LegalHqProcess process;
+
+  /// Documentos del expediente (`documents` del proceso legal).
   final List<LegalHqDocument> documents;
+
+  /// Checklist de la visita de publicación de la propiedad.
+  final List<LegalHqDocument> visitDocuments;
+
+  /// Todo lo que el HQ tiene que poder ver, con cualquier estado: los del
+  /// expediente y los de la visita. Al publicar, el backend copia al
+  /// expediente los documentos aprobados de la visita con otro id, así que
+  /// los de la visita que ya están (mismo id o misma etiqueta) no se repiten.
+  List<LegalHqDocument> get allDocuments {
+    String key(String label) => label.trim().toLowerCase();
+    final ids = {for (final d in documents) d.id}..remove('');
+    final labels = {for (final d in documents) key(d.label)};
+    return [
+      ...documents,
+      for (final d in visitDocuments)
+        if (!ids.contains(d.id) && !labels.contains(key(d.label))) d,
+    ];
+  }
 
   /// Reuniones de firma, en el orden en que se crearon. Re-agendar deja la
   /// anterior como `RESCHEDULED` y suma una nueva.
@@ -768,26 +803,24 @@ class LegalHqProcessDetail {
   /// expediente para habilitar las transiciones de estado.
   bool get canCompleteDocuments => missingRequiredDocuments.isEmpty;
 
-  /// Comprobantes que el HQ audita antes de generar el convenio: copias de
-  /// contratos, depósitos a la cuenta de DOVIA y demás archivos ya cargados.
+  /// Documentos del expediente hipotecario, con o sin archivo: DPI de las
+  /// partes, copias de contratos, depósitos a la cuenta de DOVIA, etc.
   ///
   /// Los dos slots del convenio quedan fuera: viven en su propia tarjeta, que
   /// habla del ciclo completo en vez de repetirlo como dos archivos sueltos.
-  List<LegalHqDocument> mortgageEvidenceDocuments() {
-    final agreementIds = {
-      doviaAgreementDocument?.id,
-      doviaAgreementSignedDocument?.id,
-    }..remove(null);
-    return documents
-        .where((document) =>
-            document.hasFile && !agreementIds.contains(document.id))
-        .toList();
-  }
+  List<LegalHqDocument> mortgageEvidenceDocuments() => allDocuments
+      .where((document) =>
+          document.fromVisit ||
+          (document.type != 'DOVIA_AGREEMENT_UNSIGNED' &&
+              document.type != 'DOVIA_AGREEMENT_SIGNED'))
+      .toList();
 
-  /// Documentos que el HQ audita en la grilla: todo lo que tiene archivo y no
-  /// es una versión intermedia del contrato.
-  List<LegalHqDocument> get reviewableDocuments => documents
-      .where((document) => document.hasFile && !document.isContractVersion)
+  /// Documentos de la grilla, con cualquier estado. Las versiones del
+  /// contrato ya cargadas quedan fuera porque tienen su propio historial.
+  List<LegalHqDocument> get reviewableDocuments => allDocuments
+      .where((document) =>
+          document.fromVisit ||
+          !(document.hasFile && document.isContractVersion))
       .toList();
 
   /// Historial de versiones del contrato, en orden de subida. La última
@@ -917,11 +950,14 @@ class LegalHqProcessApi {
       offer = await _fetchOffer(offerId);
     }
 
+    final visitDocuments = await _fetchVisitDocuments(data);
+
     return LegalHqProcessDetail(
       // El detalle solo se puede leer siendo el HQ asignado, así que llegar
       // acá implica que el expediente ya es propio.
       process: LegalHqProcess.fromJson(data, isAssignedToMe: true),
       documents: documents,
+      visitDocuments: visitDocuments,
       unsignedContractUrl: data['unsignedContractUrl']?.toString() ?? '',
       paymentProofUrl:
           (data['paymentProofUrl'] ?? data['paymentProof'])?.toString() ?? '',
@@ -947,6 +983,53 @@ class LegalHqProcessApi {
           : '',
       meetingNotes: data['meetingNotes']?.toString() ?? '',
     );
+  }
+
+  /// `documentChecklist` y `documents` de la visita de publicación, donde
+  /// están el DPI del propietario y los papeles de la propiedad. Se usa el
+  /// checklist si el expediente lo trae embebido; si solo trae el id de la
+  /// visita, se pide su detalle. Si no hay visita o la consulta falla, el
+  /// expediente se muestra igual con sus propios documentos.
+  static Future<List<LegalHqDocument>> _fetchVisitDocuments(
+    Map<String, dynamic> data,
+  ) async {
+    final visit = data['visit'];
+    final property = data['property'];
+    var raw = listerHqVisitDocs({
+      if (visit is Map) 'visit': visit,
+      'documentChecklist': data['documentChecklist'],
+    });
+
+    if (raw.isEmpty) {
+      final visitId = (data['visitId'] ??
+                  (visit is Map ? visit['id'] : null) ??
+                  (property is Map ? property['visitId'] : null))
+              ?.toString() ??
+          '';
+      if (visitId.isEmpty) return const [];
+
+      try {
+        final response =
+            await DOVIAAPIVisitContextGroup.getVisitDetailsCall.call(
+          visitId: visitId,
+          authToken: currentAuthenticationToken ?? '',
+        );
+        if (!response.succeeded) return const [];
+        raw = listerHqVisitDocs(getJsonField(response.jsonBody, r'$.data'));
+      } catch (e) {
+        debugPrint('No se pudo leer la visita $visitId: $e');
+        return const [];
+      }
+    }
+
+    return [
+      for (final item in raw)
+        if (item is Map)
+          LegalHqDocument.fromJson(
+            Map<String, dynamic>.from(item),
+            fromVisit: true,
+          ),
+    ];
   }
 
   /// Las condiciones pactadas y el gestor bancario viven en la oferta, no en
@@ -1170,6 +1253,19 @@ LegalHqDocumentProgress legalHqDocumentProgress(LegalHqDocument document) {
     return document.hasFile
         ? const LegalHqDocumentProgress('Cargado por el cliente', 5)
         : const LegalHqDocumentProgress('Pendiente de carga', 1);
+  }
+  // Los de la visita los decide el Lister HQ y el Legal HQ no los revisa.
+  if (document.fromVisit) {
+    switch (document.status) {
+      case 'missing':
+        return const LegalHqDocumentProgress('Pendiente de carga', 1);
+      case 'approved':
+        return const LegalHqDocumentProgress('Aprobado por Lister HQ', 5);
+      case 'rejected':
+        return const LegalHqDocumentProgress('Rechazado por Lister HQ', 3);
+      default:
+        return const LegalHqDocumentProgress('Enviado', 2);
+    }
   }
   if (document.hqReviewDecision == 'approved') {
     return const LegalHqDocumentProgress('Aprobado', 5);

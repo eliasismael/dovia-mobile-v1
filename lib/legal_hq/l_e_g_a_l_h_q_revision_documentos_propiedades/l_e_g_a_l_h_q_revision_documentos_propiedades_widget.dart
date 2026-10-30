@@ -272,7 +272,7 @@ class _LEGALHQRevisionDocumentosPropiedadesWidgetState
         ),
         const SizedBox(height: 16.0),
 
-        if (detail.documents.isEmpty)
+        if (detail.allDocuments.isEmpty)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 40.0),
             child: Center(
@@ -297,11 +297,11 @@ class _LEGALHQRevisionDocumentosPropiedadesWidgetState
               // Alto suficiente para caja + nombre + estado + barra.
               mainAxisExtent: 235.0,
             ),
-            itemCount: detail.documents.length,
+            itemCount: detail.allDocuments.length,
             itemBuilder: (context, index) => _buildDocumentCard(
               context,
               process,
-              detail.documents[index],
+              detail.allDocuments[index],
             ),
           ),
         if (process.status == 'APPROVED' &&
@@ -459,6 +459,8 @@ class _LEGALHQRevisionDocumentosPropiedadesWidgetState
         'documentUrl': serializeParam(document.url, ParamType.String),
         'propertyName': serializeParam(process.title, ParamType.String),
         'category': serializeParam(process.category, ParamType.String),
+        // Los de la visita los decidió el Lister HQ: acá solo se consultan.
+        'readOnly': serializeParam(document.fromVisit, ParamType.bool),
       }.withoutNulls,
     );
 

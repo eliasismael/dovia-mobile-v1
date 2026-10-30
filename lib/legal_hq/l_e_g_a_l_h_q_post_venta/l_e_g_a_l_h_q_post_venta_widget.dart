@@ -371,7 +371,8 @@ class _LEGALHQPostVentaWidgetState extends State<LEGALHQPostVentaWidget> {
     final progress = legalHqDocumentProgress(document);
 
     return GestureDetector(
-      onTap: () => _openDocument(process, document, readOnly: false),
+      onTap: () =>
+          _openDocument(process, document, readOnly: document.fromVisit),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
