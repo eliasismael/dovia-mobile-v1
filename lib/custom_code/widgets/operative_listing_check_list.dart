@@ -111,7 +111,9 @@ class OperativeListingCheckListState extends State<OperativeListingCheckList> {
   };
 
   // ==================== CHECKBOX STATE: SERVICIOS ====================
-  final Map<String, bool> _servicios = {};
+  /// Los tres servicios básicos vienen listos para marcar; el resto se agrega
+  /// con "Añadir servicios".
+  final Map<String, bool> _servicios = {'Gas': false, 'Agua': false, 'Luz': false};
 
   // ==================== STAR RATINGS ====================
   final Map<String, int> _starRatings = {
@@ -185,13 +187,10 @@ class OperativeListingCheckListState extends State<OperativeListingCheckList> {
     return true;
   }
 
+  /// Solo casa y apartamento, a pedido del cliente.
   static const Map<String, String> _kPropertyTypes = {
     'Casa': 'HOUSE',
     'Apartamento': 'APARTMENT',
-    'Penthouse': 'PENTHOUSE',
-    'Estudio': 'STUDIO',
-    'Finca': 'FARM',
-    'Terreno': 'LOT',
   };
 
   static const Map<String, String> _kSpaces = {
@@ -359,7 +358,10 @@ class OperativeListingCheckListState extends State<OperativeListingCheckList> {
       try {
         final Map<String, dynamic> data = jsonDecode(draftJson);
         super.setState(() {
-          _tipoVivienda = data['tipoVivienda'];
+          // Un borrador viejo puede traer un tipo que ya no se ofrece.
+          _tipoVivienda = _kPropertyTypes.containsKey(data['tipoVivienda'])
+              ? data['tipoVivienda']
+              : null;
           _direccion = data['direccion'];
           _habitaciones = data['habitaciones'];
           _banos = data['banos'];
@@ -706,14 +708,14 @@ class OperativeListingCheckListState extends State<OperativeListingCheckList> {
     );
   }
 
-  // ==================== SECTION 5: INFORMACIÓN PARA HQ ====================
+  // ==================== SECTION 5: SERVICIOS Y OBSERVACIONES ====================
   Widget _buildInfoHqSection() {
     return Column(
       key: _keyInfoHq,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildDropdownHeader(
-          'Información para HQ',
+          'Servicios y observaciones',
           _infoHqExpanded,
           () => setState(() => _infoHqExpanded = !_infoHqExpanded),
           fontSize: 14,
@@ -771,14 +773,14 @@ class OperativeListingCheckListState extends State<OperativeListingCheckList> {
     );
   }
 
-  // ==================== SECTION 6: ADICIONALES ====================
+  // ==================== SECTION 6: INFORMACIÓN PARA HQ ====================
   Widget _buildAdicionalesSection() {
     return Column(
       key: _keyAdicionales,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildDropdownHeader(
-          'Adicionales',
+          'Información para HQ',
           _adicionalesExpanded,
           () => setState(() => _adicionalesExpanded = !_adicionalesExpanded),
           fontSize: 14,

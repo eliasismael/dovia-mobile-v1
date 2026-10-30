@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import '/core/network_image_size.dart';
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_visits.dart';
@@ -60,15 +62,15 @@ class _ChecklistData {
         t.length > 1 ? int.tryParse(t[1]) ?? 0 : 0);
   }
 
-  /// Checklist por hacer: la visita ya empezó y el operative marcó que llegó
-  /// (o el backend ya la pasó a en curso / esperando reporte).
+  /// Checklist por hacer: empezó el horario de la visita. El backend la pasa
+  /// a en curso a esa hora; mientras tanto alcanza con que la hora llegó, sin
+  /// esperar a que el operative marque que llegó.
   bool get isChecklistPending {
     if (substatus == 'VISIT_IN_PROGRESS' || substatus == 'AWAITING_REPORT') {
       return true;
     }
     final start = slotStart;
-    return journey == 'AT_LOCATION' &&
-        start != null &&
+    return start != null &&
         (OperativeDebug.ignoreSchedule || !DateTime.now().isBefore(start));
   }
 
@@ -123,16 +125,27 @@ class _OPERATIVELISTINGChecklistWidgetState
   void initState() {
     super.initState();
     _model = createModel(context, () => OPERATIVELISTINGChecklistModel());
-    _pendingFuture = Future.wait([
-      for (final sub in _kPendingCandidates) _fetchEnriched(substatus: sub),
-    ]).then((lists) =>
-        lists.expand((l) => l).where((v) => v.isChecklistPending).toList());
+    _pendingFuture = _fetchPending();
     _rejectedFuture = _fetchEnriched(substatus: 'CHANGES_REQUESTED');
+    // Con la pantalla abierta, la visita pasa a pendiente apenas empieza su
+    // horario: se vuelve a pedir la lista sin mostrar el spinner otra vez.
+    _refresh = Timer.periodic(const Duration(minutes: 1), (_) async {
+      final pending = await _fetchPending();
+      if (mounted) safeSetState(() => _pendingFuture = Future.value(pending));
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
 
+  Timer? _refresh;
+
+  Future<List<_ChecklistData>> _fetchPending() => Future.wait([
+        for (final sub in _kPendingCandidates) _fetchEnriched(substatus: sub),
+      ]).then((lists) =>
+          lists.expand((l) => l).where((v) => v.isChecklistPending).toList());
+
   @override
   void dispose() {
+    _refresh?.cancel();
     _searchController.dispose();
     _model.dispose();
     super.dispose();
