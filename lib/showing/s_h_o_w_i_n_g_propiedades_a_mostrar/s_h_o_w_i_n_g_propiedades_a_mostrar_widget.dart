@@ -9,6 +9,7 @@ import '/showing/s_h_o_w_i_n_g_to_navegation_app/s_h_o_w_i_n_g_to_navegation_app
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_visits.dart';
 import '/listing_hq/listing_hq_ui.dart';
+import '/showing/showing_visit_registration.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -25,6 +26,7 @@ class _ShowingVisit {
   final String ownerName;
   final String date;
   final String time;
+  final String utcTimestamp;
   final String imageUrl;
   final String status;
   final String substatus;
@@ -38,6 +40,7 @@ class _ShowingVisit {
     this.ownerName = '',
     this.date = '',
     this.time = '',
+    this.utcTimestamp = '',
     this.imageUrl = '',
     this.status = '',
     this.substatus = '',
@@ -150,6 +153,7 @@ class _SHOWINGPropiedadesAMostrarWidgetState
         imageUrl: image,
         date: _slot(v, 'date'),
         time: _slot(v, 'time'),
+        utcTimestamp: _slot(v, 'utcTimestamp'),
         status: v is Map ? v['status']?.toString() ?? '' : '',
         substatus: v is Map ? v['substatus']?.toString() ?? '' : '',
         lat: lat,
@@ -159,45 +163,22 @@ class _SHOWINGPropiedadesAMostrarWidgetState
     return out;
   }
 
-  DateTime? _parseDateTime(String dateStr, String timeStr) {
-    if (dateStr.isEmpty) return null;
-    try {
-      final d = dateStr.split('-');
-      if (d.length != 3) return null;
-      int hour = 0;
-      int minute = 0;
-      if (timeStr.isNotEmpty) {
-        final t = timeStr.split(':');
-        if (t.isNotEmpty) hour = int.tryParse(t[0]) ?? 0;
-        if (t.length > 1) minute = int.tryParse(t[1]) ?? 0;
-      }
-      return DateTime(
-        int.parse(d[0]),
-        int.parse(d[1]),
-        int.parse(d[2]),
-        hour,
-        minute,
+  ShowingRegistration _registration(_ShowingVisit v) => showingRegistration(
+        status: v.status,
+        substatus: v.substatus,
+        start: showingVisitStart(v.date, v.time, utcTimestamp: v.utcTimestamp),
       );
-    } catch (_) {
-      return null;
-    }
-  }
 
-  bool _isPast(_ShowingVisit v) {
-    final s = v.substatus.toUpperCase();
-    if (s == 'COMPLETED' || s == 'CANCELLED') return false;
-    final dt = _parseDateTime(v.date, v.time);
-    if (dt == null) return false;
-    return dt.isBefore(DateTime.now());
-  }
+  // La misma regla que el home y "Registro de visita": registrar desde la
+  // hora de inicio y reportar solo cuando el backend la marcó vencida.
+  bool _isPast(_ShowingVisit v) =>
+      _registration(v) != ShowingRegistration.upcoming;
 
-  bool _isOverdue(_ShowingVisit v) {
-    final s = v.substatus.toUpperCase();
-    if (s == 'COMPLETED' || s == 'CANCELLED') return false;
-    final dt = _parseDateTime(v.date, v.time);
-    if (dt == null) return false;
-    return DateTime.now().difference(dt).inHours > 24;
-  }
+  bool _isOverdue(_ShowingVisit v) =>
+      _registration(v) == ShowingRegistration.overdue;
+
+  bool _canRegister(_ShowingVisit v) =>
+      _registration(v) == ShowingRegistration.register;
 
   void _openForm(String visitId) {
     context.pushNamed(
@@ -677,7 +658,7 @@ class _SHOWINGPropiedadesAMostrarWidgetState
                             ),
                           ),
                         )
-                      else
+                      else if (_canRegister(visit))
                         FFButtonWidget(
                           onPressed: () => _openForm(visit.visitId),
                           text: 'Registrar visita',

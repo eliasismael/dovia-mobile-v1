@@ -10,6 +10,8 @@ import '/showing/s_h_o_w_i_n_g_navbar/s_h_o_w_i_n_g_navbar_widget.dart';
 import '/showing/s_h_o_w_i_n_g_registro_de_visita_2/s_h_o_w_i_n_g_registro_de_visita2_widget.dart';
 import '/showing/s_h_o_w_i_n_g_report_popup/s_h_o_w_i_n_g_report_popup_widget.dart';
 import '/listing_hq/listing_hq_ui.dart';
+import '/showing/showing_visit_registration.dart';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 's_h_o_w_i_n_g_registro_de_visita_model.dart';
@@ -24,7 +26,9 @@ class _ScheduleVisit {
   final String ownerName;
   final String date; // yyyy-MM-dd
   final String time; // HH:mm
+  final String utcTimestamp;
   final String imageUrl;
+  final String status;
   final String substatus;
 
   const _ScheduleVisit({
@@ -34,9 +38,18 @@ class _ScheduleVisit {
     this.ownerName = '',
     this.date = '',
     this.time = '',
+    this.utcTimestamp = '',
     this.imageUrl = '',
+    this.status = '',
     this.substatus = '',
   });
+
+  ShowingRegistration registration(DateTime now) => showingRegistration(
+        status: status,
+        substatus: substatus,
+        start: showingVisitStart(date, time, utcTimestamp: utcTimestamp),
+        now: now,
+      );
 
   static _ScheduleVisit fromJson(dynamic j, String dateKey) {
     String title = '';
@@ -80,7 +93,7 @@ class SHOWINGRegistroDeVisitaWidget extends StatefulWidget {
 }
 
 class _SHOWINGRegistroDeVisitaWidgetState
-    extends State<SHOWINGRegistroDeVisitaWidget> {
+    extends State<SHOWINGRegistroDeVisitaWidget> with WidgetsBindingObserver {
   late SHOWINGRegistroDeVisitaModel _model;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
@@ -90,16 +103,33 @@ class _SHOWINGRegistroDeVisitaWidgetState
 
   Future<List<_ScheduleVisit>>? _scheduleFuture;
 
+  // Redibuja cada 30 s: a la hora de inicio la visita aparece para registrar
+  // sin tener que salir y volver a entrar.
+  Timer? _clock;
+
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => SHOWINGRegistroDeVisitaModel());
+    WidgetsBinding.instance.addObserver(this);
     _scheduleFuture = _fetchPastVisits();
+    _clock =
+        Timer.periodic(const Duration(seconds: 30), (_) => safeSetState(() {}));
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
+  }
+
+  // Al volver a la app se recarga: el backend pudo marcarla vencida.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      safeSetState(() => _scheduleFuture = _fetchPastVisits());
+    }
   }
 
   @override
   void dispose() {
+    _clock?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
     _searchController.dispose();
     _model.dispose();
     super.dispose();
@@ -110,6 +140,7 @@ class _SHOWINGRegistroDeVisitaWidgetState
     final token = currentAuthenticationToken ?? '';
     final res = await DOVIAAPIVisitContextGroup.getShowingAgentVisitsCall.call(
       authToken: token,
+      substatus: showingPendingSubstatuses,
       page: '1',
       limit: '100',
     );
@@ -160,7 +191,9 @@ class _SHOWINGRegistroDeVisitaWidgetState
         ownerName: owner['fullName']?.toString() ?? '',
         date: slot is Map ? slot['date']?.toString() ?? '' : '',
         time: slot is Map ? slot['time']?.toString() ?? '' : '',
+        utcTimestamp: slot is Map ? slot['utcTimestamp']?.toString() ?? '' : '',
         imageUrl: summary['image']?.toString() ?? '',
+        status: status,
         substatus: sub,
       ));
     }
@@ -361,34 +394,17 @@ class _SHOWINGRegistroDeVisitaWidgetState
     final vencidas = <_ScheduleVisit>[];
 
     for (final v in visits) {
-      if (v.substatus == 'CANCELLED') continue;
       if (!_matches(v)) continue;
-
-      DateTime visitDt;
-      try {
-        final dateParts = v.date.split('-');
-        final timeParts = v.time.split(':');
-        visitDt = DateTime(
-            int.parse(dateParts[0]),
-            int.parse(dateParts[1]),
-            int.parse(dateParts[2]),
-            int.parse(timeParts[0]),
-            int.parse(timeParts[1]));
-      } catch (_) {
-        continue;
-      }
-
-      // If the visit is in the future, don't show it in the registration dashboard yet
-      if (visitDt.isAfter(now)) {
-        continue;
-      }
-
-      // Vencida = la marcó el backend (24 h después de terminada la visita
-      // sin reporte pasa a REPORT_EXPIRED).
-      if (v.substatus != 'REPORT_EXPIRED') {
-        enPlazo.add(v);
-      } else {
-        vencidas.add(v);
+      // Desde la hora de inicio se registra; si el backend la marcó vencida
+      // (24 h después del fin sin registro) se reporta la razón.
+      switch (v.registration(now)) {
+        case ShowingRegistration.register:
+          enPlazo.add(v);
+        case ShowingRegistration.overdue:
+          vencidas.add(v);
+        case ShowingRegistration.upcoming:
+        case ShowingRegistration.closed:
+          break;
       }
     }
 

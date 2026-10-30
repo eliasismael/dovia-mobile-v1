@@ -16,6 +16,8 @@ import '/showing/s_h_o_w_i_n_g_registro_de_visita/s_h_o_w_i_n_g_registro_de_visi
 import '/showing/s_h_o_w_i_n_g_registro_de_visita_2/s_h_o_w_i_n_g_registro_de_visita2_widget.dart';
 import '/showing/s_h_o_w_i_n_g_report_popup/s_h_o_w_i_n_g_report_popup_widget.dart';
 import '/listing_hq/listing_hq_ui.dart';
+import '/showing/showing_visit_registration.dart';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 's_h_o_w_i_n_g_home_model.dart';
@@ -31,6 +33,7 @@ class _ShowingVisit {
   final String ownerName;
   final String date; // yyyy-MM-dd
   final String time; // HH:mm
+  final String utcTimestamp;
   final String imageUrl;
   final String status;
   final String substatus;
@@ -46,11 +49,18 @@ class _ShowingVisit {
     this.ownerName = '',
     this.date = '',
     this.time = '',
+    this.utcTimestamp = '',
     this.imageUrl = '',
     this.status = '',
     this.substatus = '',
     this.amount = '',
   });
+
+  DateTime? get start =>
+      showingVisitStart(date, time, utcTimestamp: utcTimestamp);
+
+  ShowingRegistration registration([DateTime? now]) => showingRegistration(
+      status: status, substatus: substatus, start: start, now: now);
 }
 
 class SHOWINGHomeWidget extends StatefulWidget {
@@ -63,7 +73,8 @@ class SHOWINGHomeWidget extends StatefulWidget {
   State<SHOWINGHomeWidget> createState() => _SHOWINGHomeWidgetState();
 }
 
-class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
+class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget>
+    with WidgetsBindingObserver {
   late SHOWINGHomeModel _model;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
@@ -75,78 +86,80 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
   Future<List<_ShowingVisit>>? _upcomingTodayFuture;
   Future<List<_ShowingVisit>>? _pastTodayFuture;
   Future<List<_ShowingVisit>>? _acceptedFuture;
+  Future<List<_ShowingVisit>>? _assignedFuture;
+
+  // Reordena las secciones sin pedir nada al backend: a la hora de inicio la
+  // visita pasa de "Visitas de hoy" a "Registro de visita".
+  Timer? _clock;
 
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => SHOWINGHomeModel());
+    WidgetsBinding.instance.addObserver(this);
     _loadAll();
+    _clock = Timer.periodic(
+        const Duration(seconds: 30), (_) => safeSetState(_splitAssigned));
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
 
-  DateTime? _parseDateTime(String dateStr, String timeStr) {
-    if (dateStr.isEmpty) return null;
-    try {
-      final d = dateStr.split('-');
-      if (d.length != 3) return null;
-      int hour = 0;
-      int minute = 0;
-      if (timeStr.isNotEmpty) {
-        final t = timeStr.split(':');
-        if (t.isNotEmpty) hour = int.tryParse(t[0]) ?? 0;
-        if (t.length > 1) minute = int.tryParse(t[1]) ?? 0;
-      }
-      return DateTime(
-        int.parse(d[0]),
-        int.parse(d[1]),
-        int.parse(d[2]),
-        hour,
-        minute,
-      );
-    } catch (_) {
-      return null;
-    }
+  // Al volver a la app se recarga: el backend pudo marcarla vencida.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) safeSetState(_loadAll);
   }
 
   void _loadAll() {
     _acceptableFuture = _fetchUnassigned();
-    final assignedAll = _fetchAssigned();
+    _assignedFuture = _fetchAssigned();
+    _splitAssigned();
+  }
 
+  void _splitAssigned() {
+    final assignedAll = _assignedFuture;
+    if (assignedAll == null) return;
+    bool isToday(DateTime d, DateTime now) =>
+        d.year == now.year && d.month == now.month && d.day == now.day;
+
+    // Hoy y todavía no empezó (o cancelada hoy, con su estado).
     _upcomingTodayFuture = assignedAll.then((list) {
       final now = DateTime.now();
       return list.where((v) {
-        final visitDt = _parseDateTime(v.date, v.time);
-        if (visitDt == null) return false;
-        return visitDt.year == now.year &&
-            visitDt.month == now.month &&
-            visitDt.day == now.day &&
-            !visitDt.isBefore(now);
+        final start = v.start;
+        if (start == null || !isToday(start, now)) return false;
+        final reg = v.registration(now);
+        return reg == ShowingRegistration.upcoming ||
+            (reg == ShowingRegistration.closed && !start.isBefore(now));
       }).toList();
     });
 
+    // Desde la hora de inicio: registrar o, si venció, reportar.
     _pastTodayFuture = assignedAll.then((list) {
       final now = DateTime.now();
       return list.where((v) {
-        final visitDt = _parseDateTime(v.date, v.time);
-        if (visitDt == null) return false;
-        return visitDt.isBefore(now);
+        final reg = v.registration(now);
+        return reg == ShowingRegistration.register ||
+            reg == ShowingRegistration.overdue;
       }).toList();
     });
 
     _acceptedFuture = assignedAll.then((list) {
       final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
       return list.where((v) {
-        final visitDt = _parseDateTime(v.date, v.time);
-        if (visitDt == null) return false;
-        final today = DateTime(now.year, now.month, now.day);
-        final vDay = DateTime(visitDt.year, visitDt.month, visitDt.day);
-        return vDay.isAfter(today);
+        final start = v.start;
+        if (start == null) return false;
+        final vDay = DateTime(start.year, start.month, start.day);
+        return vDay.isAfter(today) &&
+            v.registration(now) == ShowingRegistration.upcoming;
       }).toList();
     });
   }
 
   @override
   void dispose() {
+    _clock?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
     _model.dispose();
     super.dispose();
   }
@@ -240,12 +253,16 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
   Future<List<_ShowingVisit>> _fetchAssigned(
       {String? today, String? filter}) async {
     final token = currentAuthenticationToken ?? '';
+    // Solo las pendientes (y las canceladas, que "Visitas de hoy" muestra con
+    // su estado): sin filtro el backend manda primero las más nuevas, también
+    // las completadas, y las 10 primeras podían dejar afuera las de registrar.
     final res = await DOVIAAPIVisitContextGroup.getShowingAgentVisitsCall.call(
       authToken: token,
       today: today,
       filter: filter,
+      substatus: '$showingPendingSubstatuses,CANCELLED',
       page: '1',
-      limit: '10',
+      limit: '50',
     );
     if (!res.succeeded) return [];
 
@@ -332,6 +349,7 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
         imageUrl: image,
         date: _slot(v, 'date'),
         time: _slot(v, 'time'),
+        utcTimestamp: _slot(v, 'utcTimestamp'),
         status: v is Map ? v['status']?.toString() ?? '' : '',
         substatus: v is Map ? v['substatus']?.toString() ?? '' : '',
         amount: _commission(v),
@@ -420,7 +438,8 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
 
   // Vencida = la marcó el backend: 24 h después de terminada la visita sin
   // reporte pasa a REPORT_EXPIRED.
-  bool _isOverdue(_ShowingVisit v) => v.substatus == 'REPORT_EXPIRED';
+  bool _isOverdue(_ShowingVisit v) =>
+      v.registration() == ShowingRegistration.overdue;
 
   // Report an overdue visit: justify the delay, then unassign/republish it.
   Future<void> _onReport(String visitId) async {
@@ -790,51 +809,56 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                       if (v.amount.isNotEmpty)
                         Text(
                           'Monto: ${v.amount}',
-                          style:
-                              FlutterFlowTheme.of(context).bodyMedium.override(
-                                    font: GoogleFonts.publicSans(fontSize: 12.0),
-                                    color: _primary,
-                                  ),
+                          style: FlutterFlowTheme.of(context)
+                              .bodyMedium
+                              .override(
+                                font: GoogleFonts.publicSans(fontSize: 12.0),
+                                color: _primary,
+                              ),
                         ),
                       if (v.address.isNotEmpty)
                         Text(
                           'Dirección: ${v.address}',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style:
-                              FlutterFlowTheme.of(context).bodyMedium.override(
-                                    font: GoogleFonts.publicSans(fontSize: 12.0),
-                                    color: _primary,
-                                  ),
+                          style: FlutterFlowTheme.of(context)
+                              .bodyMedium
+                              .override(
+                                font: GoogleFonts.publicSans(fontSize: 12.0),
+                                color: _primary,
+                              ),
                         ),
                       if (v.date.isNotEmpty)
                         Text(
                           'Fecha: ${_formatDate(v.date)}',
-                          style:
-                              FlutterFlowTheme.of(context).bodyMedium.override(
-                                    font: GoogleFonts.publicSans(fontSize: 12.0),
-                                    color: _primary,
-                                  ),
+                          style: FlutterFlowTheme.of(context)
+                              .bodyMedium
+                              .override(
+                                font: GoogleFonts.publicSans(fontSize: 12.0),
+                                color: _primary,
+                              ),
                         ),
                       if (v.time.isNotEmpty)
                         Text(
                           'Hora: ${v.time}',
-                          style:
-                              FlutterFlowTheme.of(context).bodyMedium.override(
-                                    font: GoogleFonts.publicSans(fontSize: 12.0),
-                                    color: _primary,
-                                  ),
+                          style: FlutterFlowTheme.of(context)
+                              .bodyMedium
+                              .override(
+                                font: GoogleFonts.publicSans(fontSize: 12.0),
+                                color: _primary,
+                              ),
                         ),
                       if (v.ownerName.isNotEmpty)
                         Text(
                           'Propietario: ${v.ownerName}',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style:
-                              FlutterFlowTheme.of(context).bodyMedium.override(
-                                    font: GoogleFonts.publicSans(fontSize: 12.0),
-                                    color: _primary,
-                                  ),
+                          style: FlutterFlowTheme.of(context)
+                              .bodyMedium
+                              .override(
+                                font: GoogleFonts.publicSans(fontSize: 12.0),
+                                color: _primary,
+                              ),
                         ),
                     ],
                   ),
@@ -907,51 +931,56 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                       if (visit.amount.isNotEmpty)
                         Text(
                           'Monto: ${visit.amount}',
-                          style:
-                              FlutterFlowTheme.of(context).bodyMedium.override(
-                                    font: GoogleFonts.publicSans(fontSize: 12.0),
-                                    color: _primary,
-                                  ),
+                          style: FlutterFlowTheme.of(context)
+                              .bodyMedium
+                              .override(
+                                font: GoogleFonts.publicSans(fontSize: 12.0),
+                                color: _primary,
+                              ),
                         ),
                       if (visit.address.isNotEmpty)
                         Text(
                           'Dirección: ${visit.address}',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style:
-                              FlutterFlowTheme.of(context).bodyMedium.override(
-                                    font: GoogleFonts.publicSans(fontSize: 12.0),
-                                    color: _primary,
-                                  ),
+                          style: FlutterFlowTheme.of(context)
+                              .bodyMedium
+                              .override(
+                                font: GoogleFonts.publicSans(fontSize: 12.0),
+                                color: _primary,
+                              ),
                         ),
                       if (visit.date.isNotEmpty)
                         Text(
                           'Fecha: ${_formatDate(visit.date)}',
-                          style:
-                              FlutterFlowTheme.of(context).bodyMedium.override(
-                                    font: GoogleFonts.publicSans(fontSize: 12.0),
-                                    color: _primary,
-                                  ),
+                          style: FlutterFlowTheme.of(context)
+                              .bodyMedium
+                              .override(
+                                font: GoogleFonts.publicSans(fontSize: 12.0),
+                                color: _primary,
+                              ),
                         ),
                       if (visit.time.isNotEmpty)
                         Text(
                           'Hora: ${visit.time}',
-                          style:
-                              FlutterFlowTheme.of(context).bodyMedium.override(
-                                    font: GoogleFonts.publicSans(fontSize: 12.0),
-                                    color: _primary,
-                                  ),
+                          style: FlutterFlowTheme.of(context)
+                              .bodyMedium
+                              .override(
+                                font: GoogleFonts.publicSans(fontSize: 12.0),
+                                color: _primary,
+                              ),
                         ),
                       if (visit.ownerName.isNotEmpty)
                         Text(
                           'Propietario: ${visit.ownerName}',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style:
-                              FlutterFlowTheme.of(context).bodyMedium.override(
-                                    font: GoogleFonts.publicSans(fontSize: 12.0),
-                                    color: _primary,
-                                  ),
+                          style: FlutterFlowTheme.of(context)
+                              .bodyMedium
+                              .override(
+                                font: GoogleFonts.publicSans(fontSize: 12.0),
+                                color: _primary,
+                              ),
                         ),
                       if (showStatus && visit.substatus.isNotEmpty) ...[
                         const SizedBox(height: 8.0),
@@ -963,7 +992,8 @@ class _SHOWINGHomeWidgetState extends State<SHOWINGHomeWidget> {
                               style: FlutterFlowTheme.of(context)
                                   .bodyMedium
                                   .override(
-                                    font: GoogleFonts.publicSans(fontSize: 12.0),
+                                    font:
+                                        GoogleFonts.publicSans(fontSize: 12.0),
                                     color: _primary,
                                   ),
                             ),
