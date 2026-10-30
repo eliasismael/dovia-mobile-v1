@@ -99,8 +99,11 @@ class _DHCLIENTPlanesPageWidgetState extends State<DHCLIENTPlanesPageWidget> {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsetsDirectional.fromSTEB(
-                        20.0, 20.0, 20.0, 80.0),
+                    // Abajo queda libre lo que ocupan la barra flotante y el
+                    // ícono de DOVIA encima: con 80 el botón quedaba debajo
+                    // del ícono y no se podía tocar.
+                    padding: EdgeInsetsDirectional.fromSTEB(20.0, 20.0, 20.0,
+                        170.0 + MediaQuery.viewPaddingOf(context).bottom),
                     child: FFButtonWidget(
                       onPressed: () async {
                         // El cliente omitió la contratación del plan. Si vino

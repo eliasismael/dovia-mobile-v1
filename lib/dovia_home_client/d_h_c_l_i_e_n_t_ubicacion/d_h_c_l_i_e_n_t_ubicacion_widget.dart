@@ -32,8 +32,8 @@ export 'd_h_c_l_i_e_n_t_ubicacion_model.dart';
 ///
 /// Es el paso de **Coverage Check**: la zona elegida se valida contra las zonas
 /// operables de DOVIA (`GET /dovia-home/workable-zones`) antes de registrar la
-/// dirección. Si la zona no está cubierta se deriva a
-/// [DHCLIENTFueraDeAlcanceWidget] y no se crea la dirección.
+/// dirección. Si la zona no está cubierta se avisa en la misma pantalla y no
+/// se crea la dirección.
 class DHCLIENTUbicacionWidget extends StatefulWidget {
   const DHCLIENTUbicacionWidget({super.key});
 
@@ -88,9 +88,39 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
   String? _str(dynamic value) =>
       (value is String && value.trim().isNotEmpty) ? value.trim() : null;
 
-  /// Zonas ofrecidas en el desplegable: las mismas que en el formulario de
-  /// venta/renta de DOVIA. La cobertura se valida después contra el backend.
-  List<String> get _zoneOptions => kDoviaZones;
+  /// Zonas ofrecidas en el desplegable: las que cubre Dovia Home según el
+  /// backend. La lista fija de DOVIA (la del formulario de venta/renta) no es
+  /// la misma: ofrecía zonas sin cobertura y el cliente que quería contratar
+  /// un plan terminaba en otra pantalla. Sólo si las zonas no cargaron se
+  /// muestra la lista fija, y la cobertura se valida igual al aceptar.
+  List<String> get _zoneOptions =>
+      _workableZones.isNotEmpty ? _workableZones : kDoviaZones;
+
+  /// Cambia las zonas del desplegable. Si la elegida ya no está en la lista
+  /// se borra: el desplegable no puede mostrar un valor fuera de sus opciones.
+  void _setWorkableZones(List<String> zones) {
+    _workableZones = zones;
+    final selected = _model.dropDownValue;
+    if (selected != null && !_zoneOptions.contains(selected)) {
+      _model.dropDownValue = null;
+      _model.dropDownValueController?.value = null;
+    }
+  }
+
+  /// La zona elegida no tiene cobertura: se avisa acá, con las zonas que sí
+  /// la tienen, y el cliente elige otra. Antes se abría "Fuera de alcance",
+  /// que es el diagnóstico de un trabajo y ofrece pedir cotizaciones.
+  void _showZoneNotCovered(String zone) {
+    final covered = _workableZones.join(', ');
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(covered.isEmpty
+            ? 'Por ahora Dovia Home no tiene cobertura en $zone.'
+            : 'Por ahora Dovia Home no tiene cobertura en $zone. '
+                'Zonas con cobertura: $covered.'),
+      ),
+    );
+  }
 
   /// Zonas operables tal como las devuelve el endpoint, que puede mandar
   /// strings o objetos `{ name/zone/label/code }`.
@@ -123,7 +153,7 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
     final zones =
         response.succeeded ? _zonesFrom(response.jsonBody) : <String>[];
     if (zones.isNotEmpty) {
-      safeSetState(() => _workableZones = zones);
+      safeSetState(() => _setWorkableZones(zones));
     }
     return zones.isNotEmpty;
   }
@@ -156,7 +186,7 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
     }
 
     safeSetState(() {
-      _workableZones = zones;
+      _setWorkableZones(zones);
       _zonesLoaded = true;
       _previousAddresses = addresses;
     });
@@ -230,11 +260,7 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
       // Regla de cobertura: fuera del área de servicio no se permite la
       // solicitud.
       if (!_isZoneCovered(zone)) {
-        // Acá "fuera de alcance" es la zona, no un diagnóstico: no hay
-        // solicitud que revisar y se dice explícitamente, para no reusar la que
-        // hubiera quedado inyectada por una visita anterior.
-        DHCLIENTFueraDeAlcanceWidget.outOfScopeRequestId = null;
-        context.pushNamed(DHCLIENTFueraDeAlcanceWidget.routeName);
+        _showZoneNotCovered(zone);
         return;
       }
 
@@ -258,9 +284,7 @@ class _DHCLIENTUbicacionWidgetState extends State<DHCLIENTUbicacionWidget> {
         // toma sobre el código y no sobre el status: una zona sin cobertura y
         // una dirección malformada llegan las dos como 400.
         if (doviaHomeErrorCode(response) == kDoviaHomeInvalidZoneCode) {
-          // Igual que arriba: es la zona la que quedó fuera, no hay diagnóstico.
-          DHCLIENTFueraDeAlcanceWidget.outOfScopeRequestId = null;
-          context.pushNamed(DHCLIENTFueraDeAlcanceWidget.routeName);
+          _showZoneNotCovered(zone);
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(

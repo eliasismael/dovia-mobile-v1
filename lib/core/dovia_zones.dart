@@ -11,6 +11,8 @@ const List<String> kDoviaZones = [
 /// Centro aproximado de cada zona: al elegirla, el mapa se mueve alli para
 /// marcar el punto exacto.
 const Map<String, (double, double)> kDoviaZoneCenters = {
+  'Zona 1': (14.6417, -90.5133),
+  'Zona 2': (14.6560, -90.5120),
   'Zona 10': (14.6005, -90.5075),
   'Zona 14': (14.5870, -90.5130),
   'Zona 15': (14.5975, -90.4870),
