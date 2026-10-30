@@ -1,5 +1,7 @@
 import 'package:provider/provider.dart';
 
+import '/auth/custom_auth/auth_util.dart';
+import '/backend/api_requests/api_users.dart';
 import '/core/result.dart';
 import '/repositories/index.dart';
 import '/flutter_flow/flutter_flow_drop_down.dart';
@@ -37,8 +39,40 @@ class _Datos3NewWidgetState extends State<Datos3NewWidget> {
 
     _model.descriptionInputTextController ??= TextEditingController();
     _model.descriptionInputFocusNode ??= FocusNode();
+    _prefillPreferences();
 
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
+  }
+
+  /// Si ya había preferencias guardadas (p. ej. se registró desde la web o
+  /// retoma el registro), se muestran cargadas en vez de vacías.
+  Future<void> _prefillPreferences() async {
+    final res = await DOVIAAPIUserContextGroup.getAuthenticatedUserProfileCall
+        .call(authToken: currentAuthenticationToken);
+    if (!mounted || !res.succeeded) return;
+    final prefs = getJsonField(res.jsonBody, r'$.data.preferences');
+    if (prefs is! Map) return;
+    String? pick(dynamic v, List<String> allowed) {
+      final s = v?.toString() ?? '';
+      return allowed.contains(s) ? s : null;
+    }
+
+    final type = pick(prefs['propertyType'], const ['HOUSE', 'APARTMENT']);
+    final modality = pick(prefs['acquisitionModality'], const ['SALE', 'RENT']);
+    final description = prefs['description']?.toString().trim() ?? '';
+    safeSetState(() {
+      // Solo lo que todavía no tocó.
+      if (type != null && (_model.propiedadTipoDropDownValue ?? '').isEmpty) {
+        _model.propiedadTipoDropDownValue = type;
+        _model.propiedadTipoDropDownValueController?.value = type;
+      }
+      if (modality != null && (_model.modalidadDropDownValue ?? '').isEmpty) {
+        _model.modalidadDropDownValue = modality;
+        _model.modalidadDropDownValueController?.value = modality;
+      }
+      final c = _model.descriptionInputTextController!;
+      if (description.isNotEmpty && c.text.isEmpty) c.text = description;
+    });
   }
 
   @override
@@ -976,10 +1010,10 @@ class _Datos3NewWidgetState extends State<Datos3NewWidget> {
       context.pushNamed(DOVIACLIENTHomePageWidget.routeName);
     } else {
       final detail = result is Failure ? (result as Failure).message : '';
-      _model.preferencesError = detail.isNotEmpty &&
-              detail != 'Error al actualizar preferencias'
-          ? 'No pudimos guardar tus preferencias: $detail'
-          : 'No pudimos guardar tus preferencias. Inténtalo de nuevo.';
+      _model.preferencesError =
+          detail.isNotEmpty && detail != 'Error al actualizar preferencias'
+              ? 'No pudimos guardar tus preferencias: $detail'
+              : 'No pudimos guardar tus preferencias. Inténtalo de nuevo.';
       safeSetState(() {});
     }
   }

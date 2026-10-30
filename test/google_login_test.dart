@@ -288,6 +288,7 @@ void main() {
                   'roles': ['CLIENT'],
                   'verified': true,
                   'active': true,
+                  'identificationDocumentUrl': 'https://s3/dpi.jpg',
                 }
               }));
 
@@ -296,6 +297,25 @@ void main() {
       expect(authManager.isGoogleSession, isTrue);
       expect(currentUserUid, 'u1');
       expect(FFAppState().UserEmail, 'ana@gmail.com');
+    });
+
+    testWidgets(
+        'un cliente sin identificación hace el onboarding aunque tenga rol',
+        (tester) async {
+      google.signInResult = _tokens(customId: 'u1');
+      await run(
+          tester,
+          'login',
+          (_) async => _json(200, {
+                'data': {
+                  'id': 'u1',
+                  'roles': ['CLIENT'],
+                  'verified': true,
+                  'active': true,
+                }
+              }));
+
+      expect(find.text('RUTA ${Datos2Widget.routeName}'), findsOneWidget);
     });
 
     testWidgets('con cuenta pero sin rol, retoma el registro', (tester) async {

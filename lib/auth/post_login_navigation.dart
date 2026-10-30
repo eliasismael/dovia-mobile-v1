@@ -97,6 +97,17 @@ Future<void> showAdminWebOnlyDialog(BuildContext context) {
   );
 }
 
+/// Si al perfil le falta la identificación (DPI o pasaporte) que se sube en
+/// Datos_2. Con Google (sobre todo si se registró desde la web) se podía
+/// llegar al home sin ella, y después fallaba publicar y subir documentos.
+bool profileMissingIdentification(dynamic profileBody) {
+  String text(String path) =>
+      getJsonField(profileBody, path)?.toString().trim() ?? '';
+  return text(r'$.data.id').isNotEmpty &&
+      text(r'$.data.identificationDocumentUrl').isEmpty &&
+      text(r'$.data.identificationUrl').isEmpty;
+}
+
 /// Lleva a donde corresponde después de iniciar sesión (con contraseña o con
 /// Google), según el perfil de `GET /users/me`:
 /// - sin rol: retoma el registro (identificación, términos y rol);
@@ -135,7 +146,13 @@ Future<void> navigateAfterSignIn(
       verified == true || profileCall.isVerified(profileBody) == true;
 
   // Registro a medias: se retoma el paso que falta en vez de entrar al home.
-  if (roleSelected == false) {
+  // Vale para cualquier forma de entrar: un cliente sin identificación vuelve
+  // a Datos_2 (identificación y términos) y de ahí a preferencias, el mismo
+  // onboarding que el registro con correo. El rol ya elegido no molesta:
+  // select-role responde 409 y Datos_2 sigue.
+  if (roleSelected == false ||
+      (!associateRoles.contains(userRole) &&
+          profileMissingIdentification(profileBody))) {
     await RegistrationProgress.set(RegistrationProgress.idAndTerms);
     RegistrationProgress.resumedAfterRestart = true;
     if (!context.mounted) return;
