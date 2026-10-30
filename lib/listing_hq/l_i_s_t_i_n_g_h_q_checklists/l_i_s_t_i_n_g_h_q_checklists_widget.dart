@@ -1,7 +1,9 @@
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_visits.dart';
+import '/domain/property_types.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/listing_hq/listing_hq_ui.dart';
+import '/listing_hq/listing_hq_visit_property.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_header/l_i_s_t_i_n_g_h_q_header_widget.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_navbar/l_i_s_t_i_n_g_h_q_navbar_widget.dart';
@@ -15,11 +17,15 @@ export 'l_i_s_t_i_n_g_h_q_checklists_model.dart';
 
 class _ChecklistCardData {
   final String visitId;
+  final String propertyId;
+  final String title;
   final String address;
   final String age;
 
   _ChecklistCardData({
     required this.visitId,
+    required this.propertyId,
+    required this.title,
     required this.address,
     required this.age,
   });
@@ -123,33 +129,33 @@ class _LISTINGHQChecklistsWidgetState extends State<LISTINGHQChecklistsWidget>
       limit: '50',
     );
     if (!res.succeeded) return [];
-    final raw = getJsonField(res.jsonBody, r'$.data');
-    final visits = raw is List ? raw : <dynamic>[];
-
-    return visits.whereType<Map>().map((v) {
+    return Future.wait(listerHqVisitsFrom(res.jsonBody).map((v) async {
+      final propertyId = listerHqVisitPropertyId(v);
+      final prop = await listerHqVisitProperty(v, token);
       String address = '';
-      // `/visits/lister-hq` expone la propiedad resumida como
-      // `propertyInfo`; se conserva `property` por compatibilidad.
-      final prop = v['propertyInfo'] ?? v['property'];
+      String title = 'Propiedad';
       if (prop is Map) {
         final locAddr = _deepMap(prop, ['location', 'address']);
         address = locAddr?['fullAddress']?.toString() ??
             locAddr?['street']?.toString() ??
-            prop['name']?.toString() ??
             '';
+        title = propertyShortTitle(prop,
+            fallback: prop['name']?.toString() ?? 'Propiedad');
       }
       return _ChecklistCardData(
         visitId: v['id']?.toString() ?? '',
+        propertyId: propertyId,
+        title: title,
         address: address,
         age: _ageLabel(v['updatedAt']),
       );
-    }).toList();
+    }));
   }
 
   bool _matches(_ChecklistCardData card) {
     final q = _query.trim().toLowerCase();
     if (q.isEmpty) return true;
-    final haystack = card.address.toLowerCase();
+    final haystack = '${card.title} ${card.address}'.toLowerCase();
     return q.split(RegExp(r'\s+')).every(haystack.contains);
   }
 
@@ -167,18 +173,34 @@ class _LISTINGHQChecklistsWidgetState extends State<LISTINGHQChecklistsWidget>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
-                  child: Text(
-                    card.address.isNotEmpty
-                        ? card.address
-                        : 'Sin dirección registrada',
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.publicSans(
-                      color: ListingHqUi.textDark,
-                      fontSize: 14.0,
-                      fontWeight: FontWeight.w600,
-                      height: 1.3,
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        card.title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.publicSans(
+                          color: ListingHqUi.textDark,
+                          fontSize: 14.0,
+                          fontWeight: FontWeight.w600,
+                          height: 1.3,
+                        ),
+                      ),
+                      const SizedBox(height: 4.0),
+                      Text(
+                        card.address.isNotEmpty
+                            ? card.address
+                            : 'Sin dirección registrada',
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.publicSans(
+                          color: FlutterFlowTheme.of(context).secondaryText,
+                          fontSize: 13.0,
+                          height: 1.3,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(width: 8.0),
@@ -194,6 +216,9 @@ class _LISTINGHQChecklistsWidgetState extends State<LISTINGHQChecklistsWidget>
                 LISTINGHQPropiedadWidget.routeName,
                 queryParameters: {
                   'visitId': serializeParam(card.visitId, ParamType.String),
+                  'propertyId': card.propertyId.isEmpty
+                      ? null
+                      : serializeParam(card.propertyId, ParamType.String),
                 }.withoutNulls,
               ),
             ),

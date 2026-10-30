@@ -59,18 +59,18 @@ class ListingHqPropertyDetails extends StatelessWidget {
         _card(context, [
           _InfoRow('Dirección', _str(address['fullAddress'])),
           _InfoRow('Referencia', _str(address['extra'])),
-          _InfoRow('Tipo',
-              propertyTypeLabel(p?['propertyType']) ?? _str(p?['propertyType'])),
+          _InfoRow(
+              'Tipo',
+              propertyTypeLabel(p?['propertyType']) ??
+                  _str(p?['propertyType'])),
           _InfoRow('Operación', operation),
           _InfoRow('Precio de venta', _money(sale['salePrice'])),
           _InfoRow('Renta mensual', _money(rent['monthlyRent'])),
           _InfoRow('Mantenimiento', _money(sale['maintenanceFee'])),
           _InfoRow('IUSI', _money(sale['singlePropertyTax'])),
           _InfoRow('Propietario', view.ownerName),
-          _InfoRow(
-              'Teléfono',
-              '${_str(phone['countryCode'])} ${_str(phone['number'])}'
-                  .trim()),
+          _InfoRow('Teléfono',
+              '${_str(phone['countryCode'])} ${_str(phone['number'])}'.trim()),
           _InfoRow('Email', _str(ownerProfile?['email'])),
           _InfoRow('A nombre de', view.typeLabel),
           _InfoRow('Descripción', _str(description['raw'])),
@@ -171,9 +171,8 @@ class ListingHqDocTile extends StatelessWidget {
               has ? 'Ver' : missingText,
               style: theme.bodyMedium.override(
                 font: GoogleFonts.publicSans(
-                    fontWeight: has || required
-                        ? FontWeight.w600
-                        : FontWeight.w400),
+                    fontWeight:
+                        has || required ? FontWeight.w600 : FontWeight.w400),
                 color: has ? theme.primary : idle,
                 fontSize: 13.0,
                 letterSpacing: 0.0,

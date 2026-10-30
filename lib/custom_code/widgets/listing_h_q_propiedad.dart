@@ -28,6 +28,10 @@ class ListingHQPropiedad extends StatefulWidget {
   final Function(Map<String, dynamic>)? onSave;
   final Map<String, dynamic>? initialData;
 
+  /// Avisa cuando empieza y termina de guardar o publicar, para que la
+  /// pantalla bloquee el resto (barra, volver) mientras se sube.
+  final ValueChanged<bool>? onBusyChanged;
+
   const ListingHQPropiedad({
     super.key,
     this.width,
@@ -38,6 +42,7 @@ class ListingHQPropiedad extends StatefulWidget {
     this.onAddAreaAdicional,
     this.onSave,
     this.initialData,
+    this.onBusyChanged,
   });
 
   @override
@@ -79,6 +84,8 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
   bool _adicionalesExpanded = true;
 
   // ==================== FORM CONTROLLERS ====================
+  /// Nombre público (`name` de la propiedad): el título de las tarjetas.
+  final _nombrePublicoController = TextEditingController();
   final _descripcionController = TextEditingController();
   final _dudasController = TextEditingController();
   final _consideracionesController = TextEditingController();
@@ -281,6 +288,8 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
           if (hasText(data['mediosBanos'])) _mediosBanos = data['mediosBanos'];
           if (hasText(data['hasDanos'])) _hasDanos = data['hasDanos'];
 
+          if (hasText(data['nombrePublico']))
+            _nombrePublicoController.text = data['nombrePublico'];
           if (hasText(data['descripcion']))
             _descripcionController.text = data['descripcion'];
           if (hasText(data['dudas'])) _dudasController.text = data['dudas'];
@@ -351,6 +360,10 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
       final addr = sub(sub(prop, 'location'), 'address');
       _direccion =
           addr['fullAddress']?.toString() ?? addr['street']?.toString();
+
+      // ── Nombre público ────────────────────────────────────────────────────
+      final name = (prop['name'] ?? prop['title'])?.toString().trim() ?? '';
+      if (name.isNotEmpty) _nombrePublicoController.text = name;
 
       // ── Descripción ───────────────────────────────────────────────────────
       final desc = prop['description'];
@@ -516,6 +529,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
       'pisos': _pisos,
       'mediosBanos': _mediosBanos,
       'hasDanos': _hasDanos,
+      'nombrePublico': _nombrePublicoController.text,
       'descripcion': _descripcionController.text,
       'dudas': _dudasController.text,
       'consideraciones': _consideracionesController.text,
@@ -540,10 +554,18 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
   /// Lo que falta para publicar, con el nombre que tiene en la pantalla (como
   /// la lista de pendientes de la web).
   List<String> _missingForPublish() {
+    bool empty(String? v) => v == null || v.trim().isEmpty;
     final missing = <String>[
-      if (_tipoVivienda == null) 'Tipo de vivienda',
-      if (_direccion == null) 'Dirección',
-      if (_habitaciones == null) 'Cantidad de habitaciones',
+      if (empty(_nombrePublicoController.text)) 'Nombre público del inmueble',
+      if (empty(_tipoVivienda)) 'Tipo de vivienda',
+      if (empty(_direccion)) 'Dirección',
+      if (empty(_descripcionController.text)) 'Descripción sobre la propiedad',
+      if (empty(_habitaciones)) 'Habitaciones',
+      if (empty(_banos)) 'Baños',
+      if (empty(_parqueo)) 'Parqueo',
+      if (empty(_pisos)) 'Pisos',
+      if (empty(_mediosBanos)) 'Medios baños',
+      if (empty(_hasDanos)) 'Hay daños en la propiedad',
     ];
 
     if (_selectedCriteria.length < 3) {
@@ -584,6 +606,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
 
   @override
   void dispose() {
+    _nombrePublicoController.dispose();
     _descripcionController.dispose();
     _dudasController.dispose();
     _consideracionesController.dispose();
@@ -651,6 +674,8 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
     });
     final propertyType = propertyTypeFromLabel(_tipoVivienda);
     return {
+      if (_text(_nombrePublicoController) != null)
+        'name': _text(_nombrePublicoController),
       if (propertyType != null) 'propertyType': propertyType,
       if (_text(_descripcionController) != null)
         'description': _text(_descripcionController),
@@ -740,10 +765,13 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
 
   Future<void> _runAction(String action, Future<void> Function() run) async {
     if (_busyAction != null) return;
+    FocusManager.instance.primaryFocus?.unfocus();
     setState(() => _busyAction = action);
+    widget.onBusyChanged?.call(true);
     try {
       await run();
     } finally {
+      widget.onBusyChanged?.call(false);
       if (mounted) setState(() => _busyAction = null);
     }
   }
@@ -752,59 +780,63 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: widget.width ?? double.infinity,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // ========== ALERT BANNER ==========
-            _buildAlertBanner(),
-            const SizedBox(height: _gapField),
+    // Mientras se sube no se puede tocar nada del formulario.
+    return AbsorbPointer(
+      absorbing: _busyAction != null,
+      child: SizedBox(
+        width: widget.width ?? double.infinity,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // ========== ALERT BANNER ==========
+              _buildAlertBanner(),
+              const SizedBox(height: _gapField),
 
-            // ========== TITLE ==========
-            const Text(
-              'Revisa y organiza la información sobre la vivienda',
-              style: TextStyle(
-                fontFamily: 'Public Sans',
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: textColor,
-                height: 22 / 16,
+              // ========== TITLE ==========
+              const Text(
+                'Revisa y organiza la información sobre la vivienda',
+                style: TextStyle(
+                  fontFamily: 'Public Sans',
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: textColor,
+                  height: 22 / 16,
+                ),
               ),
-            ),
-            const SizedBox(height: _gapField),
+              const SizedBox(height: _gapField),
 
-            // ========== SECTION 1: DATOS GENERALES ==========
-            _buildDatosGeneralesSection(),
+              // ========== SECTION 1: DATOS GENERALES ==========
+              _buildDatosGeneralesSection(),
 
-            // ========== SECTION 2: CARACTERÍSTICAS ==========
-            _buildCaracteristicasSection(),
+              // ========== SECTION 2: CARACTERÍSTICAS ==========
+              _buildCaracteristicasSection(),
 
-            // ========== SECTION 3: AMENIDADES ==========
-            _buildAmenidadesSection(),
+              // ========== SECTION 3: AMENIDADES ==========
+              _buildAmenidadesSection(),
 
-            // ========== SECTION 4: CRITERIOS DE CALIFICACIÓN ==========
-            _buildCriteriosSection(),
+              // ========== SECTION 4: CRITERIOS DE CALIFICACIÓN ==========
+              _buildCriteriosSection(),
 
-            // ========== SECTION 5: INFORMACIÓN PARA HQ ==========
-            _buildInfoHqSection(),
+              // ========== SECTION 5: SERVICIOS Y OBSERVACIONES ==========
+              _buildInfoHqSection(),
 
-            // ========== SECTION 6: ADICIONALES ==========
-            // Cada sección ya termina con `_gapSection`.
-            _buildAdicionalesSection(),
+              // ========== SECTION 6: INFORMACIÓN PARA HQ ==========
+              // Cada sección ya termina con `_gapSection`.
+              _buildAdicionalesSection(),
 
-            // ========== SECTION 7: IMAGES ==========
-            _buildImagesSection(),
+              // ========== SECTION 7: IMAGES ==========
+              _buildImagesSection(),
 
-            const SizedBox(height: _gapSection - _gapField),
+              const SizedBox(height: _gapSection - _gapField),
 
-            // ========== ACTION BUTTONS ==========
-            _buildActionButtons(),
+              // ========== ACTION BUTTONS ==========
+              _buildActionButtons(),
 
-            const SizedBox(height: 24),
-          ],
+              const SizedBox(height: 24),
+            ],
+          ),
         ),
       ),
     );
@@ -871,6 +903,13 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
               () => _datosGeneralesExpanded = !_datosGeneralesExpanded),
         ),
         if (_datosGeneralesExpanded) ...[
+          const SizedBox(height: _gapField),
+          _buildTextField(
+            'Nombre público del inmueble',
+            _nombrePublicoController,
+            placeholder: 'Es el título que se verá en las tarjetas',
+            maxLength: 200,
+          ),
           const SizedBox(height: _gapField),
           // Tipo de vivienda
           _buildDropdownField(
@@ -1058,13 +1097,13 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
     );
   }
 
-  // ==================== SECTION 5: INFORMACIÓN PARA HQ ====================
+  // ==================== SECTION 5: SERVICIOS Y OBSERVACIONES ====================
   Widget _buildInfoHqSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildDropdownHeader(
-          'Información para HQ',
+          'Servicios y observaciones',
           _infoHqExpanded,
           () => setState(() => _infoHqExpanded = !_infoHqExpanded),
           fontSize: 14,
@@ -1089,7 +1128,7 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
             _hasDanos,
             (val) => setState(() => _hasDanos = val),
             options: ['Si', 'No'],
-            placeholder: 'No',
+            placeholder: 'Si/No',
           ),
           const SizedBox(height: _gapSection),
         ],
@@ -1097,13 +1136,13 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
     );
   }
 
-  // ==================== SECTION 6: ADICIONALES ====================
+  // ==================== SECTION 6: INFORMACIÓN PARA HQ ====================
   Widget _buildAdicionalesSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildDropdownHeader(
-          'Adicionales',
+          'Información para HQ',
           _adicionalesExpanded,
           () => setState(() => _adicionalesExpanded = !_adicionalesExpanded),
           fontSize: 14,
@@ -1113,28 +1152,28 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
           _buildTextAreaField(
             'Anota las dudas que tengas',
             _dudasController,
-            placeholder: 'XXX',
+            placeholder: 'Escribe aquí...',
             labelFontSize: 14,
           ),
           const SizedBox(height: _gapField),
           _buildTextAreaField(
             'Anota las consideraciones que tengas para enseñar (información privada)',
             _consideracionesController,
-            placeholder: 'XXX',
+            placeholder: 'Escribe aquí...',
             labelFontSize: 14,
           ),
           const SizedBox(height: _gapField),
           _buildTextAreaField(
             'Anota las instrucciones para el visitante',
             _instruccionesController,
-            placeholder: 'XXX',
+            placeholder: 'Escribe aquí...',
             labelFontSize: 14,
           ),
           const SizedBox(height: _gapField),
           _buildTextAreaField(
             'Anota sobre el complejo',
             _complejoController,
-            placeholder: 'XXX',
+            placeholder: 'Escribe aquí...',
             labelFontSize: 14,
           ),
           const SizedBox(height: _gapSection),
@@ -1214,7 +1253,9 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
           ),
         ],
         const SizedBox(height: _gapLabel),
-        if (imagesForSection.isEmpty)
+        if (label == _kRecorrido360)
+          _buildComingSoon()
+        else if (imagesForSection.isEmpty)
           GestureDetector(
             onTap: () => _pickImagesFor(label),
             child: Container(
@@ -1237,11 +1278,39 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
     );
   }
 
+  /// El recorrido 360 todavía no se sube desde la app.
+  static const String _kRecorrido360 = 'Recorrido 360';
+
+  Widget _buildComingSoon() {
+    return Container(
+      width: double.infinity,
+      height: 104,
+      decoration: _inputDecoration,
+      alignment: Alignment.center,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: addButtonBg,
+          borderRadius: BorderRadius.circular(99),
+        ),
+        child: const Text(
+          'Próximamente',
+          style: TextStyle(
+            fontFamily: 'Public Sans',
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: primaryColor,
+          ),
+        ),
+      ),
+    );
+  }
+
   Future<void> _pickImagesFor(String label) async {
     // A resolución completa una foto de celular pasa los 10 MB que acepta el
     // backend. Las panorámicas del 360 conservan más detalle porque el visor
     // las amplía.
-    final maxSide = label == 'Recorrido 360' ? 4096.0 : kPhotoUploadMaxSide;
+    final maxSide = label == _kRecorrido360 ? 4096.0 : kPhotoUploadMaxSide;
     if (label == 'Foto principal') {
       final image = await pickSafely(
         () => _picker.pickImage(
@@ -1890,6 +1959,56 @@ class _ListingHQPropiedadState extends State<ListingHQPropiedad> {
               items: items
                   .map((e) => DropdownMenuItem(value: e, child: Text(e)))
                   .toList(),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ==================== REUSABLE: TEXT FIELD (UNA LÍNEA) ====================
+  Widget _buildTextField(
+    String label,
+    TextEditingController controller, {
+    String placeholder = '',
+    int? maxLength,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontFamily: 'Public Sans',
+            fontSize: 16,
+            fontWeight: FontWeight.w400,
+            color: textColor,
+          ),
+        ),
+        const SizedBox(height: _gapLabel),
+        Container(
+          decoration: _inputDecoration,
+          child: TextField(
+            controller: controller,
+            maxLength: maxLength,
+            textCapitalization: TextCapitalization.sentences,
+            style: const TextStyle(
+              fontFamily: 'Public Sans',
+              fontSize: 14,
+              color: textColor,
+            ),
+            decoration: InputDecoration(
+              hintText: placeholder,
+              hintStyle: TextStyle(
+                fontFamily: 'Public Sans',
+                fontSize: 14,
+                color: placeholderColor.withValues(alpha: 0.5),
+              ),
+              counterText: '',
+              isDense: true,
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 13, vertical: 12),
+              border: InputBorder.none,
             ),
           ),
         ),

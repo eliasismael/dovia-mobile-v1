@@ -4,6 +4,7 @@ import '/backend/api_requests/api_visits.dart';
 import '/backend/api_requests/api_legal_process.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/listing_hq/listing_hq_ui.dart';
+import '/listing_hq/listing_hq_visit_property.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_header/l_i_s_t_i_n_g_h_q_header_widget.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_navbar/l_i_s_t_i_n_g_h_q_navbar_widget.dart';
@@ -21,6 +22,7 @@ export 'l_i_s_t_i_n_g_h_q_home_model.dart';
 
 class _HqCardData {
   final String id;
+  final String propertyId;
   final String address;
   final String statusText;
   final Color statusBgColor;
@@ -33,6 +35,7 @@ class _HqCardData {
 
   _HqCardData({
     required this.id,
+    this.propertyId = '',
     required this.address,
     required this.statusText,
     required this.statusBgColor,
@@ -231,17 +234,13 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget>
       limit: '10',
     );
     if (!res.succeeded) return [];
-    final raw = getJsonField(res.jsonBody, r'$.data');
-    final visits = raw is List ? raw : <dynamic>[];
 
-    return visits.map((v) {
-      final id = v is Map ? v['id']?.toString() ?? '' : '';
-      final visitSubstatus = v is Map ? v['substatus']?.toString() ?? '' : '';
+    return Future.wait(listerHqVisitsFrom(res.jsonBody).map((v) async {
+      final id = v['id']?.toString() ?? '';
+      final visitSubstatus = v['substatus']?.toString() ?? '';
       String address = '';
-      if (v is Map) {
-        // `/visits/lister-hq` expone la propiedad resumida como
-        // `propertyInfo`; se conserva `property` por compatibilidad.
-        final prop = v['propertyInfo'] ?? v['property'];
+      {
+        final prop = await listerHqVisitProperty(v, token);
         if (prop is Map) {
           final locAddr = _deepMap(prop, ['location', 'address']);
           address = locAddr?['fullAddress']?.toString() ??
@@ -250,12 +249,10 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget>
               '';
         }
       }
-      final labels = _cardLabels(
-        visitSubstatus,
-        v is Map ? v['updatedAt'] : null,
-      );
+      final labels = _cardLabels(visitSubstatus, v['updatedAt']);
       return _HqCardData(
         id: id,
+        propertyId: listerHqVisitPropertyId(v),
         address: address,
         statusText: labels.status,
         statusBgColor: labels.bg,
@@ -263,7 +260,7 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget>
         tagText: labels.tag,
         substatus: visitSubstatus,
       );
-    }).toList();
+    }));
   }
 
   Future<List<_HqLargeCardData>> _fetchLegalProcesses({
@@ -642,6 +639,12 @@ class _LISTINGHQHomeWidgetState extends State<LISTINGHQHomeWidget>
                                               queryParameters: {
                                                 'visitId': serializeParam(
                                                     e.id, ParamType.String),
+                                                'propertyId':
+                                                    e.propertyId.isEmpty
+                                                        ? null
+                                                        : serializeParam(
+                                                            e.propertyId,
+                                                            ParamType.String),
                                               }.withoutNulls,
                                             ),
                                           ))

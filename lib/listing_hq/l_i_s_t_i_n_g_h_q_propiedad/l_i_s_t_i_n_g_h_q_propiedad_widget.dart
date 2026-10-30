@@ -21,7 +21,11 @@ export 'l_i_s_t_i_n_g_h_q_propiedad_model.dart';
 class LISTINGHQPropiedadWidget extends StatefulWidget {
   final String? visitId;
 
-  const LISTINGHQPropiedadWidget({super.key, this.visitId});
+  /// La propiedad de la visita, tal como vino en la lista. Si el detalle de
+  /// la visita falla, el formulario se carga igual desde el backoffice.
+  final String? propertyId;
+
+  const LISTINGHQPropiedadWidget({super.key, this.visitId, this.propertyId});
 
   static String routeName = 'LISTING_HQ_Propiedad';
   static String routePath = '/lISTINGHQPropiedad';
@@ -34,6 +38,9 @@ class LISTINGHQPropiedadWidget extends StatefulWidget {
 class _LISTINGHQPropiedadWidgetState extends State<LISTINGHQPropiedadWidget> {
   late LISTINGHQPropiedadModel _model;
   Future<Map<String, dynamic>?>? _visitDetailsFuture;
+
+  /// Guardando o publicando: se bloquea la barra y el volver hasta que termine.
+  bool _busy = false;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -55,11 +62,13 @@ class _LISTINGHQPropiedadWidgetState extends State<LISTINGHQPropiedadWidget> {
       visitId: widget.visitId,
       authToken: token,
     );
-    if (!response.succeeded) return null;
-
-    final data =
-        getJsonField(response.jsonBody, r'$.data') as Map<String, dynamic>?;
-    if (data == null) return null;
+    // El detalle falla entero si falta alguno de los usuarios de la visita;
+    // con el id de la propiedad de la lista se sigue igual.
+    final details =
+        response.succeeded ? getJsonField(response.jsonBody, r'$.data') : null;
+    final Map<String, dynamic> data = details is Map
+        ? Map<String, dynamic>.from(details)
+        : <String, dynamic>{};
 
     // The property embedded in the visit details is a trimmed summary (no
     // `features`, `infoHQ` or full `images`). Fetch the full backoffice
@@ -68,7 +77,8 @@ class _LISTINGHQPropiedadWidgetState extends State<LISTINGHQPropiedadWidget> {
         data['property'] is Map ? data['property'] as Map : null;
     final String? propertyId = summaryProp?['id']?.toString() ??
         summaryProp?['_id']?.toString() ??
-        data['propertyId']?.toString();
+        data['propertyId']?.toString() ??
+        widget.propertyId;
 
     if (propertyId != null && propertyId.isNotEmpty) {
       final propRes =
@@ -94,7 +104,7 @@ class _LISTINGHQPropiedadWidgetState extends State<LISTINGHQPropiedadWidget> {
       }
     }
 
-    return data;
+    return data['property'] is Map ? data : null;
   }
 
   @override
@@ -119,365 +129,409 @@ class _LISTINGHQPropiedadWidgetState extends State<LISTINGHQPropiedadWidget> {
           // Sin SafeArea abajo: el contenido pasa por debajo de la barra
           // flotante hasta el borde de la pantalla.
           bottom: false,
-          child: Stack(
-            children: [
-              wrapWithModel(
-                model: _model.cornerGradientBackgroundModel,
-                updateCallback: () => safeSetState(() {}),
-                child: const CornerGradientBackgroundWidget(),
-              ),
-              SingleChildScrollView(
-                // Lo que ocupa el indicador de inicio (iPhone), que ya no
-                // descuenta el SafeArea: el final queda sobre la barra.
-                padding: EdgeInsets.only(
-                    bottom: MediaQuery.viewPaddingOf(context).bottom),
-                child: Column(
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    wrapWithModel(
-                      model: _model.lISTINGHQHeaderModel,
-                      updateCallback: () => safeSetState(() {}),
-                      child: const LISTINGHQHeaderWidget(
-                        titleText: 'Propiedad',
-                      ),
-                    ),
-                    FutureBuilder<Map<String, dynamic>?>(
-                      future: _visitDetailsFuture,
-                      builder: (context, snapshot) {
-                        if (widget.visitId != null &&
-                            snapshot.connectionState ==
-                                ConnectionState.waiting) {
-                          return const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 40.0),
-                            child: Center(child: DoviaSpinner()),
-                          );
-                        }
+          child: PopScope(
+            canPop: !_busy,
+            child: AbsorbPointer(
+              absorbing: _busy,
+              child: Stack(
+                children: [
+                  wrapWithModel(
+                    model: _model.cornerGradientBackgroundModel,
+                    updateCallback: () => safeSetState(() {}),
+                    child: const CornerGradientBackgroundWidget(),
+                  ),
+                  SingleChildScrollView(
+                    // Lo que ocupa el indicador de inicio (iPhone), que ya no
+                    // descuenta el SafeArea: el final queda sobre la barra.
+                    padding: EdgeInsets.only(
+                        bottom: MediaQuery.viewPaddingOf(context).bottom),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        wrapWithModel(
+                          model: _model.lISTINGHQHeaderModel,
+                          updateCallback: () => safeSetState(() {}),
+                          child: const LISTINGHQHeaderWidget(
+                            titleText: 'Propiedad',
+                          ),
+                        ),
+                        FutureBuilder<Map<String, dynamic>?>(
+                          future: _visitDetailsFuture,
+                          builder: (context, snapshot) {
+                            if (widget.visitId != null &&
+                                snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                              return const Padding(
+                                padding: EdgeInsets.symmetric(vertical: 40.0),
+                                child: Center(child: DoviaSpinner()),
+                              );
+                            }
 
-                        final initialData = snapshot.data;
-
-                        return Padding(
-                          padding: const EdgeInsetsDirectional.fromSTEB(
-                              20.0, 20.0, 20.0, 100.0),
-                          child: custom_widgets.ListingHQPropiedad(
-                            width: MediaQuery.sizeOf(context).width * 1.0,
-                            initialData: initialData,
-                            onGuardar: () async {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content:
-                                      Text('Borrador guardado exitosamente.'),
-                                  backgroundColor: Color(0xFF007376),
+                            final initialData = snapshot.data;
+                            // Sin datos el formulario saldría vacío y el
+                            // Publicar fallaría: se avisa en su lugar.
+                            if (widget.visitId != null && initialData == null) {
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 20.0, vertical: 40.0),
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      'No pudimos cargar el checklist de esta visita.',
+                                      textAlign: TextAlign.center,
+                                      style: FlutterFlowTheme.of(context)
+                                          .bodyMedium,
+                                    ),
+                                    const SizedBox(height: 12.0),
+                                    TextButton(
+                                      onPressed: () => safeSetState(() =>
+                                          _visitDetailsFuture =
+                                              _fetchInitialData()),
+                                      child: const Text('Reintentar'),
+                                    ),
+                                  ],
                                 ),
                               );
-                            },
-                            onPublicar: () async {
-                              if (widget.visitId != null) {
-                                final res = await DOVIAAPIVisitContextGroup
-                                    .publishPropertyAfterVisitCall
-                                    .call(
-                                  visitId: widget.visitId,
-                                  authToken: currentAuthenticationToken ?? '',
-                                );
-                                debugPrint(
-                                    '[HQ Publicar] POST /visits/${widget.visitId}/publish → ${res.statusCode}: ${res.bodyText}');
-                                if (!res.succeeded) {
-                                  if (!context.mounted) return;
+                            }
+
+                            return Padding(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
+                                  20.0, 20.0, 20.0, 100.0),
+                              child: custom_widgets.ListingHQPropiedad(
+                                width: MediaQuery.sizeOf(context).width * 1.0,
+                                initialData: initialData,
+                                onBusyChanged: (busy) =>
+                                    safeSetState(() => _busy = busy),
+                                onGuardar: () async {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
                                       content: Text(
-                                          'Error al publicar la propiedad.'),
-                                      backgroundColor: Colors.red,
-                                    ),
-                                  );
-                                  return;
-                                }
-                              }
-
-                              if (!context.mounted) return;
-
-                              await showDialog(
-                                context: context,
-                                builder: (dialogContext) {
-                                  return Dialog(
-                                    elevation: 0,
-                                    insetPadding: EdgeInsets.zero,
-                                    backgroundColor: Colors.transparent,
-                                    alignment: const AlignmentDirectional(
-                                            0.0, 0.0)
-                                        .resolve(Directionality.of(context)),
-                                    child: GestureDetector(
-                                      onTap: () {
-                                        FocusScope.of(dialogContext).unfocus();
-                                        FocusManager.instance.primaryFocus
-                                            ?.unfocus();
-                                      },
-                                      child: const PopupExitoWidget(
-                                        title: 'Se publicó con éxito',
-                                        text:
-                                            'La información de la propiedad se ha publicado con éxito. Se le notificará al propietario.',
-                                      ),
+                                          'Borrador guardado exitosamente.'),
+                                      backgroundColor: Color(0xFF007376),
                                     ),
                                   );
                                 },
-                              );
-                              // Vuelve a la lista de donde vino (Inicio,
-                              // Propiedades o Checklists), que se relee al
-                              // volver; sin pila, al inicio.
-                              if (context.mounted) {
-                                if (context.canPop()) {
-                                  context.pop();
-                                } else {
-                                  context.goNamed('LISTING_HQ_Home');
-                                }
-                              }
-                            },
-                            onSave: (data) async {
-                              final token = currentAuthenticationToken ?? '';
-                              final property = initialData?['property'] is Map
-                                  ? initialData!['property'] as Map
-                                  : {};
-                              final String? propertyId =
-                                  property['id']?.toString() ??
+                                onPublicar: () async {
+                                  if (widget.visitId != null) {
+                                    final res = await DOVIAAPIVisitContextGroup
+                                        .publishPropertyAfterVisitCall
+                                        .call(
+                                      visitId: widget.visitId,
+                                      authToken:
+                                          currentAuthenticationToken ?? '',
+                                    );
+                                    debugPrint(
+                                        '[HQ Publicar] POST /visits/${widget.visitId}/publish → ${res.statusCode}: ${res.bodyText}');
+                                    if (!res.succeeded) {
+                                      if (!context.mounted) return;
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                              'Error al publicar la propiedad.'),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
+                                      return;
+                                    }
+                                  }
+
+                                  if (!context.mounted) return;
+
+                                  await showDialog(
+                                    context: context,
+                                    builder: (dialogContext) {
+                                      return Dialog(
+                                        elevation: 0,
+                                        insetPadding: EdgeInsets.zero,
+                                        backgroundColor: Colors.transparent,
+                                        alignment:
+                                            const AlignmentDirectional(0.0, 0.0)
+                                                .resolve(
+                                                    Directionality.of(context)),
+                                        child: GestureDetector(
+                                          onTap: () {
+                                            FocusScope.of(dialogContext)
+                                                .unfocus();
+                                            FocusManager.instance.primaryFocus
+                                                ?.unfocus();
+                                          },
+                                          child: const PopupExitoWidget(
+                                            title: 'Se publicó con éxito',
+                                            text:
+                                                'La información de la propiedad se ha publicado con éxito. Se le notificará al propietario.',
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  );
+                                  // Vuelve a la lista de donde vino (Inicio,
+                                  // Propiedades o Checklists), que se relee al
+                                  // volver; sin pila, al inicio.
+                                  if (context.mounted) {
+                                    if (context.canPop()) {
+                                      context.pop();
+                                    } else {
+                                      context.goNamed('LISTING_HQ_Home');
+                                    }
+                                  }
+                                },
+                                onSave: (data) async {
+                                  final token =
+                                      currentAuthenticationToken ?? '';
+                                  final property =
+                                      initialData?['property'] is Map
+                                          ? initialData!['property'] as Map
+                                          : {};
+                                  final String? propertyId = property['id']
+                                          ?.toString() ??
                                       property['_id']?.toString() ??
                                       initialData?['propertyId']?.toString();
-                              if (propertyId == null || propertyId.isEmpty) {
-                                throw Exception(
-                                    'No se pudo encontrar el ID de la propiedad.');
-                              }
+                                  if (propertyId == null ||
+                                      propertyId.isEmpty) {
+                                    throw Exception(
+                                        'No se pudo encontrar el ID de la propiedad.');
+                                  }
 
-                              // Process and upload images
-                              final rawImages =
-                                  data['images'] as Map<dynamic, dynamic>?;
+                                  // Process and upload images
+                                  final rawImages =
+                                      data['images'] as Map<dynamic, dynamic>?;
 
-                              // Sección → URLs ya subidas, para que el formulario no las
+                                  // Sección → URLs ya subidas, para que el formulario no las
 
-                              // vuelva a subir.
+                                  // vuelva a subir.
 
-                              final uploaded = <String, List<String>>{};
+                                  final uploaded = <String, List<String>>{};
 
-                              if (rawImages != null) {
-                                for (final entry in rawImages.entries) {
-                                  final sectionName = entry.key.toString();
-                                  final files =
-                                      entry.value as List<dynamic>? ?? [];
-                                  final List<String> sectionUrls = [];
-                                  uploaded[sectionName] = sectionUrls;
+                                  if (rawImages != null) {
+                                    for (final entry in rawImages.entries) {
+                                      final sectionName = entry.key.toString();
+                                      final files =
+                                          entry.value as List<dynamic>? ?? [];
+                                      final List<String> sectionUrls = [];
+                                      uploaded[sectionName] = sectionUrls;
 
-                                  final String zone =
-                                      propertyZoneForSection(sectionName);
+                                      final String zone =
+                                          propertyZoneForSection(sectionName);
 
-                                  final List<XFile> localFiles = [];
-                                  for (final dynamic fileObj in files) {
-                                    if (fileObj is XFile) {
-                                      if (fileObj.path.startsWith('http://') ||
-                                          fileObj.path.startsWith('https://')) {
-                                        sectionUrls.add(fileObj.path);
-                                      } else {
-                                        localFiles.add(fileObj);
+                                      final List<XFile> localFiles = [];
+                                      for (final dynamic fileObj in files) {
+                                        if (fileObj is XFile) {
+                                          if (fileObj.path
+                                                  .startsWith('http://') ||
+                                              fileObj.path
+                                                  .startsWith('https://')) {
+                                            sectionUrls.add(fileObj.path);
+                                          } else {
+                                            localFiles.add(fileObj);
+                                          }
+                                        }
+                                      }
+
+                                      if (localFiles.isNotEmpty) {
+                                        // New presign contract: zone, fileName, mimeType, sizeBytes.
+                                        final List<Map<String, dynamic>>
+                                            uploadsPayload = [];
+                                        final List<String> mimeTypes = [];
+                                        for (final file in localFiles) {
+                                          final int sizeBytes =
+                                              await file.length();
+                                          // El backend no firma imágenes de más
+                                          // de 10 MB: se avisa antes en vez de
+                                          // mostrar su respuesta cruda.
+                                          if (sizeBytes > 10 * 1024 * 1024) {
+                                            throw Exception(
+                                                'La foto "${file.name}" de "$sectionName" pesa más de 10 MB. Quitala y volvé a elegirla.');
+                                          }
+                                          String mimeType = mime(file.path) ??
+                                              mime(file.name) ??
+                                              'image/jpeg';
+                                          if (mimeType == 'image/jpg')
+                                            mimeType = 'image/jpeg';
+                                          mimeTypes.add(mimeType);
+                                          uploadsPayload.add({
+                                            'zone': zone,
+                                            'fileName': file.name,
+                                            'mimeType': mimeType,
+                                            'sizeBytes': sizeBytes,
+                                          });
+                                        }
+
+                                        final presignRes =
+                                            await DOVIAAPIPropertyContextGroup
+                                                .presignPropertyImagesCall
+                                                .call(
+                                          propertyId: propertyId,
+                                          authToken: token,
+                                          uploads: uploadsPayload,
+                                        );
+
+                                        if (!presignRes.succeeded) {
+                                          throw Exception(
+                                              'Error al obtener URLs firmadas: ${presignRes.jsonBody}');
+                                        }
+
+                                        // Response: { data: { propertyId, items: [...] } } (con o sin envoltura `data`).
+                                        final dataField = getJsonField(
+                                            presignRes.jsonBody, r'$.data');
+                                        final Map respMap = dataField is Map
+                                            ? dataField
+                                            : (presignRes.jsonBody is Map
+                                                ? presignRes.jsonBody as Map
+                                                : {});
+                                        final presignList = (respMap['items'] ??
+                                            respMap['uploads']) as List?;
+                                        if (presignList == null ||
+                                            presignList.isEmpty) {
+                                          throw Exception(
+                                              'No se devolvieron URLs firmadas.');
+                                        }
+
+                                        final List<Map<String, dynamic>>
+                                            confirmPayload = [];
+                                        for (int i = 0;
+                                            i < localFiles.length;
+                                            i++) {
+                                          final localFile = localFiles[i];
+                                          final presignItem = presignList[i]
+                                              as Map<String, dynamic>;
+                                          final uploadUrl =
+                                              (presignItem['uploadUrl'] ??
+                                                      presignItem['url'])
+                                                  ?.toString();
+                                          final storageKey =
+                                              (presignItem['storageKey'] ??
+                                                      presignItem['key'])
+                                                  ?.toString();
+                                          final publicUrl =
+                                              (presignItem['publicUrl'] ??
+                                                      presignItem['s3Url'])
+                                                  ?.toString();
+                                          final requiredHeaders =
+                                              presignItem['requiredHeaders'];
+
+                                          if (uploadUrl == null ||
+                                              storageKey == null) {
+                                            throw Exception(
+                                                'Falta URL de subida o storageKey.');
+                                          }
+
+                                          final bytes =
+                                              await localFile.readAsBytes();
+
+                                          // Usar exactamente los headers que pide el presign.
+                                          final Map<String, String> putHeaders =
+                                              {};
+                                          if (requiredHeaders is Map) {
+                                            requiredHeaders.forEach((k, v) =>
+                                                putHeaders[k.toString()] =
+                                                    v.toString());
+                                          }
+                                          putHeaders.putIfAbsent('Content-Type',
+                                              () => mimeTypes[i]);
+
+                                          final s3PutRes = await putPresigned(
+                                            Uri.parse(uploadUrl),
+                                            headers: putHeaders,
+                                            body: bytes,
+                                          );
+
+                                          if (s3PutRes.statusCode < 200 ||
+                                              s3PutRes.statusCode >= 300) {
+                                            throw Exception(
+                                                'Fallo al subir a S3: ${s3PutRes.statusCode}');
+                                          }
+
+                                          confirmPayload.add({
+                                            'storageKey': storageKey,
+                                            'zone': zone
+                                          });
+
+                                          final String imageUrl = publicUrl ??
+                                              'https://dovia-media-dev.s3.us-east-2.amazonaws.com/$storageKey';
+                                          sectionUrls.add(imageUrl);
+                                        }
+
+                                        final confirmRes =
+                                            await DOVIAAPIPropertyContextGroup
+                                                .confirmPropertyImagesCall
+                                                .call(
+                                          propertyId: propertyId,
+                                          authToken: token,
+                                          uploads: confirmPayload,
+                                        );
+
+                                        if (!confirmRes.succeeded) {
+                                          throw Exception(
+                                              'Error al confirmar imágenes: ${confirmRes.jsonBody}');
+                                        }
                                       }
                                     }
                                   }
 
-                                  if (localFiles.isNotEmpty) {
-                                    // New presign contract: zone, fileName, mimeType, sizeBytes.
-                                    final List<Map<String, dynamic>>
-                                        uploadsPayload = [];
-                                    final List<String> mimeTypes = [];
-                                    for (final file in localFiles) {
-                                      final int sizeBytes = await file.length();
-                                      // El backend no firma imágenes de más
-                                      // de 10 MB: se avisa antes en vez de
-                                      // mostrar su respuesta cruda.
-                                      if (sizeBytes > 10 * 1024 * 1024) {
-                                        throw Exception(
-                                            'La foto "${file.name}" de "$sectionName" pesa más de 10 MB. Quitala y volvé a elegirla.');
-                                      }
-                                      String mimeType = mime(file.path) ??
-                                          mime(file.name) ??
-                                          'image/jpeg';
-                                      if (mimeType == 'image/jpg')
-                                        mimeType = 'image/jpeg';
-                                      mimeTypes.add(mimeType);
-                                      uploadsPayload.add({
-                                        'zone': zone,
-                                        'fileName': file.name,
-                                        'mimeType': mimeType,
-                                        'sizeBytes': sizeBytes,
-                                      });
-                                    }
+                                  // Formato del backend. Las imágenes ya quedaron registradas con
+                                  // images/confirm: el PATCH no tiene `images` ni `video360Url`.
+                                  final Map<String, dynamic> patchPayload =
+                                      Map<String, dynamic>.from(
+                                          data['patchBody'] as Map);
 
-                                    final presignRes =
-                                        await DOVIAAPIPropertyContextGroup
-                                            .presignPropertyImagesCall
-                                            .call(
-                                      propertyId: propertyId,
-                                      authToken: token,
-                                      uploads: uploadsPayload,
-                                    );
+                                  debugPrint(
+                                      '[HQ Publicar] PATCH /properties/$propertyId body: ${jsonEncode(patchPayload)}');
 
-                                    if (!presignRes.succeeded) {
-                                      throw Exception(
-                                          'Error al obtener URLs firmadas: ${presignRes.jsonBody}');
-                                    }
+                                  final patchRes =
+                                      await ApiManager.instance.makeApiCall(
+                                    callName: 'PATCH Property Details',
+                                    apiUrl:
+                                        '${DOVIAAPIPropertyContextGroup.getBaseUrl()}/properties/$propertyId',
+                                    callType: ApiCallType.PATCH,
+                                    headers: {
+                                      'Authorization': 'Bearer $token',
+                                      'Content-Type': 'application/json',
+                                    },
+                                    params: {},
+                                    body: jsonEncode(patchPayload),
+                                    bodyType: BodyType.JSON,
+                                    returnBody: true,
+                                    encodeBodyUtf8: false,
+                                    decodeUtf8: false,
+                                    cache: false,
+                                    isStreamingApi: false,
+                                    alwaysAllowBody: false,
+                                  );
 
-                                    // Response: { data: { propertyId, items: [...] } } (con o sin envoltura `data`).
-                                    final dataField = getJsonField(
-                                        presignRes.jsonBody, r'$.data');
-                                    final Map respMap = dataField is Map
-                                        ? dataField
-                                        : (presignRes.jsonBody is Map
-                                            ? presignRes.jsonBody as Map
-                                            : {});
-                                    final presignList = (respMap['items'] ??
-                                        respMap['uploads']) as List?;
-                                    if (presignList == null ||
-                                        presignList.isEmpty) {
-                                      throw Exception(
-                                          'No se devolvieron URLs firmadas.');
-                                    }
+                                  debugPrint(
+                                      '[HQ Publicar] PATCH /properties/$propertyId → ${patchRes.statusCode}: ${patchRes.bodyText}');
 
-                                    final List<Map<String, dynamic>>
-                                        confirmPayload = [];
-                                    for (int i = 0;
-                                        i < localFiles.length;
-                                        i++) {
-                                      final localFile = localFiles[i];
-                                      final presignItem = presignList[i]
-                                          as Map<String, dynamic>;
-                                      final uploadUrl =
-                                          (presignItem['uploadUrl'] ??
-                                                  presignItem['url'])
-                                              ?.toString();
-                                      final storageKey =
-                                          (presignItem['storageKey'] ??
-                                                  presignItem['key'])
-                                              ?.toString();
-                                      final publicUrl =
-                                          (presignItem['publicUrl'] ??
-                                                  presignItem['s3Url'])
-                                              ?.toString();
-                                      final requiredHeaders =
-                                          presignItem['requiredHeaders'];
-
-                                      if (uploadUrl == null ||
-                                          storageKey == null) {
-                                        throw Exception(
-                                            'Falta URL de subida o storageKey.');
-                                      }
-
-                                      final bytes =
-                                          await localFile.readAsBytes();
-
-                                      // Usar exactamente los headers que pide el presign.
-                                      final Map<String, String> putHeaders = {};
-                                      if (requiredHeaders is Map) {
-                                        requiredHeaders.forEach((k, v) =>
-                                            putHeaders[k.toString()] =
-                                                v.toString());
-                                      }
-                                      putHeaders.putIfAbsent(
-                                          'Content-Type', () => mimeTypes[i]);
-
-                                      final s3PutRes = await putPresigned(
-                                        Uri.parse(uploadUrl),
-                                        headers: putHeaders,
-                                        body: bytes,
-                                      );
-
-                                      if (s3PutRes.statusCode < 200 ||
-                                          s3PutRes.statusCode >= 300) {
-                                        throw Exception(
-                                            'Fallo al subir a S3: ${s3PutRes.statusCode}');
-                                      }
-
-                                      confirmPayload.add({
-                                        'storageKey': storageKey,
-                                        'zone': zone
-                                      });
-
-                                      final String imageUrl = publicUrl ??
-                                          'https://dovia-media-dev.s3.us-east-2.amazonaws.com/$storageKey';
-                                      sectionUrls.add(imageUrl);
-                                    }
-
-                                    final confirmRes =
-                                        await DOVIAAPIPropertyContextGroup
-                                            .confirmPropertyImagesCall
-                                            .call(
-                                      propertyId: propertyId,
-                                      authToken: token,
-                                      uploads: confirmPayload,
-                                    );
-
-                                    if (!confirmRes.succeeded) {
-                                      throw Exception(
-                                          'Error al confirmar imágenes: ${confirmRes.jsonBody}');
-                                    }
+                                  if (!patchRes.succeeded) {
+                                    throw Exception(
+                                        'Error al guardar datos: ${patchRes.jsonBody}');
                                   }
-                                }
-                              }
-
-                              // Formato del backend. Las imágenes ya quedaron registradas con
-                              // images/confirm: el PATCH no tiene `images` ni `video360Url`.
-                              final Map<String, dynamic> patchPayload =
-                                  Map<String, dynamic>.from(
-                                      data['patchBody'] as Map);
-
-                              debugPrint(
-                                  '[HQ Publicar] PATCH /properties/$propertyId body: ${jsonEncode(patchPayload)}');
-
-                              final patchRes =
-                                  await ApiManager.instance.makeApiCall(
-                                callName: 'PATCH Property Details',
-                                apiUrl:
-                                    '${DOVIAAPIPropertyContextGroup.getBaseUrl()}/properties/$propertyId',
-                                callType: ApiCallType.PATCH,
-                                headers: {
-                                  'Authorization': 'Bearer $token',
-                                  'Content-Type': 'application/json',
+                                  return uploaded;
                                 },
-                                params: {},
-                                body: jsonEncode(patchPayload),
-                                bodyType: BodyType.JSON,
-                                returnBody: true,
-                                encodeBodyUtf8: false,
-                                decodeUtf8: false,
-                                cache: false,
-                                isStreamingApi: false,
-                                alwaysAllowBody: false,
-                              );
-
-                              debugPrint(
-                                  '[HQ Publicar] PATCH /properties/$propertyId → ${patchRes.statusCode}: ${patchRes.bodyText}');
-
-                              if (!patchRes.succeeded) {
-                                throw Exception(
-                                    'Error al guardar datos: ${patchRes.jsonBody}');
-                              }
-                              return uploaded;
-                            },
-                          ),
-                        );
-                      },
+                              ),
+                            );
+                          },
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ),
-              Align(
-                alignment: const AlignmentDirectional(0.0, 0.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.max,
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    wrapWithModel(
-                      model: _model.lISTINGHQNavbarModel,
-                      updateCallback: () => safeSetState(() {}),
-                      child: const LISTINGHQNavbarWidget(),
+                  ),
+                  Align(
+                    alignment: const AlignmentDirectional(0.0, 0.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        wrapWithModel(
+                          model: _model.lISTINGHQNavbarModel,
+                          updateCallback: () => safeSetState(() {}),
+                          child: const LISTINGHQNavbarWidget(),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),

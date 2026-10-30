@@ -167,8 +167,7 @@ class _LISTINGHQPropiedadAsignadaWidgetState
     if (property is Map) {
       _property = property;
       _ownership = property['ownership'];
-      _ownerIdUrl =
-          _deepString(property, ['legalInfo', 'ownerIdDocument']);
+      _ownerIdUrl = _deepString(property, ['legalInfo', 'ownerIdDocument']);
       if (isClassifiedOwnership(_ownership)) {
         await _loadFullOwnership(property, data, token);
         if (!mounted) return;

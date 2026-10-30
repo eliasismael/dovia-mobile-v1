@@ -4,6 +4,7 @@ import '/backend/api_requests/api_visits.dart';
 import '/backend/api_requests/api_legal_process.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/listing_hq/listing_hq_ui.dart';
+import '/listing_hq/listing_hq_visit_property.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_header/l_i_s_t_i_n_g_h_q_header_widget.dart';
 import '/listing_hq/l_i_s_t_i_n_g_h_q_navbar/l_i_s_t_i_n_g_h_q_navbar_widget.dart';
@@ -18,6 +19,7 @@ export 'l_i_s_t_i_n_g_h_q_propiedades_model.dart';
 
 class _HqCardData {
   final String id;
+  final String propertyId;
   final String address;
 
   /// Nombre de la propiedad: no se muestra (la tarjeta lleva la dirección),
@@ -34,6 +36,7 @@ class _HqCardData {
 
   _HqCardData({
     required this.id,
+    this.propertyId = '',
     required this.address,
     required this.statusText,
     required this.statusBgColor,
@@ -215,19 +218,15 @@ class _LISTINGHQPropiedadesWidgetState extends State<LISTINGHQPropiedadesWidget>
       limit: _kPageLimit,
     );
     if (!res.succeeded) return [];
-    final raw = getJsonField(res.jsonBody, r'$.data');
-    final visits = raw is List ? raw : <dynamic>[];
 
-    return visits.map((v) {
-      final id = v is Map ? v['id']?.toString() ?? '' : '';
-      final visitSubstatus = v is Map ? v['substatus']?.toString() ?? '' : '';
+    return Future.wait(listerHqVisitsFrom(res.jsonBody).map((v) async {
+      final id = v['id']?.toString() ?? '';
+      final visitSubstatus = v['substatus']?.toString() ?? '';
       String address = '';
       String name = '';
-      if (v is Map) {
+      {
         name = v['propertyName']?.toString() ?? '';
-        // `/visits/lister-hq` expone la propiedad resumida como
-        // `propertyInfo`; se conserva `property` por compatibilidad.
-        final prop = v['propertyInfo'] ?? v['property'];
+        final prop = await listerHqVisitProperty(v, token);
         if (prop is Map) {
           if (name.isEmpty) {
             name = prop['name']?.toString() ?? prop['title']?.toString() ?? '';
@@ -241,12 +240,10 @@ class _LISTINGHQPropiedadesWidgetState extends State<LISTINGHQPropiedadesWidget>
               '';
         }
       }
-      final labels = _cardLabels(
-        visitSubstatus,
-        v is Map ? v['updatedAt'] : null,
-      );
+      final labels = _cardLabels(visitSubstatus, v['updatedAt']);
       return _HqCardData(
         id: id,
+        propertyId: listerHqVisitPropertyId(v),
         address: address,
         name: name,
         statusText: labels.status,
@@ -255,7 +252,7 @@ class _LISTINGHQPropiedadesWidgetState extends State<LISTINGHQPropiedadesWidget>
         tagText: labels.tag,
         substatus: visitSubstatus,
       );
-    }).toList();
+    }));
   }
 
   Future<List<_HqCardData>> _fetchLegalProcesses({
@@ -580,6 +577,12 @@ class _LISTINGHQPropiedadesWidgetState extends State<LISTINGHQPropiedadesWidget>
                                                 queryParameters: {
                                                   'visitId': serializeParam(
                                                       e.id, ParamType.String),
+                                                  'propertyId':
+                                                      e.propertyId.isEmpty
+                                                          ? null
+                                                          : serializeParam(
+                                                              e.propertyId,
+                                                              ParamType.String),
                                                 }.withoutNulls,
                                               ),
                                             ))
@@ -613,6 +616,12 @@ class _LISTINGHQPropiedadesWidgetState extends State<LISTINGHQPropiedadesWidget>
                                                 queryParameters: {
                                                   'visitId': serializeParam(
                                                       e.id, ParamType.String),
+                                                  'propertyId':
+                                                      e.propertyId.isEmpty
+                                                          ? null
+                                                          : serializeParam(
+                                                              e.propertyId,
+                                                              ParamType.String),
                                                 }.withoutNulls,
                                               ),
                                             ))
@@ -646,6 +655,12 @@ class _LISTINGHQPropiedadesWidgetState extends State<LISTINGHQPropiedadesWidget>
                                                 queryParameters: {
                                                   'visitId': serializeParam(
                                                       e.id, ParamType.String),
+                                                  'propertyId':
+                                                      e.propertyId.isEmpty
+                                                          ? null
+                                                          : serializeParam(
+                                                              e.propertyId,
+                                                              ParamType.String),
                                                 }.withoutNulls,
                                               ),
                                             ))
