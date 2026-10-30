@@ -137,20 +137,28 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
       // Flatten all room image arrays into a single ordered list
       final imagesObj = d?['images'];
       final imagesList = <String>[];
-      final mainImg = d?['image']?.toString() ?? '';
-      if (mainImg.isNotEmpty) imagesList.add(mainImg);
-      // La foto principal va primero en la galería.
+      // La foto principal (la que eligió el Lister HQ) va primero en la
+      // galería; después la miniatura del backend, si es otra.
       if (imagesObj is Map && imagesObj['principal'] is List) {
         final principal = (imagesObj['principal'] as List)
             .map((e) => e?.toString() ?? '')
             .where((s) => s.isNotEmpty);
-        if (principal.isNotEmpty && !imagesList.contains(principal.last)) {
-          imagesList.add(principal.last);
-        }
+        if (principal.isNotEmpty) imagesList.add(principal.last);
+      }
+      final mainImg = d?['image']?.toString() ?? '';
+      if (mainImg.isNotEmpty && !imagesList.contains(mainImg)) {
+        imagesList.add(mainImg);
       }
       final imagesByRoom = <String, List<String>>{};
       if (imagesObj is Map) {
-        imagesObj.forEach((room, value) {
+        // La zona principal primero, así también encabeza "Todas las fotos".
+        final rooms = [
+          if (imagesObj.containsKey('principal')) 'principal',
+          ...imagesObj.keys.where((k) => k != 'principal'),
+        ];
+        for (final room in rooms) {
+          final value = imagesObj[room];
+          if (value is! List) continue;
           if (value is! List) return;
           final urls = <String>[];
           for (final url in value) {
@@ -160,7 +168,7 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
             if (!imagesList.contains(s)) imagesList.add(s);
           }
           if (urls.isNotEmpty) imagesByRoom[room.toString()] = urls;
-        });
+        }
       }
 
       safeSetState(() {
@@ -447,9 +455,15 @@ class _DOVIACLIENTPropiedadSeleccionadaNewWidgetState
     final categories = <String, List<String>>{};
     final inRooms = _imagesByRoom.values.expand((u) => u).toSet();
     final sueltas = _carouselImages.where((u) => !inRooms.contains(u)).toList();
-    if (sueltas.isNotEmpty) categories['Foto principal'] = sueltas;
+    // "Foto principal" encabeza la galería: la zona principal y, detrás, las
+    // fotos sueltas (la miniatura del backend).
+    final principal = _imagesByRoom['principal'] ?? const <String>[];
+    if (principal.isNotEmpty || sueltas.isNotEmpty) {
+      categories['Foto principal'] = [...principal, ...sueltas];
+    }
     // Mismos nombres que la web; las zonas viejas y nuevas se juntan.
     _imagesByRoom.forEach((room, urls) {
+      if (room == 'principal') return;
       categories
           .putIfAbsent(propertySectionForZone(room), () => [])
           .addAll(urls);
